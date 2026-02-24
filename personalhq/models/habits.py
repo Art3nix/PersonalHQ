@@ -21,15 +21,15 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
     name: Mapped[str] = mapped_column(nullable=False)
-    identity: Mapped[str]
+    identity: Mapped[str | None]
     icon: Mapped[str] = mapped_column(nullable=False)
     frequency: Mapped[HabitFrequency] = mapped_column(
         SAEnum(HabitFrequency, name="frequency"),
         default=HabitFrequency.DAILY,
         nullable=False
     )
-    streak: Mapped[int]
-    category: Mapped[str]
-    last_completed: Mapped[datetime]
+    streak: Mapped[int | None]
+    category: Mapped[str | None]
+    last_completed: Mapped[datetime | None]
 
     user = relationship("User", back_populates="habits")

@@ -24,15 +24,15 @@ class FocusSession(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
 
     name: Mapped[str] = mapped_column(nullable=False)
     target_date: Mapped[date] = mapped_column(nullable=False)
-    start_time: Mapped[datetime]
-    end_time: Mapped[datetime]
+    start_time: Mapped[datetime | None]
+    end_time: Mapped[datetime | None]
     status: Mapped[SessionStatus] = mapped_column(
         SAEnum(SessionStatus, name="session_status"),
         default=SessionStatus.NOT_STARTED,
         nullable=False
     )
     queue_order: Mapped[int] = mapped_column(nullable=False)
-    total_paused_seconds: Mapped[int]
-    last_paused_tick: Mapped[datetime]
+    total_paused_seconds: Mapped[int | None]
+    last_paused_tick: Mapped[datetime | None]
 
     user = relationship("User", back_populates="focus_sessions")

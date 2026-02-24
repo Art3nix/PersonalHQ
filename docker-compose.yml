@@ -1,0 +1,44 @@
+services:
+  web: 
+    build: .
+    command: flask --app personalhq run --host 0.0.0.0 --port=8000
+    restart: no
+    stop_signal: SIGINT
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - FLASK_CONFIG=${FLASK_CONFIG}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - DEV_DATABASE_URL=${DEV_DATABASE_URL}
+      - LOCAL_TEST_DATABASE_URL=${LOCAL_TEST_DATABASE_URL}
+      - DOCKER_TEST_DATABASE_URL=${DOCKER_TEST_DATABASE_URL}
+  db:
+    image: postgres:18-alpine
+    restart: no
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_db:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: no
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+volumes:
+  postgres_db:
+  pgadmin-data:

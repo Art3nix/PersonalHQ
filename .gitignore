@@ -206,3 +206,6 @@ __marimo__/
 
 # VSCode
 .vscode/
+
+# Project workfiles, misc.
+workfiles/

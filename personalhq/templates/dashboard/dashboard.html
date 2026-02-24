@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life HQ - Jacob's Workspace</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ... [Keep all your existing CSS variables and styles exactly as they were] ... */
+        :root {
+            --bg-canvas: #FDFDFB;
+            --text-main: #1A1C1E;
+            --text-sub: #78716C;
+            --accent-indigo: #4338CA;
+            --success-green: #065F46;
+            --border-soft: #F1F1F0;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-canvas); 
+            color: var(--text-main);
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Sidebar Nav */
+        .nav-icon { @apply w-10 h-10 flex items-center justify-center rounded-xl transition-all text-stone-400 hover:bg-stone-100 hover:text-stone-900; }
+        .nav-icon.active { @apply bg-stone-900 text-white shadow-lg shadow-stone-200; }
+
+        /* Right Side Progress */
+        .progress-bar { @apply w-full h-1 bg-stone-100 rounded-full overflow-hidden; }
+        .progress-fill { @apply h-full bg-stone-800 rounded-full transition-all duration-700; }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E7E5E4; border-radius: 10px; }
+
+        /* Fixed Lore Tooltip (i) */
+        .lore-box {
+            visibility: hidden;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: all 0.2s ease-in-out;
+            pointer-events: none;
+            position: absolute;
+            bottom: calc(100% + 12px);
+            left: 0;
+            background-color: #0f172a;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            width: 14rem;
+            z-index: 50;
+            font-size: 0.65rem;
+            line-height: 1.5;
+            font-weight: 400;
+            text-transform: none;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+        .has-info:hover .lore-box {
+            visibility: visible;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .info-btn { 
+            @apply inline-flex items-center justify-center w-4 h-4 rounded-full border border-stone-200 text-[10px] text-stone-300 cursor-help transition-all hover:bg-stone-900 hover:text-white hover:border-stone-900 ml-1.5;
+        }
+
+        /* Analog Clock Scaling */
+        #analog-clock { width: 130px; height: 130px; }
+        .hand { stroke-linecap: round; transform-origin: 50% 50%; }
+        .hour-hand { stroke: var(--text-main); stroke-width: 4; }
+        .min-hand { stroke: var(--text-sub); stroke-width: 3; }
+        .sec-hand { stroke: var(--accent-indigo); stroke-width: 1.5; }
+
+        /* Logic for End Session Button */
+        #end-session-btn { display: none; }
+        .is-paused #end-session-btn { display: inline-flex; }
+        .is-paused #pause-btn-text::after { content: 'Resume'; }
+        #pause-btn-text::after { content: 'Pause Session'; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <aside class="w-64 border-r border-slate-200 bg-white flex flex-col shrink-0">
+        </aside>
+
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-12 z-20">
+            <div class="flex-1"></div>
+            <div class="w-full max-w-xl relative">
+                <input type="text" id="thought-catcher" placeholder="Write down any thought" class="w-full bg-stone-100/40 border border-transparent rounded-2xl py-3 px-6 text-sm focus:bg-white focus:border-stone-200 transition-all outline-none font-medium text-stone-500 shadow-sm italic text-center">
+            </div>
+            <div class="flex-1 flex justify-end"></div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            <main class="w-[70%] overflow-y-auto custom-scrollbar p-12 pt-4">
+                <div class="mb-14">
+                    <h2 class="text-3xl font-bold text-stone-400">Good evening, <span class="text-stone-900">{{ current_user.first_name }}.</span></h2>
+                    <p class="text-sm text-stone-400 mt-2 font-medium italic">"I build systems that free my time to collect soulful experiences."</p>
+                </div>
+
+                <section class="mb-20">
+                    <div class="flex justify-between items-end mb-6 px-1">
+                        <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
+                            Deep work <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
+                            <span class="lore-box">CAL NEWPORT: 90 mins of undistracted concentration on your most cognitively demanding task.</span>
+                        </h3>
+                    </div>
+                    
+                    <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 {% if active_session and active_session.status.value == 'PAUSED' %}is-paused{% endif %}">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-10">
+                            <div class="flex-1">
+                                <div class="mb-8">
+                                    <h4 class="text-4xl font-extrabold text-stone-900 tracking-tight leading-none">
+                                        {{ active_session.name if active_session else "Ready to Focus?" }}
+                                    </h4>
+                                </div>
+                                
+                                <div class="flex items-center gap-4">
+                                    {% if not active_session %}
+                                        <button onclick="startSession()" class="flex-grow bg-indigo-600 text-white py-4 rounded-2xl font-bold text-base hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">
+                                            Start Session
+                                        </button>
+                                    {% else %}
+                                        <input type="hidden" id="current-session-id" value="{{ active_session.id }}">
+                                        <button onclick="handlePauseResume()" class="flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200">
+                                            <span id="pause-btn-text"></span>
+                                        </button>
+                                        <button id="end-session-btn" onclick="endSession()" class="px-6 py-4 border border-stone-200 text-stone-400 rounded-2xl font-bold text-[10px] uppercase hover:bg-stone-50 transition-all">
+                                            End Session
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="text-center shrink-0 border-l border-stone-50 pl-12">
+                                <span id="timer-display" class="text-6xl font-black mono text-stone-900 tracking-tighter leading-none">00:00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex justify-between items-center mb-10 px-1">
+                        <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">Habits</h3>
+                    </div>
+                    <div class="space-y-3">
+                        {% for habit in habits %}
+                        {% set is_done = habit.last_completed and habit.last_completed.date() == current_date %}
+                        
+                        <div id="habit-row-{{ habit.id }}" class="flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group {% if is_done %}bg-indigo-50/50 border-indigo-100{% else %}bg-white border-slate-100 hover:border-indigo-200{% endif %}" onclick="toggleHabit({{ habit.id }})">
+                            
+                            <div class="flex items-center gap-4">
+                                <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors {% if is_done %}bg-indigo-600 text-white{% else %}bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600{% endif %}">
+                                    {{ habit.icon }}
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold {% if is_done %}text-indigo-900{% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
+                                    <p class="text-[10px] font-bold {% if is_done %}text-indigo-400{% else %}text-slate-400{% endif %} uppercase">{{ habit.identity }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-4">
+                                <span id="streak-{{ habit.id }}" class="text-xs font-bold {% if is_done %}text-indigo-600{% else %}text-amber-500{% endif %}">🔥 {{ habit.streak }} day streak</span>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-sm text-stone-400 font-medium">No habits loaded.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+            </main>
+
+            <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10">
+                <section class="flex flex-col items-center mb-12">
+                    <svg id="analog-clock" viewBox="0 0 100 100" class="mb-6 drop-shadow-sm">
+                        <circle cx="50" cy="50" r="48" fill="white" stroke="#E7E5E4" stroke-width="1" />
+                        <line x1="50" y1="5" x2="50" y2="8" stroke="#E7E5E4" stroke-width="2"/>
+                        <line x1="95" y1="50" x2="92" y2="50" stroke="#E7E5E4" stroke-width="2"/>
+                        <line x1="50" y1="95" x2="50" y2="92" stroke="#E7E5E4" stroke-width="2"/>
+                        <line x1="5" y1="50" x2="8" y2="50" stroke="#E7E5E4" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="50" y2="25" class="hand hour-hand" id="hour" />
+                        <line x1="50" y1="50" x2="50" y2="15" class="hand min-hand" id="min" />
+                        <line x1="50" y1="50" x2="50" y2="10" class="hand sec-hand" id="sec" />
+                        <circle cx="50" cy="50" r="2" fill="var(--text-main)" />
+                    </svg>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-[0.3em]" id="date-label"></p>
+                    <p id="digital-clock" class="text-xs font-bold text-stone-900 mt-2 mono">00:00:00</p>
+                </section>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        async function apiCall(endpoint, method = 'POST', body = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            };
+            if (body) options.body = JSON.stringify(body);
+            const response = await fetch(endpoint, options);
+            return response.json();
+        }
+
+        // --- CLOCKS (Your original logic) ---
+        function updateClocks() {
+            const now = new Date();
+            document.getElementById('digital-clock').innerText = now.toLocaleTimeString('en-GB', { hour12: false });
+
+            const sec = now.getSeconds();
+            const min = now.getMinutes();
+            const hour = now.getHours();
+
+            document.getElementById('sec').style.transform = `rotate(${(sec / 60) * 360}deg)`;
+            document.getElementById('min').style.transform = `rotate(${(min / 60) * 360 + (sec / 60) * 6}deg)`;
+            document.getElementById('hour').style.transform = `rotate(${(hour / 12) * 360 + (min / 60) * 30}deg)`;
+            
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            document.getElementById('date-label').innerText = now.toLocaleDateString('en-US', options);
+        }
+        setInterval(updateClocks, 1000);
+        updateClocks();
+
+        // --- HABITS API SYNC ---
+        async function toggleHabit(habitId) {
+            const data = await apiCall(`/actions/habits/${habitId}/toggle`);
+            
+            if (data.status === 'success') {
+                const row = document.getElementById(`habit-row-${habitId}`);
+                const iconBox = document.getElementById(`habit-icon-${habitId}`);
+                const streakLabel = document.getElementById(`streak-${habitId}`);
+                
+                streakLabel.innerText = `🔥 ${data.streak} day streak`;
+                
+                if (data.is_completed) {
+                    row.classList.replace('bg-white', 'bg-indigo-50/50');
+                    row.classList.replace('border-slate-100', 'border-indigo-100');
+                    iconBox.classList.replace('bg-slate-50', 'bg-indigo-600');
+                    iconBox.classList.replace('text-slate-400', 'text-white');
+                    streakLabel.classList.replace('text-amber-500', 'text-indigo-600');
+                } else {
+                    row.classList.replace('bg-indigo-50/50', 'bg-white');
+                    row.classList.replace('border-indigo-100', 'border-slate-100');
+                    iconBox.classList.replace('bg-indigo-600', 'bg-slate-50');
+                    iconBox.classList.replace('text-white', 'text-slate-400');
+                    streakLabel.classList.replace('text-indigo-600', 'text-amber-500');
+                }
+            }
+        }
+
+        // --- DEEP WORK API SYNC ---
+        function formatTimer(totalSeconds) {
+            const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (totalSeconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        async function startSession() {
+            const data = await apiCall('/actions/focus/start', 'POST', { name: "Deep Work Session" });
+            if (data.status === 'success') location.reload();
+        }
+
+        async function handlePauseResume() {
+            const sessionId = document.getElementById('current-session-id').value;
+            const card = document.getElementById('deep-work-card');
+            const isPaused = card.classList.contains('is-paused');
+            
+            const endpoint = isPaused ? `/actions/focus/${sessionId}/resume` : `/actions/focus/${sessionId}/pause`;
+            const data = await apiCall(endpoint);
+            
+            if (data.status === 'success') {
+                card.classList.toggle('is-paused');
+                if (isPaused) syncTimer(); // restart polling loop
+            }
+        }
+
+        async function endSession() {
+            const sessionId = document.getElementById('current-session-id').value;
+            const data = await apiCall(`/actions/focus/${sessionId}/end`);
+            if (data.status === 'success') location.reload();
+        }
+
+        async function syncTimer() {
+            const sessionInput = document.getElementById('current-session-id');
+            if (!sessionInput) return;
+            
+            const sessionId = sessionInput.value;
+            const data = await apiCall(`/actions/focus/${sessionId}/status`, 'GET');
+            
+            if (data.status === 'success') {
+                document.getElementById('timer-display').innerText = formatTimer(data.data.elapsed_seconds);
+                
+                // Only keep fetching if we are actively running
+                if (data.data.status === 'IN_PROGRESS') {
+                    setTimeout(syncTimer, 1000);
+                }
+            }
+        }
+        document.addEventListener("DOMContentLoaded", syncTimer);
+
+    </script>
+</body>
+</html>

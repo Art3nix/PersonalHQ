@@ -18,9 +18,9 @@ class User(UserMixin, db.Model):
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
-    last_login: Mapped[datetime]
-    date_of_birth: Mapped[date]
-    life_expectancy: Mapped[int]
+    last_login: Mapped[datetime | None]
+    date_of_birth: Mapped[date | None]
+    life_expectancy: Mapped[int | None]
 
     subscriptions = relationship("Subscription",
         back_populates="user",
@@ -47,6 +47,10 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    def check_password(self, password: str) -> bool:
+        """Verifies if the provided plain-text password matches the hash."""
+        return bcrypt.check_password_hash(self.password, password)
 
     def __init__(self, email: str,
                  first_name: str,

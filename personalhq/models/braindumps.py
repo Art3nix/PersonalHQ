@@ -17,6 +17,6 @@ class BrainDump(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to 
 
     content: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False)
-    processed: Mapped[bool]
+    processed: Mapped[bool | None]
 
     user = relationship("User", back_populates="brain_dumps")

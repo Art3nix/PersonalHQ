@@ -10,11 +10,11 @@ class Experience(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to
     __tablename__ = 'experiences'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    theme_id: Mapped[int] = mapped_column(ForeignKey('themes.id'))
+    theme_id: Mapped[int] = mapped_column(ForeignKey('core_themes.id'))
     emotional_value_id: Mapped[int] = mapped_column(ForeignKey('emotional_values.id'))
 
     name: Mapped[str] = mapped_column(nullable=False)
-    details: Mapped[str]
+    details: Mapped[str | None]
 
     core_theme = relationship("CoreTheme", back_populates="experiences")
     emotional_value = relationship("EmotionalValue", back_populates="experiences")

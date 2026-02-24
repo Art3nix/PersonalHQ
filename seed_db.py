@@ -1,0 +1,119 @@
+"""Script to seed the Personal HQ database with test data."""
+
+from datetime import datetime, timedelta, date
+from sqlalchemy.exc import IntegrityError
+
+# Adjust the import based on where your create_app function lives
+from personalhq import create_app
+from personalhq.extensions import db
+from personalhq.models.users import User
+from personalhq.models.habits import Habit, HabitFrequency
+from personalhq.models.tasks import Task
+from personalhq.models.lifebuckets import LifeBucket
+
+def run_seed():
+    """Generates a test user and populates the dashboard with dummy data."""
+    app = create_app()
+
+    with app.app_context():
+        print("Starting database seed...")
+
+        # 1. Create the Test User
+        # Uses the custom __init__ from your users.py which hashes the password automatically
+        test_user = User(
+            email="jacob@example.com",
+            first_name="Jacob",
+            last_name="Workspace",
+            password="password123"
+        )
+        test_user.date_of_birth = date(1996, 5, 15)
+        test_user.life_expectancy = 82
+
+        db.session.add(test_user)
+
+        try:
+            db.session.commit()
+            print("Created user: jacob@example.com (Password: password123)")
+        except IntegrityError:
+            db.session.rollback()
+            test_user = User.query.filter_by(email="jacob@example.com").first()
+            print("User already exists, skipping creation.")
+
+        user_id = test_user.id
+        now = datetime.now()
+        yesterday = now - timedelta(days=1)
+
+        # 2. Clear existing habits/tasks for a clean slate (optional, but good for testing)
+        Habit.query.filter_by(user_id=user_id).delete()
+        Task.query.filter_by(user_id=user_id).delete()
+        LifeBucket.query.filter_by(user_id=user_id).delete()
+        db.session.commit()
+
+        # 3. Create Dummy Habits
+        habits = [
+            Habit(
+                user_id=user_id,
+                name="Daily 5km Run",
+                identity="Athlete Identity",
+                icon="🏃‍♂️",
+                frequency=HabitFrequency.DAILY,
+                streak=12,
+                category="Health",
+                last_completed=yesterday # Ready to be checked today
+            ),
+            Habit(
+                user_id=user_id,
+                name="Morning Review",
+                identity="Planner Identity",
+                icon="📓",
+                frequency=HabitFrequency.DAILY,
+                streak=45,
+                category="Mindset",
+                last_completed=now # Already checked today to test the UI state
+            ),
+            Habit(
+                user_id=user_id,
+                name="Weekly Finance Sync",
+                identity="Wealth Builder",
+                icon="💰",
+                frequency=HabitFrequency.WEEKLY,
+                streak=4,
+                category="Finance",
+                last_completed=now - timedelta(days=3) # Completed a few days ago
+            )
+        ]
+        db.session.add_all(habits)
+
+        # 4. Create Dummy Tasks (to populate the bottom right GTD list)
+        tasks = [
+            Task(
+                user_id=user_id,
+                title_name="Journal Morning Thoughts",
+                is_completed=False,
+                created_at=now
+            ),
+            Task(
+                user_id=user_id,
+                title_name="Meditate - try 15 mins",
+                is_completed=False,
+                created_at=now
+            )
+        ]
+        db.session.add_all(tasks)
+
+        # 5. Create a Life Bucket (for the runway UI)
+        bucket = LifeBucket(
+            user_id=user_id,
+            name="20s decade",
+            theme="Exploration and Base Building",
+            start_date=date(2016, 5, 15),
+            end_date=date(2026, 5, 14)
+        )
+        db.session.add(bucket)
+
+        # Commit everything
+        db.session.commit()
+        print("Successfully seeded habits, tasks, and life buckets!")
+
+if __name__ == "__main__":
+    run_seed()

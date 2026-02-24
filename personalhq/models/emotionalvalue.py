@@ -6,7 +6,7 @@ from personalhq.extensions import db
 
 class EmotionalValue(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only store data
     """Class representing table emotional_value in database."""
-    __tablename__ = 'emotional_value'
+    __tablename__ = 'emotional_values'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
