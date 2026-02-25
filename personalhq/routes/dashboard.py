@@ -1,5 +1,6 @@
 """Module defining the main dashboard view."""
 
+from datetime import date
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit
@@ -11,18 +12,20 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @login_required
 def index():
     """Renders the main command center dashboard."""
-    # Fetch all habits for the user
     habits = Habit.query.filter_by(user_id=current_user.id).all()
+    today = date.today()
     
-    # Check if there is an active or paused focus session
-    active_session = FocusSession.query.filter(
+    # Fetch all deep work sessions scheduled for today that aren't finished
+    queued_sessions = FocusSession.query.filter(
         FocusSession.user_id == current_user.id,
-        FocusSession.status.in_([SessionStatus.IN_PROGRESS, SessionStatus.PAUSED])
-    ).first()
+        FocusSession.target_date == today,
+        FocusSession.status != SessionStatus.FINISHED
+    ).order_by(FocusSession.queue_order).all()
 
     return render_template(
         'dashboard/dashboard.html', 
         habits=habits, 
-        active_session=active_session,
-        SessionStatus=SessionStatus # Passing the enum to Jinja for easy state checking
+        queued_sessions=queued_sessions,
+        SessionStatus=SessionStatus,
+        current_date=today
     )

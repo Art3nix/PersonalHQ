@@ -10,6 +10,7 @@ from personalhq.models.users import User
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.tasks import Task
 from personalhq.models.lifebuckets import LifeBucket
+from personalhq.models.focussessions import FocusSession, SessionStatus
 
 def run_seed():
     """Generates a test user and populates the dashboard with dummy data."""
@@ -47,6 +48,7 @@ def run_seed():
         Habit.query.filter_by(user_id=user_id).delete()
         Task.query.filter_by(user_id=user_id).delete()
         LifeBucket.query.filter_by(user_id=user_id).delete()
+        FocusSession.query.filter_by(user_id=user_id).delete()
         db.session.commit()
 
         # 3. Create Dummy Habits
@@ -110,6 +112,45 @@ def run_seed():
             end_date=date(2026, 5, 14)
         )
         db.session.add(bucket)
+
+        # 6. Create Planned Focus Sessions for Today
+        sessions = [
+            FocusSession(
+                user_id=user_id,
+                name="Create MVP API Schema",
+                target_date=now.date(),
+                target_duration_minutes=90,
+                status=SessionStatus.NOT_STARTED,
+                queue_order=1,
+                start_time=None,
+                total_paused_seconds=0,
+                last_paused_tick=now
+            ),
+            FocusSession(
+                user_id=user_id,
+                name="Write Documentation",
+                target_date=now.date(),
+                target_duration_minutes=45,
+                status=SessionStatus.NOT_STARTED,
+                queue_order=2,
+                start_time=None,
+                total_paused_seconds=0,
+                last_paused_tick=now
+            ),
+            FocusSession(
+                user_id=user_id,
+                name="Inbox Zero & Admin",
+                target_date=now.date(),
+                target_duration_minutes=30,
+                status=SessionStatus.NOT_STARTED,
+                queue_order=3,
+                start_time=None,
+                total_paused_seconds=0,
+                last_paused_tick=now
+            )
+        ]
+        db.session.add_all(sessions)
+        db.session.commit()
 
         # Commit everything
         db.session.commit()

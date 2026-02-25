@@ -75,12 +75,6 @@
         .hour-hand { stroke: var(--text-main); stroke-width: 4; }
         .min-hand { stroke: var(--text-sub); stroke-width: 3; }
         .sec-hand { stroke: var(--accent-indigo); stroke-width: 1.5; }
-
-        /* Logic for End Session Button */
-        #end-session-btn { display: none; }
-        .is-paused #end-session-btn { display: inline-flex; }
-        .is-paused #pause-btn-text::after { content: 'Resume'; }
-        #pause-btn-text::after { content: 'Pause Session'; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -105,36 +99,40 @@
                 </div>
 
                 <section class="mb-20">
-                    <div class="flex justify-between items-end mb-6 px-1">
+                    <div class="flex justify-between items-end mb-6 px-1 relative">
                         <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
                             Deep work <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
                             <span class="lore-box">CAL NEWPORT: 90 mins of undistracted concentration on your most cognitively demanding task.</span>
                         </h3>
+                        
+                        <div class="relative">
+                            <button onclick="toggleTaskDropdown()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-colors flex items-center gap-1">
+                                Change Task
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            
+                            <div id="task-dropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-white border border-stone-100 rounded-2xl shadow-xl shadow-stone-200/50 z-50 overflow-hidden opacity-0 transform scale-95 transition-all duration-150 origin-top-right">
+                                <div class="p-2 space-y-1" id="task-dropdown-list">
+                                    </div>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 {% if active_session and active_session.status.value == 'PAUSED' %}is-paused{% endif %}">
+                    <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 transition-all duration-300">
                         <div class="flex flex-col md:flex-row justify-between items-center gap-10">
                             <div class="flex-1">
                                 <div class="mb-8">
-                                    <h4 class="text-4xl font-extrabold text-stone-900 tracking-tight leading-none">
-                                        {{ active_session.name if active_session else "Ready to Focus?" }}
-                                    </h4>
+                                    <h4 id="session-title" class="text-4xl font-extrabold text-stone-900 tracking-tight leading-none">Loading...</h4>
                                 </div>
                                 
-                                <div class="flex items-center gap-4">
-                                    {% if not active_session %}
-                                        <button onclick="startSession()" class="flex-grow bg-indigo-600 text-white py-4 rounded-2xl font-bold text-base hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">
-                                            Start Session
-                                        </button>
-                                    {% else %}
-                                        <input type="hidden" id="current-session-id" value="{{ active_session.id }}">
-                                        <button onclick="handlePauseResume()" class="flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200">
-                                            <span id="pause-btn-text"></span>
-                                        </button>
-                                        <button id="end-session-btn" onclick="endSession()" class="px-6 py-4 border border-stone-200 text-stone-400 rounded-2xl font-bold text-[10px] uppercase hover:bg-stone-50 transition-all">
-                                            End Session
-                                        </button>
-                                    {% endif %}
+                                <div class="flex items-center gap-4" id="timer-controls">
+                                    <input type="hidden" id="current-session-id" value="">
+                                    <button onclick="handlePauseResume()" id="main-timer-btn" class="flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200">
+                                        <span id="pause-btn-text"></span>
+                                    </button>
+                                    <button id="end-session-btn" style="display: none;" onclick="endSession()" class="px-6 py-4 border border-stone-200 text-stone-400 rounded-2xl font-bold text-[10px] uppercase hover:bg-stone-50 transition-all">
+                                        End Session
+                                    </button>
                                 </div>
                             </div>
                             <div class="text-center shrink-0 border-l border-stone-50 pl-12">
@@ -256,57 +254,170 @@
                 }
             }
         }
+        
+        // --- DEEP WORK STATE MACHINE & QUEUE LOGIC ---
+        
+        // 1. Serialize the Python list into a JavaScript array
+        const sessionQueue = [
+            {% for session in queued_sessions %}
+            {
+                id: {{ session.id }},
+                name: "{{ session.name }}",
+                durationSeconds: {{ session.target_duration_minutes * 60 }},
+                status: "{{ session.status.value }}"
+            },
+            {% endfor %}
+        ];
+        let currentQueueIndex = 0;
+        let isDropdownOpen = false;
 
-        // --- DEEP WORK API SYNC ---
         function formatTimer(totalSeconds) {
+            if (totalSeconds < 0) totalSeconds = 0;
             const h = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
             const m = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
             const s = (totalSeconds % 60).toString().padStart(2, '0');
             return `${h}:${m}:${s}`;
         }
 
-        async function startSession() {
-            const data = await apiCall('/actions/focus/start', 'POST', { name: "Deep Work Session" });
-            if (data.status === 'success') location.reload();
+        function loadSessionUI() {
+            if (sessionQueue.length === 0) {
+                document.getElementById('session-title').textContent = "No Focus Planned Today";
+                document.getElementById('timer-controls').style.display = 'none';
+                return;
+            }
+
+            const current = sessionQueue[currentQueueIndex];
+            
+            document.getElementById('session-title').textContent = current.name;
+            document.getElementById('current-session-id').value = current.id;
+            
+            const card = document.getElementById('deep-work-card');
+            const mainBtn = document.getElementById('main-timer-btn');
+            const endBtn = document.getElementById('end-session-btn');
+            const btnText = document.getElementById('pause-btn-text');
+            
+            // Explicit UI painting based entirely on your Enum states
+            if (current.status === 'IN_PROGRESS') {
+                btnText.textContent = 'Pause Session';
+                mainBtn.className = "flex-grow bg-amber-500 text-white py-4 rounded-2xl font-bold text-base hover:bg-amber-600 transition-all shadow-xl shadow-amber-200/50";
+                endBtn.style.display = 'none';
+                card.classList.remove('border-stone-100');
+                card.classList.add('border-indigo-200', 'ring-4', 'ring-indigo-50');
+            } else {
+                // Styling for both NOT_STARTED and PAUSED
+                mainBtn.className = "flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200";
+                card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50');
+                card.classList.add('border-stone-100');
+                
+                // Differentiate text and End button visibility
+                if (current.status === 'NOT_STARTED') {
+                    btnText.textContent = 'Start Session';
+                    endBtn.style.display = 'none'; // Hide End button if it hasn't started
+                } else if (current.status === 'PAUSED') {
+                    btnText.textContent = 'Resume Session';
+                    endBtn.style.display = 'inline-flex'; // Show End button only when paused
+                }
+            }
+
+            renderDropdownList();
+            
+            // Trigger the server sync to start the countdown loop if needed
+            syncTimer(); 
         }
 
+        // --- Dropdown Controller ---
+        function toggleTaskDropdown() {
+            const dropdown = document.getElementById('task-dropdown');
+            isDropdownOpen = !isDropdownOpen;
+            if (isDropdownOpen) {
+                dropdown.classList.remove('hidden');
+                // Tiny delay to allow display:block to apply before animating opacity
+                setTimeout(() => dropdown.classList.remove('opacity-0', 'scale-95'), 10);
+            } else {
+                dropdown.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => dropdown.classList.add('hidden'), 150);
+            }
+        }
+
+        function selectTask(index) {
+            currentQueueIndex = index;
+            toggleTaskDropdown();
+            loadSessionUI();
+        }
+
+        function renderDropdownList() {
+            const list = document.getElementById('task-dropdown-list');
+            list.innerHTML = '';
+            
+            sessionQueue.forEach((session, idx) => {
+                const isSelected = idx === currentQueueIndex;
+                const min = session.durationSeconds / 60;
+                
+                list.innerHTML += `
+                    <button onclick="selectTask(${idx})" class="w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors ${isSelected ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-stone-50 text-stone-700'}">
+                        <span class="text-xs font-bold truncate pr-4">${session.name}</span>
+                        <span class="text-[10px] font-bold px-2 py-1 rounded-md ${isSelected ? 'bg-indigo-100' : 'bg-stone-100 text-stone-400'}">${min}m</span>
+                    </button>
+                `;
+            });
+        }
+
+        // --- CORE TIMER LOGIC ---
         async function handlePauseResume() {
-            const sessionId = document.getElementById('current-session-id').value;
-            const card = document.getElementById('deep-work-card');
-            const isPaused = card.classList.contains('is-paused');
+            if (sessionQueue.length === 0) return;
+            const current = sessionQueue[currentQueueIndex];
             
-            const endpoint = isPaused ? `/actions/focus/${sessionId}/resume` : `/actions/focus/${sessionId}/pause`;
+            // If it's IN_PROGRESS, we pause it. Otherwise (PAUSED or NOT_STARTED), we resume/start it.
+            const endpoint = (current.status === 'IN_PROGRESS') ? `/actions/focus/${current.id}/pause` : `/actions/focus/${current.id}/resume`;
+            
             const data = await apiCall(endpoint);
-            
             if (data.status === 'success') {
-                card.classList.toggle('is-paused');
-                if (isPaused) syncTimer(); // restart polling loop
+                current.status = (current.status === 'IN_PROGRESS') ? 'PAUSED' : 'IN_PROGRESS';
+                loadSessionUI();
             }
         }
 
         async function endSession() {
-            const sessionId = document.getElementById('current-session-id').value;
-            const data = await apiCall(`/actions/focus/${sessionId}/end`);
-            if (data.status === 'success') location.reload();
+            const current = sessionQueue[currentQueueIndex];
+            const data = await apiCall(`/actions/focus/${current.id}/end`);
+            if (data.status === 'success') {
+                location.reload(); // Reload the whole page to clear the finished task from the queue
+            }
         }
 
+        let syncTimeout = null;
         async function syncTimer() {
-            const sessionInput = document.getElementById('current-session-id');
-            if (!sessionInput) return;
+            if (sessionQueue.length === 0) return;
+            const current = sessionQueue[currentQueueIndex];
             
-            const sessionId = sessionInput.value;
-            const data = await apiCall(`/actions/focus/${sessionId}/status`, 'GET');
+            const data = await apiCall(`/actions/focus/${current.id}/status`, 'GET');
             
             if (data.status === 'success') {
-                document.getElementById('timer-display').innerText = formatTimer(data.data.elapsed_seconds);
+                const elapsed = data.data.elapsed_seconds || 0;
+                const remainingSeconds = current.durationSeconds - elapsed;
                 
-                // Only keep fetching if we are actively running
-                if (data.data.status === 'IN_PROGRESS') {
-                    setTimeout(syncTimer, 1000);
+                document.getElementById('timer-display').textContent = formatTimer(remainingSeconds);
+                current.status = data.data.status;
+                
+                const btnText = document.getElementById('pause-btn-text');
+                
+                // Pure state-machine logic driven directly by your enum
+                if (current.status === 'IN_PROGRESS') {
+                    btnText.textContent = 'Pause Session';
+                } else if (current.status === 'NOT_STARTED') {
+                    btnText.textContent = 'Start Session';
+                } else {
+                    btnText.textContent = 'Resume Session';
+                }
+                
+                clearTimeout(syncTimeout);
+                if (current.status === 'IN_PROGRESS') {
+                    syncTimeout = setTimeout(syncTimer, 1000);
                 }
             }
         }
-        document.addEventListener("DOMContentLoaded", syncTimer);
+
+        document.addEventListener("DOMContentLoaded", loadSessionUI);
 
     </script>
 </body>

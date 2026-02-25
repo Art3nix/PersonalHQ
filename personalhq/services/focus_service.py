@@ -32,6 +32,15 @@ def pause_session(session_id: int) -> bool:
 def resume_session(session_id: int) -> bool:
     """Calculates pause duration, adds to the total, and resumes IN_PROGRESS."""
     session = db.session.get(FocusSession, session_id)
+
+    # Handle the very first start
+    if session.status == SessionStatus.NOT_STARTED:
+        session.status = SessionStatus.IN_PROGRESS
+        session.start_time = datetime.now()
+        db.session.commit()
+        return True
+    
+    # Handle resuming from a pause
     if session and session.status == SessionStatus.PAUSED:
         pause_delta = (datetime.now() - session.last_paused_tick).total_seconds()
 

@@ -24,6 +24,7 @@ class FocusSession(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
 
     name: Mapped[str] = mapped_column(nullable=False)
     target_date: Mapped[date] = mapped_column(nullable=False)
+    target_duration_minutes: Mapped[int] = mapped_column(nullable=False)
     start_time: Mapped[datetime | None]
     end_time: Mapped[datetime | None]
     status: Mapped[SessionStatus] = mapped_column(
