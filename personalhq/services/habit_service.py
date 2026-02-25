@@ -41,9 +41,9 @@ def toggle_habit(habit_id: int, user_id: int) -> dict:
         return {"error": "Habit not found"}
 
     now = datetime.now()
-    is_daily = (habit.frequency == HabitFrequency.DAILY)
-    
-    # 1. Determine if the habit is already completed for the current cycle
+    is_daily = habit.frequency == HabitFrequency.DAILY
+
+    # Determine if the habit is already completed for the current cycle
     already_completed = False
     if habit.last_completed:
         if is_daily:
@@ -51,19 +51,24 @@ def toggle_habit(habit_id: int, user_id: int) -> dict:
         else:
             already_completed = _is_same_week(habit.last_completed, now)
 
-    # 2. Toggle Logic
+    # Toggle Logic
     if already_completed:
         # UNDO action: The user is un-checking the habit for today/this week.
         habit.streak = max(0, habit.streak - 1)
-        # Note: In a perfect world we'd store a history of all completions to revert 
-        # to the exact previous datetime. For this OS, setting to None or leaving 
-        # it mathematically handles the UI state well enough for an undo.
+        # Note: In a perfect world we'd store a history of all completions to revert
+        # to the exact previous datetime. For this OS, setting to None or previous
+        # cycle is fine
         if habit.streak == 0:
             habit.last_completed = None
+        else:
+            if is_daily:
+                habit.last_completed = now - timedelta(days=1)
+            else:
+                habit.last_completed = now - timedelta(days=7)
         db.session.commit()
         return {"status": "success", "is_completed": False, "streak": habit.streak}
 
-    # 3. DO action: The user is checking the habit.
+    # DO action: The user is checking the habit.
     if is_daily:
         if _is_yesterday(habit.last_completed, now):
             habit.streak += 1
