@@ -31,7 +31,7 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
-    life_buckets = relationship("LifeBucket",
+    time_buckets = relationship("TimeBucket",
         back_populates="user",
         cascade="all, delete-orphan"
     )

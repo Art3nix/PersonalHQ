@@ -7,7 +7,7 @@ from .habits import Habit
 from .braindumps import BrainDump
 from .tasks import Task
 from .focussessions import FocusSession
-from .lifebuckets import LifeBucket
+from .timebuckets import TimeBucket
 from .experiences import Experience
 from .bucket_experience import BucketExperience
 from .tags import Tag

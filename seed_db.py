@@ -8,7 +8,9 @@ from personalhq.extensions import db
 from personalhq.models.users import User
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.tasks import Task
-from personalhq.models.lifebuckets import LifeBucket
+from personalhq.models.timebuckets import TimeBucket
+from personalhq.models.experiences import Experience
+from personalhq.models.bucket_experience import BucketExperience
 from personalhq.models.focussessions import FocusSession, SessionStatus
 
 def run_seed():
@@ -46,7 +48,7 @@ def run_seed():
         # 2. Clear existing habits/tasks for a clean slate (optional, but good for testing)
         Habit.query.filter_by(user_id=user_id).delete()
         Task.query.filter_by(user_id=user_id).delete()
-        LifeBucket.query.filter_by(user_id=user_id).delete()
+        TimeBucket.query.filter_by(user_id=user_id).delete()
         FocusSession.query.filter_by(user_id=user_id).delete()
         db.session.commit()
 
@@ -102,15 +104,28 @@ def run_seed():
         ]
         db.session.add_all(tasks)
 
-        # 5. Create a Life Bucket (for the runway UI)
-        bucket = LifeBucket(
+        # 5. Create a Time Bucket
+        bucket_30s = TimeBucket(
             user_id=user_id,
-            name="20s decade",
-            theme="Exploration and Base Building",
-            start_date=date(2016, 5, 15),
-            end_date=date(2026, 5, 14)
+            name="My 30s",
+            theme="Wealth Building & Adventure",
+            start_date=date(2026, 1, 1), # Adjust to your actual decade dates
+            end_date=date(2035, 12, 31)
         )
-        db.session.add(bucket)
+        db.session.add(bucket_30s)
+        db.session.flush() # Flush to get the bucket_30s.id
+
+        # Create an Experience (Assuming theme/emotional_values are commented out or created)
+        japan_trip = Experience(
+            name="Ski in Niseko, Japan",
+            details="2-week powder skiing trip with friends."
+        )
+        db.session.add(japan_trip)
+        db.session.flush()
+
+        # Link them together
+        link = BucketExperience(bucket_id=bucket_30s.id, experience_id=japan_trip.id)
+        db.session.add(link)
 
         # 6. Create Planned Focus Sessions for Today
         sessions = [
@@ -153,7 +168,7 @@ def run_seed():
 
         # Commit everything
         db.session.commit()
-        print("Successfully seeded habits, tasks, and life buckets!")
+        print("Successfully seeded habits, tasks, and time buckets!")
 
 if __name__ == "__main__":
     run_seed()
