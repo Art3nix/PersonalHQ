@@ -60,5 +60,7 @@ def create_app(config_name=None):
     app.register_blueprint(focus_bp)
     from personalhq.routes.auth import auth_bp
     app.register_blueprint(auth_bp)
+    from personalhq.routes.braindumps import braindumps_bp
+    app.register_blueprint(braindumps_bp)
 
     return app

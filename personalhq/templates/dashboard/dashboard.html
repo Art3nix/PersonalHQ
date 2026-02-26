@@ -83,11 +83,19 @@
         </aside>
 
     <div class="flex-1 flex flex-col min-w-0">
-        <header class="h-20 flex items-center justify-between px-12 z-20">
+        <header class="h-24 flex items-center justify-between px-12 z-20">
             <div class="flex-1"></div>
-            <div class="w-full max-w-xl relative">
-                <input type="text" id="thought-catcher" placeholder="Write down any thought" class="w-full bg-stone-100/40 border border-transparent rounded-2xl py-3 px-6 text-sm focus:bg-white focus:border-stone-200 transition-all outline-none font-medium text-stone-500 shadow-sm italic text-center">
+            
+            <div class="w-full max-w-2xl relative group">
+                <input type="text" id="thought-catcher" placeholder="Write down any thought..." 
+                       class="w-full bg-white border border-stone-200 rounded-2xl py-3.5 px-6 text-base focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none font-medium text-stone-700 shadow-sm placeholder:text-stone-400">
+                
+                <div class="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-70 group-focus-within:opacity-0 transition-opacity pointer-events-none">
+                    <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Press</span>
+                    <span class="border border-stone-200 rounded-md px-2 py-0.5 bg-stone-50 text-[10px] font-bold text-stone-500">/</span>
+                </div>
             </div>
+            
             <div class="flex-1 flex justify-end"></div>
         </header>
 
@@ -418,6 +426,58 @@
         }
 
         document.addEventListener("DOMContentLoaded", loadSessionUI);
+
+        // --- THOUGHT CATCHER LOGIC ---
+        const thoughtInput = document.getElementById('thought-catcher');
+
+        // Feature: Global Keyboard Shortcut ('/')
+        document.addEventListener('keydown', function(e) {
+            // Don't trigger if the user is already typing in an input or textarea
+            if (e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'textarea') {
+                return;
+            }
+            
+            if (e.key === '/') {
+                e.preventDefault(); // Prevents the '/' character from being typed into the box
+                thoughtInput.focus();
+            }
+        });
+
+        thoughtInput.addEventListener('keypress', async function (e) {
+            if (e.key === 'Enter' && this.value.trim() !== "") {
+                const val = this.value.trim();
+                
+                // 1. Instantly clear the UI for a snappy feel and lock input
+                this.value = "";
+                this.placeholder = "Saving...";
+                this.disabled = true; 
+
+                // 2. Fire the payload to the Python backend
+                const data = await apiCall('/actions/braindumps/catch', 'POST', { content: val });
+
+                this.disabled = false;
+
+                if (data.status === 'success') {
+                    // 3. Success Animation (from your prototype)
+                    this.placeholder = "✓ " + val.substring(0, 15) + "... saved";
+                    this.classList.add('!border-[var(--success-green)]', 'text-[var(--success-green)]');
+                    
+                    setTimeout(() => {
+                        this.placeholder = "Write down any thought";
+                        this.classList.remove('!border-[var(--success-green)]', 'text-[var(--success-green)]');
+                        this.blur(); // Remove focus
+                    }, 2500);
+                } else {
+                    // 4. Error handling
+                    this.placeholder = "Error saving. Try again.";
+                    this.value = val; // Put their text back so they don't lose the idea!
+                    
+                    setTimeout(() => {
+                        this.placeholder = "Write down any thought";
+                    }, 3000);
+                }
+            }
+        });
 
     </script>
 </body>
