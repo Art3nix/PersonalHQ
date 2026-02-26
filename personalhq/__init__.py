@@ -54,8 +54,9 @@ def create_app(config_name=None):
     # Register Blueprints
     from personalhq.routes.dashboard import dashboard_bp
     app.register_blueprint(dashboard_bp)
-    from personalhq.routes.habits import habits_bp
-    app.register_blueprint(habits_bp)
+    from personalhq.routes.habits import habits_api_bp, habits_view_bp
+    app.register_blueprint(habits_api_bp)
+    app.register_blueprint(habits_view_bp)
     from personalhq.routes.focus import focus_bp
     app.register_blueprint(focus_bp)
     from personalhq.routes.auth import auth_bp

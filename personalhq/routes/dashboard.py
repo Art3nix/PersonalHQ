@@ -7,7 +7,7 @@ from personalhq.models.habits import Habit
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
 
-dashboard_bp = Blueprint('dashboard', __name__)
+dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 @dashboard_bp.route('/')
 @login_required

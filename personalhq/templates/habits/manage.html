@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habits & Analytics - Life HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDFDFB; color: #1A1C1E; }
+    </style>
+</head>
+<body class="min-h-screen flex pl-24"> <nav class="w-24 h-screen border-r border-stone-200 fixed left-0 top-0 bg-white flex flex-col items-center py-8 z-50">
+        <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-200 mb-8 cursor-pointer" onclick="window.location.href='/dashboard'">HQ</div>
+    </nav>
+
+    <main class="flex-1 max-w-6xl mx-auto px-12 py-12">
+        
+        <header class="flex justify-between items-end mb-12">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Habit Analytics</h1>
+                <p class="text-sm font-medium text-stone-400 mt-2">Track your consistency and manage your routines.</p>
+            </div>
+            <button onclick="document.getElementById('new-habit-modal').classList.toggle('hidden')" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Habit
+            </button>
+        </header>
+
+        <section class="grid grid-cols-3 gap-6 mb-12">
+            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-xl shadow-stone-200/30 flex items-center gap-6">
+                <div class="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">Best Streak</p>
+                    <p class="text-3xl font-black text-stone-900">{{ stats.best_streak }} <span class="text-sm text-stone-400 font-bold">days</span></p>
+                </div>
+            </div>
+            
+            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-xl shadow-stone-200/30 flex items-center gap-6">
+                <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">Active Routines</p>
+                    <p class="text-3xl font-black text-stone-900">{{ stats.total }}</p>
+                </div>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-100 border-dashed p-6 rounded-[2rem] flex flex-col justify-center items-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-300 mb-2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                <p class="text-[11px] font-bold text-stone-400 uppercase tracking-widest">30-Day Completion</p>
+                <p class="text-xs font-medium text-stone-400 mt-1">Requires HabitLog update</p>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">
+                Manage Habits
+                <span class="bg-stone-100 text-stone-500 py-0.5 px-2 rounded-md text-[10px]">{{ stats.total }}</span>
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-6">
+                {% for habit in habits %}
+                <div class="bg-white border border-stone-100 rounded-3xl p-6 shadow-lg shadow-stone-200/20 group hover:border-indigo-100 transition-colors relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-stone-900">{{ habit.name }}</h3>
+                            <p class="text-[10px] font-bold uppercase tracking-widest mt-1 {% if habit.frequency.value == 'daily' %}text-indigo-500{% else %}text-emerald-500{% endif %}">
+                                {{ habit.frequency.value }}
+                            </p>
+                        </div>
+                        
+                        <button class="text-stone-300 hover:text-stone-900 transition-colors p-2 -mr-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+                        </button>
+                    </div>
+
+                    <div class="flex items-end justify-between mt-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Current Streak</p>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-2xl font-black text-stone-900">{{ habit.streak }}</span>
+                                <span class="text-xs font-bold text-stone-400">🔥</span>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Last Logged</p>
+                            <p class="text-sm font-bold text-stone-700">
+                                {% if habit.last_completed %}
+                                    {{ habit.last_completed.strftime('%b %d, %Y') }}
+                                {% else %}
+                                    Never
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <div id="new-habit-modal" class="hidden fixed inset-0 z-50 flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('new-habit-modal').classList.add('hidden')"></div>
+        
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl border-l border-stone-100 p-8 flex flex-col transform transition-transform">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-extrabold text-stone-900">Create Routine</h2>
+                <button onclick="document.getElementById('new-habit-modal').classList.add('hidden')" class="text-stone-400 hover:text-stone-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            
+            <form action="{{ url_for('habits_api.create_habit') }}" method="POST" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Choose an Icon</label>
+                    <div class="grid grid-cols-6 gap-2">
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="📚" class="peer sr-only" required checked>
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📚</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🏋️‍♂️" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🏋️‍♂️</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🏃‍♂️" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🏃‍♂️</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="💧" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💧</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🧘‍♂️" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🧘‍♂️</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🥗" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🥗</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="💻" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💻</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🛌" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🛌</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="📓" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📓</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="🚶‍♂️" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🚶‍♂️</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="📵" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📵</div>
+                        </label>
+                        <label class="cursor-pointer relative">
+                            <input type="radio" name="icon" value="💊" class="peer sr-only">
+                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💊</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Habit Name</label>
+                    <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., Read 10 Pages">
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Frequency</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="frequency" value="DAILY" class="peer sr-only" checked>
+                            <div class="text-center py-3 border border-stone-200 rounded-xl text-sm font-bold text-stone-500 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-colors">Daily</div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="frequency" value="WEEKLY" class="peer sr-only">
+                            <div class="text-center py-3 border border-stone-200 rounded-xl text-sm font-bold text-stone-500 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-colors">Weekly</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="pt-6 mt-auto">
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">Save Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>
