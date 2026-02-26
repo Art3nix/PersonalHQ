@@ -11,6 +11,8 @@ from personalhq.models.tasks import Task
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.experiences import Experience
 from personalhq.models.bucket_experience import BucketExperience
+from personalhq.models.coretheme import CoreTheme
+from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.models.focussessions import FocusSession, SessionStatus
 
 def run_seed():
@@ -115,10 +117,19 @@ def run_seed():
         db.session.add(bucket_30s)
         db.session.flush() # Flush to get the bucket_30s.id
 
+        # Create Categories
+        theme_adventure = CoreTheme(name="Adventure & Travel")
+        theme_growth = CoreTheme(name="Personal Growth")
+        val_awe = EmotionalValue(name="Awe & Wonder")
+        db.session.add_all([theme_adventure, theme_growth, val_awe])
+        db.session.flush()
+
         # Create an Experience (Assuming theme/emotional_values are commented out or created)
         japan_trip = Experience(
             name="Ski in Niseko, Japan",
-            details="2-week powder skiing trip with friends."
+            details="2-week powder skiing trip with friends.",
+            theme_id=theme_adventure.id,
+            emotional_value_id=val_awe.id
         )
         db.session.add(japan_trip)
         db.session.flush()
