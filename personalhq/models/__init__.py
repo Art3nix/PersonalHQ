@@ -3,6 +3,7 @@
 from .users import User
 from .subscriptions import Subscription
 from .plans import Plan
+from .habit_logs import HabitLog
 from .habits import Habit
 from .braindumps import BrainDump
 from .tasks import Task

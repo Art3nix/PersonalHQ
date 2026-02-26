@@ -310,7 +310,7 @@
         // --- HABITS API SYNC ---
         async function toggleHabit(habitId) {
             const data = await apiCall(`/actions/habits/${habitId}/toggle`);
-            
+
             if (data.status === 'success') {
                 const row = document.getElementById(`habit-row-${habitId}`);
                 const iconBox = document.getElementById(`habit-icon-${habitId}`);
@@ -318,7 +318,7 @@
                 
                 streakLabel.innerText = `🔥 ${data.streak} day streak`;
                 
-                if (data.is_completed) {
+                if (data.is_done) {
                     row.classList.replace('bg-white', 'bg-indigo-50/50');
                     row.classList.replace('border-slate-100', 'border-indigo-100');
                     iconBox.classList.replace('bg-slate-50', 'bg-indigo-600');

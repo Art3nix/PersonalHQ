@@ -1,5 +1,6 @@
 """Script to seed the Personal HQ database with test data."""
 
+import random
 from datetime import datetime, timedelta, date
 from sqlalchemy.exc import IntegrityError
 
@@ -7,6 +8,7 @@ from personalhq import create_app
 from personalhq.extensions import db
 from personalhq.models.users import User
 from personalhq.models.habits import Habit, HabitFrequency
+from personalhq.models.habit_logs import HabitLog
 from personalhq.models.tasks import Task
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.experiences import Experience
@@ -50,7 +52,13 @@ def run_seed():
         # 2. Clear existing habits/tasks for a clean slate (optional, but good for testing)
         Habit.query.filter_by(user_id=user_id).delete()
         Task.query.filter_by(user_id=user_id).delete()
+        BucketExperience.query.delete()
+        # If you created TagExperience, uncomment the line below:
+        # TagExperience.query.delete()
         TimeBucket.query.filter_by(user_id=user_id).delete()
+        Experience.query.delete()
+        CoreTheme.query.delete()
+        EmotionalValue.query.delete()
         FocusSession.query.filter_by(user_id=user_id).delete()
         db.session.commit()
 
@@ -88,6 +96,33 @@ def run_seed():
             )
         ]
         db.session.add_all(habits)
+        # HabitLogs
+        seeded_habits = Habit.query.filter_by(user_id=user_id).all()
+
+        logs_to_add = []
+        today = date.today()
+
+        # 3. Loop backwards through the last 30 days
+        for i in range(30):
+            current_date = today - timedelta(days=i)
+
+            for habit in seeded_habits:
+                # Give it a 70% chance of being completed on any given day
+                if random.random() < 0.70:
+                    logs_to_add.append(
+                        HabitLog(
+                            habit_id=habit.id,
+                            completed_date=current_date,
+                            # Fake the exact timestamp to noon on that day
+                            logged_at=datetime.combine(current_date, datetime.strptime('12:00:00', '%H:%M:%S').time()) 
+                        )
+                    )
+
+                    # If the date is today, and we completed it, update the parent habit's last_completed
+                    if i == 0:
+                        habit.last_completed = current_date
+
+        db.session.add_all(logs_to_add)
 
         # 4. Create Dummy Tasks (to populate the bottom right GTD list)
         tasks = [

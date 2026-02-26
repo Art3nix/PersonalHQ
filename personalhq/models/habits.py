@@ -33,3 +33,5 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     last_completed: Mapped[datetime | None]
 
     user = relationship("User", back_populates="habits")
+    logs = relationship("HabitLog", back_populates="habit", cascade="all, delete-orphan", order_by="desc(HabitLog.completed_date)")
+
