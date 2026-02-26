@@ -3,7 +3,6 @@
 from datetime import datetime, timedelta, date
 from sqlalchemy.exc import IntegrityError
 
-# Adjust the import based on where your create_app function lives
 from personalhq import create_app
 from personalhq.extensions import db
 from personalhq.models.users import User
@@ -20,7 +19,7 @@ def run_seed():
         print("Starting database seed...")
 
         # 1. Create the Test User
-        # Uses the custom __init__ from your users.py which hashes the password automatically
+        # Uses the custom __init__ from users.py which hashes the password automatically
         test_user = User(
             email="jacob@example.com",
             first_name="Jacob",

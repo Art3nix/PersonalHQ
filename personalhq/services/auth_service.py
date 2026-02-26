@@ -17,7 +17,7 @@ def register_new_user(email: str, first_name: str, last_name: str, password: str
         email=email,
         first_name=first_name,
         last_name=last_name,
-        password=password # Your User model __init__ handles the hashing
+        password=password # User model __init__ handles the hashing
     )
     db.session.add(new_user)
     db.session.commit()
