@@ -86,14 +86,18 @@
         <header class="h-24 flex items-center justify-between px-12 z-20">
             <div class="flex-1"></div>
             
-            <div class="w-full max-w-2xl relative group">
+            <div class="w-full max-w-2xl relative">
                 <input type="text" id="thought-catcher" placeholder="Write down any thought..." 
-                       class="w-full bg-white border border-stone-200 rounded-2xl py-3.5 px-6 text-base focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none font-medium text-stone-700 shadow-sm placeholder:text-stone-400">
+                       class="w-full bg-white border border-stone-200 rounded-2xl py-3.5 pl-6 pr-14 text-base focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50/50 transition-all outline-none font-medium text-stone-700 shadow-sm placeholder:text-stone-400">
                 
-                <div class="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-70 group-focus-within:opacity-0 transition-opacity pointer-events-none">
+                <div id="shortcut-hint" class="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 opacity-70 transition-opacity pointer-events-none">
                     <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Press</span>
                     <span class="border border-stone-200 rounded-md px-2 py-0.5 bg-stone-50 text-[10px] font-bold text-stone-500">/</span>
                 </div>
+
+                <button id="send-thought-btn" onclick="submitThought()" class="absolute right-2.5 top-1/2 -translate-y-1/2 bg-indigo-600 text-white p-2 rounded-xl hover:bg-indigo-700 transition-all duration-200 opacity-0 scale-90 pointer-events-none shadow-md shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
             </div>
             
             <div class="flex-1 flex justify-end"></div>
@@ -429,6 +433,8 @@
 
         // --- THOUGHT CATCHER LOGIC ---
         const thoughtInput = document.getElementById('thought-catcher');
+        const sendBtn = document.getElementById('send-thought-btn');
+        const shortcutHint = document.getElementById('shortcut-hint');
 
         // Feature: Global Keyboard Shortcut ('/')
         document.addEventListener('keydown', function(e) {
@@ -443,39 +449,76 @@
             }
         });
 
-        thoughtInput.addEventListener('keypress', async function (e) {
-            if (e.key === 'Enter' && this.value.trim() !== "") {
-                const val = this.value.trim();
+        // Watch for typing to toggle the Send button and hide the hint
+        thoughtInput.addEventListener('input', function() {
+            if (this.value.trim().length > 0) {
+                // Show button, hide hint
+                sendBtn.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+                sendBtn.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                shortcutHint.classList.remove('opacity-70');
+                shortcutHint.classList.add('opacity-0');
+            } else {
+                // Hide button, show hint
+                sendBtn.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+                sendBtn.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+                shortcutHint.classList.remove('opacity-0');
+                shortcutHint.classList.add('opacity-70'); // Bring the hint back
+            }
+        });
+
+        // The master save function used by both the Enter key and the Button click
+        async function submitThought() {
+            const val = thoughtInput.value.trim();
+            if (!val) return;
+
+            // 1. Instantly clear the UI for a snappy feel and lock input
+            thoughtInput.value = "";
+            thoughtInput.placeholder = "Saving...";
+            thoughtInput.disabled = true; 
+            sendBtn.disabled = true;
+            
+            // Force hide the button immediately during save
+            sendBtn.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
+            sendBtn.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+
+            // 2. Fire the payload to the Python backend
+            const data = await apiCall('/actions/braindumps/catch', 'POST', { content: val });
+
+            thoughtInput.disabled = false;
+            sendBtn.disabled = false;
+
+            if (data.status === 'success') {
+                // 3. Success Animation
+                thoughtInput.placeholder = "✓ " + val.substring(0, 15) + "... saved";
+                thoughtInput.classList.add('!border-[var(--success-green)]', 'text-[var(--success-green)]');
                 
-                // 1. Instantly clear the UI for a snappy feel and lock input
-                this.value = "";
-                this.placeholder = "Saving...";
-                this.disabled = true; 
+                setTimeout(() => {
+                    thoughtInput.placeholder = "Write down any thought...";
+                    thoughtInput.classList.remove('!border-[var(--success-green)]', 'text-[var(--success-green)]');
+                    thoughtInput.blur(); // Remove focus
+                    shortcutHint.classList.remove('opacity-0'); 
+                    shortcutHint.classList.add('opacity-70'); // Bring the hint back
+                }, 2500);
+            } else {
+                // 4. Error handling
+                thoughtInput.placeholder = "Error saving. Try again.";
+                thoughtInput.value = val; // Restore their text
+                
+                // Bring the button back since we restored the text
+                sendBtn.classList.remove('opacity-0', 'scale-90', 'pointer-events-none');
+                sendBtn.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+                
+                setTimeout(() => {
+                    thoughtInput.placeholder = "Write down any thought...";
+                }, 3000);
+            }
+        }
 
-                // 2. Fire the payload to the Python backend
-                const data = await apiCall('/actions/braindumps/catch', 'POST', { content: val });
-
-                this.disabled = false;
-
-                if (data.status === 'success') {
-                    // 3. Success Animation (from your prototype)
-                    this.placeholder = "✓ " + val.substring(0, 15) + "... saved";
-                    this.classList.add('!border-[var(--success-green)]', 'text-[var(--success-green)]');
-                    
-                    setTimeout(() => {
-                        this.placeholder = "Write down any thought";
-                        this.classList.remove('!border-[var(--success-green)]', 'text-[var(--success-green)]');
-                        this.blur(); // Remove focus
-                    }, 2500);
-                } else {
-                    // 4. Error handling
-                    this.placeholder = "Error saving. Try again.";
-                    this.value = val; // Put their text back so they don't lose the idea!
-                    
-                    setTimeout(() => {
-                        this.placeholder = "Write down any thought";
-                    }, 3000);
-                }
+        // Allow Enter key to trigger the exact same logic
+        thoughtInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitThought();
             }
         });
 
