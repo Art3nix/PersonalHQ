@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Inbox - Life HQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FDFDFB; color: #1A1C1E; }
+    </style>
+</head>
+<body class="min-h-screen flex pl-24">
+
+    <nav class="w-24 h-screen border-r border-stone-200 fixed left-0 top-0 bg-white flex flex-col items-center py-8 z-50">
+        <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-200 mb-8 cursor-pointer" onclick="window.location.href='/dashboard'">HQ</div>
+    </nav>
+
+    <main class="flex-1 max-w-4xl mx-auto px-12 py-12">
+        
+        <header class="flex justify-between items-end mb-10 border-b border-stone-100 pb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight flex items-center gap-3">
+                    Inbox
+                    {% if dump_count > 0 %}
+                        <span class="bg-indigo-100 text-indigo-700 text-sm py-1 px-3 rounded-lg font-bold">{{ dump_count }}</span>
+                    {% endif %}
+                </h1>
+                <p class="text-sm font-medium text-stone-400 mt-2">Process your captured thoughts to keep your mind clear.</p>
+            </div>
+            
+            {% if dump_count == 0 %}
+            <button class="bg-stone-100 text-stone-400 px-6 py-3 rounded-2xl font-bold text-sm cursor-not-allowed">Inbox Zero 🎉</button>
+            {% else %}
+            <button class="bg-indigo-50 text-indigo-600 px-6 py-3 rounded-2xl font-bold text-sm hover:bg-indigo-100 transition-colors">Process All</button>
+            {% endif %}
+        </header>
+
+        <section class="space-y-4">
+            {% if braindumps %}
+                {% for dump in braindumps %}
+                <div id="dump-{{ dump.id }}" class="bg-white border border-stone-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all group flex items-start justify-between gap-6">
+                    
+                    <div class="flex-1">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-1.5">
+                            Captured {{ dump.created_at.strftime('%b %d, %H:%M') }}
+                        </p>
+                        <p class="text-stone-800 font-medium leading-relaxed">{{ dump.content }}</p>
+                    </div>
+
+                    <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button class="px-4 py-2 bg-stone-50 text-stone-600 rounded-xl text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-stone-100 hover:border-indigo-100">
+                            Convert...
+                        </button>
+                        
+                        <button onclick="deleteDump({{ dump.id }})" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                    
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-20">
+                    <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-stone-900">Your mind is clear.</h3>
+                    <p class="text-sm font-medium text-stone-400 mt-1">Capture new thoughts from the dashboard using the <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-xs">/</kbd> key.</p>
+                </div>
+            {% endif %}
+        </section>
+
+    </main>
+
+    <script>
+        async function deleteDump(dumpId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            try {
+                const response = await fetch(`/actions/braindumps/${dumpId}/delete`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+
+                if (response.ok) {
+                    // Visually shrink and remove the element for a smooth UX
+                    const element = document.getElementById(`dump-${dumpId}`);
+                    element.style.transform = 'scale(0.95)';
+                    element.style.opacity = '0';
+                    setTimeout(() => element.remove(), 200);
+                }
+            } catch (error) {
+                console.error("Failed to delete thought:", error);
+            }
+        }
+    </script>
+</body>
+</html>
