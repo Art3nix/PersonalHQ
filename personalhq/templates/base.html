@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <title>{% block title %}Life HQ{% endblock %}</title>
+    
+    <!-- External Fonts & Frameworks -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Official Static CSS Pipeline -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Global Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="fixed top-6 right-6 z-[100] space-y-3">
+          {% for category, message in messages %}
+            <div class="px-5 py-3.5 rounded-xl shadow-xl text-sm font-bold {% if category == 'error' %}bg-red-50 text-red-600 border border-red-100{% else %}bg-stone-900 text-white{% endif %} transition-all animate-fade-in-down">
+                {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Where pages like Login/Register will inject their content -->
+    {% block content %}{% endblock %}
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
