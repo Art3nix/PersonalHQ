@@ -21,6 +21,7 @@ class FocusSession(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    identity_id: Mapped[int | None] = mapped_column(ForeignKey('identities.id'))
 
     name: Mapped[str] = mapped_column(nullable=False)
     target_date: Mapped[date] = mapped_column(nullable=False)
@@ -36,4 +37,5 @@ class FocusSession(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
     total_paused_seconds: Mapped[int | None]
     last_paused_tick: Mapped[datetime | None]
 
+    identity = relationship("Identity", back_populates="focus_sessions")
     user = relationship("User", back_populates="focus_sessions")

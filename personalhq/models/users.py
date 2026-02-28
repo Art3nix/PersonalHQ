@@ -47,6 +47,10 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    identities = relationship("Identity",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     def check_password(self, password: str) -> bool:
         """Verifies if the provided plain-text password matches the hash."""

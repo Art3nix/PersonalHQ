@@ -97,6 +97,16 @@
                                 </select>
                             </div>
                         </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
+                            <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="">None (Unassigned)</option>
+                                {% for identity in identities %}
+                                    <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
 
                     <div id="exp-fields" class="space-y-6 hidden">

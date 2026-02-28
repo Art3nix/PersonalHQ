@@ -19,6 +19,7 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
+    identity_id: Mapped[int | None] = mapped_column(ForeignKey('identities.id'))
 
     name: Mapped[str] = mapped_column(nullable=False)
     identity: Mapped[str | None]
@@ -32,6 +33,6 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     category: Mapped[str | None]
     last_completed: Mapped[datetime | None]
 
+    identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")
     logs = relationship("HabitLog", back_populates="habit", cascade="all, delete-orphan", order_by="desc(HabitLog.completed_date)")
-

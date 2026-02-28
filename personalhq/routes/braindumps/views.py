@@ -4,6 +4,7 @@ from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from personalhq.models.braindumps import BrainDump
 from personalhq.models.timebuckets import TimeBucket
+from personalhq.models.identities import Identity
 
 braindumps_view_bp = Blueprint('braindumps_view', __name__, url_prefix='/inbox')
 
@@ -13,10 +14,12 @@ def index():
     """Renders the Inbox triage page."""
     braindumps = BrainDump.query.filter_by(user_id=current_user.id).order_by(BrainDump.created_at.asc()).all()
     buckets = TimeBucket.query.filter_by(user_id=current_user.id).order_by(TimeBucket.start_date.asc()).all()
+    identities = Identity.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
-        'inbox.html',
+        'braindumps/inbox.html',
         braindumps=braindumps,
         dump_count=len(braindumps),
-        buckets=buckets
+        buckets=buckets,
+        identities=identities
     )

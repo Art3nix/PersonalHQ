@@ -69,11 +69,14 @@ def create_habit():
 
     frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
 
+    identity_id = request.form.get('identity_id', type=int)
+
     new_habit = Habit(
         user_id=current_user.id,
         name=name.strip(),
         icon=icon.strip(),
-        frequency=frequency
+        frequency=frequency,
+        identity_id=identity_id
     )
 
     db.session.add(new_habit)

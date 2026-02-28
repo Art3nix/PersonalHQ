@@ -64,6 +64,8 @@ def convert_dump(dump_id):
             user_id=current_user.id, target_date=target_date
         ).scalar() or 0
 
+        identity_id = request.form.get('identity_id', type=int)
+
         new_session = FocusSession(
             user_id=current_user.id,
             name=name.strip(),
@@ -71,7 +73,8 @@ def convert_dump(dump_id):
             target_duration_minutes=duration or 60,
             status=SessionStatus.NOT_STARTED,
             queue_order=max_order + 1,
-            total_paused_seconds=0
+            total_paused_seconds=0,
+            identity_id=identity_id
         )
         db.session.add(new_session)
 

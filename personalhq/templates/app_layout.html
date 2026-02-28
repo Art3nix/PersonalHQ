@@ -23,6 +23,14 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </a>
 
+            <a href="{{ url_for('habits_view.manage') }}" class="w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-colors {% if '/habits' in request.path %}bg-indigo-50 text-indigo-600{% else %}text-stone-400 hover:bg-stone-50 hover:text-stone-600{% endif %}" title="Habit Analytics">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            </a>
+
+            <a href="{{ url_for('identities_view.matrix') }}" class="w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-colors {% if '/identity' in request.path %}bg-indigo-50 text-indigo-600{% else %}text-stone-400 hover:bg-stone-50 hover:text-stone-600{% endif %}" title="Identity Matrix">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </a>
+
             <a href="{{ url_for('time_buckets_view.manage') }}" class="w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-colors {% if '/life' in request.path %}bg-indigo-50 text-indigo-600{% else %}text-stone-400 hover:bg-stone-50 hover:text-stone-600{% endif %}" title="Time Buckets">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             </a>

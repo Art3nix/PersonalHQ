@@ -1,0 +1,121 @@
+{% extends "app_layout.html" %}
+
+{% block title %}Identity Matrix - Life HQ{% endblock %}
+
+{% block app_content %}
+    <main class="flex-1 max-w-6xl mx-auto px-12 py-12">
+        
+        <header class="flex justify-between items-end mb-12 border-b border-stone-100 pb-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Identity Matrix</h1>
+                <p class="text-sm font-medium text-stone-400 mt-2">Every action is a vote for the person you are becoming.</p>
+            </div>
+            <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+                + Define Identity
+            </button>
+        </header>
+
+        <section class="grid grid-cols-2 gap-8">
+            {% if identity_stats %}
+                {% for stat in identity_stats %}
+                <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-xl shadow-stone-200/40 flex flex-col relative overflow-hidden group hover:border-indigo-100 transition-colors">
+                    
+                    <div class="absolute -right-16 -top-16 w-48 h-48 bg-gradient-to-br from-indigo-50 to-white rounded-full blur-3xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+
+                    <div class="relative z-10 flex justify-between items-start mb-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">Core Identity</p>
+                            <h2 class="text-2xl font-extrabold text-stone-900">{{ stat.model.name }}</h2>
+                            {% if stat.model.description %}
+                                <p class="text-xs font-medium text-stone-400 mt-1 max-w-xs">{{ stat.model.description }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="text-right shrink-0 bg-stone-50 border border-stone-100 rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shadow-inner">
+                            <span class="text-3xl font-black text-indigo-600 leading-none">{{ stat.total_evidence }}</span>
+                            <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-1">Total Votes</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto border-t border-stone-50 pt-6">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">Supporting Systems</p>
+                        <div class="flex gap-2 flex-wrap">
+                            {% for habit in stat.model.habits %}
+                                <span class="bg-white border border-stone-200 text-stone-600 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                    {{ habit.icon }} {{ habit.name }}
+                                </span>
+                            {% endfor %}
+                            
+                            {% if stat.focus_count > 0 %}
+                                <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    {{ stat.focus_count }} Focus Rules
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-span-2 text-center py-20 border-2 border-dashed border-stone-100 rounded-[2rem]">
+                    <h3 class="text-lg font-bold text-stone-900">Who do you want to become?</h3>
+                    <p class="text-sm font-medium text-stone-400 mt-1">Define your first identity to start gathering evidence.</p>
+                </div>
+            {% endif %}
+        </section>
+
+    </main>
+
+    <div id="new-identity-modal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('new-identity-modal').classList.add('translate-x-full')"></div>
+
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Define Identity</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Identity Matrix</p>
+                </div>
+                <button onclick="document.getElementById('new-identity-modal').classList.add('translate-x-full')" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <form action="{{ url_for('identities_api.create_identity') }}" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Identity Name</label>
+                        <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., The Athlete">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Standard (Optional)</label>
+                        <textarea name="description" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none" placeholder="e.g., I never miss a Monday workout."></textarea>
+                    </div>
+
+                    {% if unassigned_habits %}
+                    <div class="border-t border-stone-100 pt-6 mt-6">
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-3">Attach Existing Habits</label>
+                        <div class="space-y-2">
+                            {% for habit in unassigned_habits %}
+                            <label class="flex items-center p-3 border border-stone-100 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors group">
+                                <input type="checkbox" name="habit_ids" value="{{ habit.id }}" class="w-4 h-4 text-indigo-600 bg-stone-100 border-stone-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                <span class="ml-3 text-sm font-bold text-stone-700 group-hover:text-stone-900">{{ habit.icon }} {{ habit.name }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="pt-6 mt-auto">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Establish Identity
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

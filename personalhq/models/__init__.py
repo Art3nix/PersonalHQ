@@ -15,3 +15,4 @@ from .tags import Tag
 from .tag_experience import TagExperience
 from .coretheme import CoreTheme
 from .emotionalvalue import EmotionalValue
+from .identities import Identity

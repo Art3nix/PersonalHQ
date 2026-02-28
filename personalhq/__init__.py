@@ -68,5 +68,8 @@ def create_app(config_name=None):
     from personalhq.routes.focus_sessions import focus_api_bp, focus_view_bp
     app.register_blueprint(focus_api_bp)
     app.register_blueprint(focus_view_bp)
+    from personalhq.routes.identities import identities_api_bp, identities_view_bp
+    app.register_blueprint(identities_api_bp)
+    app.register_blueprint(identities_view_bp)
 
     return app

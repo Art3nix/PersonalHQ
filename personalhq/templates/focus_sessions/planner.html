@@ -103,6 +103,15 @@
                             </select>
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
+                        <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
+                            <option value="">None (Unassigned)</option>
+                            {% for identity in identities %}
+                                <option value="{{ identity.id }}">{{ identity.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">

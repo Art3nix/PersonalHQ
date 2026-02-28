@@ -8,6 +8,7 @@ from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
+from personalhq.models.identities import Identity
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 
@@ -104,6 +105,8 @@ def manage():
             sparkline.append(check_date in history_map[habit.id])
         habit_sparklines[habit.id] = sparkline
 
+    identities = Identity.query.filter_by(user_id=current_user.id).all()
+
     return render_template(
         'habits/manage.html',
         habits=all_habits,
@@ -117,5 +120,6 @@ def manage():
         dow_counts=json.dumps(dow_counts),
         weekly_trend=json.dumps(weekly_trend),
         habit_sparklines=habit_sparklines,
-        HabitFrequency=HabitFrequency
+        HabitFrequency=HabitFrequency,
+        identities=identities
     )
