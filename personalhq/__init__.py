@@ -70,6 +70,9 @@ def create_app(config_name=None):
     app.register_blueprint(focus_view_bp)
     from personalhq.routes.identities import identities_api_bp, identities_view_bp
     app.register_blueprint(identities_api_bp)
-    app.register_blueprint(identities_view_bp)
+    app.register_blueprint(identities_view_bp)# Inside your create_app() function:
+    from personalhq.routes.journals import journals_view_bp, journals_api_bp
+    app.register_blueprint(journals_view_bp)
+    app.register_blueprint(journals_api_bp)
 
     return app

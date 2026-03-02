@@ -34,6 +34,9 @@
             <a href="{{ url_for('time_buckets_view.manage') }}" class="w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-colors {% if '/life' in request.path %}bg-indigo-50 text-indigo-600{% else %}text-stone-400 hover:bg-stone-50 hover:text-stone-600{% endif %}" title="Time Buckets">
                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
             </a>
+            <a href="{{ url_for('journals_view.index') }}" class="w-12 h-12 mx-auto flex items-center justify-center rounded-xl transition-colors {% if '/journals' in request.path %}bg-indigo-50 text-indigo-600{% else %}text-stone-400 hover:bg-stone-50 hover:text-stone-600{% endif %}" title="Journals">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+            </a>
 
         </div>
 

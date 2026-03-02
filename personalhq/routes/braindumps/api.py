@@ -10,6 +10,7 @@ from personalhq.models.braindumps import BrainDump
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.experiences import Experience
 from personalhq.models.bucket_experience import BucketExperience
+from personalhq.models.journalentries import JournalEntry
 
 braindumps_api_bp = Blueprint('braindumps_api', __name__, url_prefix='/actions/braindumps')
 
@@ -98,6 +99,17 @@ def convert_dump(dump_id):
             experience_id=new_exp.id
         )
         db.session.add(link)
+
+    elif convert_type == 'journal':
+        journal_id = request.form.get('journal_id')
+        content = request.form.get('journal_content')
+        
+        if journal_id and content:
+            new_entry = JournalEntry(
+                journal_id=int(journal_id),
+                content=content.strip()
+            )
+            db.session.add(new_entry)
 
     # Clear it from the Inbox
     db.session.delete(dump)

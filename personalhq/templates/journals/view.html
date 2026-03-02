@@ -1,0 +1,154 @@
+{% extends "app_layout.html" %}
+
+{% block title %}{{ journal.name }} - Life HQ{% endblock %}
+
+{% block app_content %}
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <header class="h-24 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('journals_view.index') }}" class="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </a>
+                <div>
+                    <h1 class="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
+                        {{ journal.icon or '📓' }} {{ journal.name }}
+                    </h1>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ journal.frequency.value }} • {{ entries|length }} Entries</p>
+                </div>
+            </div>
+            
+            <button onclick="document.getElementById('slide-over-prompts').classList.remove('translate-x-full')" class="flex items-center gap-2 px-4 py-2 bg-stone-50 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-100 transition-colors border border-stone-100 hover:border-stone-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                Manage Prompts
+            </button>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            <main class="w-[60%] overflow-y-auto custom-scrollbar p-12">
+                
+                {% if active_prompt %}
+                <div class="mb-10 p-6 bg-indigo-50 border border-indigo-100 rounded-3xl">
+                    <h3 class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Current Prompt
+                    </h3>
+                    <p class="text-lg font-bold text-indigo-900 leading-snug">{{ active_prompt.text }}</p>
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('journals_api.add_entry', journal_id=journal.id) }}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-8 shadow-2xl shadow-stone-200/40">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    
+                    <textarea name="content" rows="8" placeholder="What's on your mind today?" required 
+                              class="w-full bg-transparent text-stone-800 text-base placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed custom-scrollbar"></textarea>
+                    
+                    <div class="flex justify-between items-center mt-6 pt-6 border-t border-stone-50">
+                        <p class="text-xs font-medium text-stone-400">Press <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Cmd</kbd> + <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Enter</kbd> to save</p>
+                        <button type="submit" class="px-6 py-3 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
+                            Save Entry
+                        </button>
+                    </div>
+                </form>
+
+            </main>
+
+            <aside class="w-[40%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-12">
+                <h3 class="text-sm font-bold text-stone-900 mb-8">Previous Entries</h3>
+                
+                <div class="space-y-6">
+                    {% for entry in entries %}
+                    <div class="bg-white border border-stone-100 rounded-3xl p-6 shadow-sm group hover:border-indigo-100 transition-colors">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest bg-stone-50 px-2.5 py-1 rounded-md border border-stone-100">
+                                {{ entry.created_at.strftime('%b %d, %Y') }}
+                            </span>
+                            
+                            <form action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="text-stone-300 hover:text-red-500 transition-colors" title="Delete Entry">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <p class="text-sm font-medium text-stone-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-10">
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest">It's quiet here.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </aside>
+        </div>
+        <div id="slide-over-prompts" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+            <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')"></div>
+            
+            <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+                <div class="p-8 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Journal Prompts</h2>
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Rotation: {{ journal.frequency.value }}</p>
+                    </div>
+                    <button onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')" class="p-2 bg-white text-stone-400 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                    
+                    <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}" method="POST" class="mb-10">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Add New Question</label>
+                        <div class="flex gap-3">
+                            <input type="text" name="text" required class="flex-1 bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 transition-all outline-none font-medium" placeholder="e.g., What energized me today?">
+                            <button type="submit" class="px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                                Add
+                            </button>
+                        </div>
+                    </form>
+
+                    <div>
+                        <h3 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4 border-b border-stone-100 pb-2">Active Prompts ({{ prompts|length }})</h3>
+                        
+                        <div class="space-y-3">
+                            {% for prompt in prompts %}
+                            <div class="flex justify-between items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl group hover:border-stone-200 transition-colors shadow-sm">
+                                <p class="text-sm font-medium text-stone-700 leading-snug">{{ prompt.text }}</p>
+                                
+                                <form action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="submit" class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-6 bg-stone-50 rounded-2xl border border-stone-100 border-dashed">
+                                <p class="text-xs font-medium text-stone-400">No prompts added yet.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Quick save shortcut matching your UI note
+    document.addEventListener('keydown', function(e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+            const activeElement = document.activeElement;
+            if (activeElement.tagName.toLowerCase() === 'textarea') {
+                activeElement.closest('form').submit();
+            }
+        }
+    });
+</script>
+{% endblock %}

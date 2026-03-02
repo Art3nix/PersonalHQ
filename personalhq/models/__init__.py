@@ -16,3 +16,6 @@ from .tag_experience import TagExperience
 from .coretheme import CoreTheme
 from .emotionalvalue import EmotionalValue
 from .identities import Identity
+from .journals import Journal
+from .journalentries import JournalEntry
+from .journalprompts import JournalPrompt

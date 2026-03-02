@@ -70,6 +70,7 @@
             <div class="flex border-b border-stone-100">
                 <button onclick="switchTab('focus')" id="tab-focus" class="flex-1 py-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 transition-colors">Focus Session</button>
                 <button onclick="switchTab('experience')" id="tab-exp" class="flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-stone-400 hover:text-stone-600 transition-colors">Life Experience</button>
+                <button onclick="switchTab('journal')" id="tab-journal" class="flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-stone-400 hover:text-stone-600 transition-colors">Journal</button>
             </div>
 
             <div class="p-8 flex-1 overflow-y-auto">
@@ -124,6 +125,21 @@
                             <textarea name="details" id="exp-details-input" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium resize-none"></textarea>
                         </div>
                     </div>
+                    <div id="journal-fields" class="space-y-6 hidden">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Select Journal</label>
+                            <select name="journal_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="" disabled selected>Choose a journal...</option>
+                                {% for journal in journals %}
+                                    <option value="{{ journal.id }}">{{ journal.icon }} {{ journal.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Entry Content</label>
+                            <textarea name="journal_content" id="journal-content-input" rows="6" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium resize-none"></textarea>
+                        </div>
+                    </div>
 
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
@@ -165,9 +181,10 @@
             // Set the URL so the form knows which dump to delete
             document.getElementById('convert-form').action = `/actions/braindumps/${dumpId}/convert`;
             
-            // Pre-fill the inputs with the thought you captured
+            // Pre-fill inputs across all possible tabs
             document.getElementById('modal-title-input').value = content;
             document.getElementById('exp-details-input').value = content;
+            document.getElementById('journal-content-input').value = content; // New!
             
             // Default date to today for Focus Sessions
             document.getElementById('focus-date').valueAsDate = new Date();
@@ -179,30 +196,22 @@
         function switchTab(type) {
             document.getElementById('convert-type-input').value = type;
             
-            const focusFields = document.getElementById('focus-fields');
-            const expFields = document.getElementById('exp-fields');
-            const tabFocus = document.getElementById('tab-focus');
-            const tabExp = document.getElementById('tab-exp');
-
-            if (type === 'focus') {
-                focusFields.classList.remove('hidden');
-                expFields.classList.add('hidden');
+            const tabs = ['focus', 'experience', 'journal'];
+            
+            tabs.forEach(t => {
+                const fields = document.getElementById(`${t === 'experience' ? 'exp' : t}-fields`);
+                const tabBtn = document.getElementById(`tab-${t === 'experience' ? 'exp' : t}`);
                 
-                tabFocus.classList.add('border-indigo-600', 'text-indigo-600');
-                tabFocus.classList.remove('border-transparent', 'text-stone-400');
-                
-                tabExp.classList.remove('border-indigo-600', 'text-indigo-600');
-                tabExp.classList.add('border-transparent', 'text-stone-400');
-            } else {
-                focusFields.classList.add('hidden');
-                expFields.classList.remove('hidden');
-                
-                tabExp.classList.add('border-indigo-600', 'text-indigo-600');
-                tabExp.classList.remove('border-transparent', 'text-stone-400');
-                
-                tabFocus.classList.remove('border-indigo-600', 'text-indigo-600');
-                tabFocus.classList.add('border-transparent', 'text-stone-400');
-            }
+                if (t === type) {
+                    fields.classList.remove('hidden');
+                    tabBtn.classList.add('border-indigo-600', 'text-indigo-600');
+                    tabBtn.classList.remove('border-transparent', 'text-stone-400');
+                } else {
+                    fields.classList.add('hidden');
+                    tabBtn.classList.remove('border-indigo-600', 'text-indigo-600');
+                    tabBtn.classList.add('border-transparent', 'text-stone-400');
+                }
+            });
         }
     </script>
 {% endblock %}

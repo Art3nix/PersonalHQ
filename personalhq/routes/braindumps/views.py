@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from personalhq.models.braindumps import BrainDump
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.identities import Identity
+from personalhq.models.journals import Journal
 
 braindumps_view_bp = Blueprint('braindumps_view', __name__, url_prefix='/inbox')
 
@@ -15,11 +16,13 @@ def index():
     braindumps = BrainDump.query.filter_by(user_id=current_user.id).order_by(BrainDump.created_at.asc()).all()
     buckets = TimeBucket.query.filter_by(user_id=current_user.id).order_by(TimeBucket.start_date.asc()).all()
     identities = Identity.query.filter_by(user_id=current_user.id).all()
+    journals = Journal.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
         'braindumps/inbox.html',
         braindumps=braindumps,
         dump_count=len(braindumps),
         buckets=buckets,
-        identities=identities
+        identities=identities,
+        journals=journals
     )
