@@ -128,7 +128,14 @@
     <script>
         async function toggleSession(sessionId) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
+            const checkIcon = document.getElementById(`icon-check-${sessionId}`);
+            const isCurrentlyFinished = checkIcon && !checkIcon.classList.contains('hidden');
+            if (isCurrentlyFinished) {
+                const confirmed = window.confirm("Are you sure you want to uncheck this session?\n\nThis will permanently erase the tracked deep work time.");
+                if (!confirmed) {
+                    return; // Stop the function from hitting the API
+                }
+            }
             try {
                 const response = await fetch(`/actions/focus/${sessionId}/toggle`, {
                     method: 'POST',

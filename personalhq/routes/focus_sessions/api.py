@@ -122,6 +122,10 @@ def toggle_session(session_id):
     # Flip the Enum status
     if session_record.status == SessionStatus.FINISHED:
         session_record.status = SessionStatus.NOT_STARTED
+        session_record.start_time = None
+        session_record.end_time = None
+        session_record.total_paused_seconds = 0
+        session_record.last_paused_tick = None
     else:
         session_record.status = SessionStatus.FINISHED
         
