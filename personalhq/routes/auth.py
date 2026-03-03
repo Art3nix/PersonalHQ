@@ -1,11 +1,12 @@
 """Module providing API and view routes for authentication."""
 
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 
 from personalhq.forms.auth_forms import LoginForm, RegistrationForm, ForgotPasswordForm, ResetPasswordForm
 from personalhq.services import auth_service
 from personalhq.models.users import User
+from personalhq.extensions import db
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -18,13 +19,18 @@ def login():
     if form.validate_on_submit():
         email = form.email.data.strip().lower()
         password = form.password.data
-        
+        client_timezone = request.form.get('timezone')
+
         user = User.query.filter_by(email=email).first()
-        
+
         # Call the built-in password checker on the model
         if user and user.check_password(password):
             login_user(user, remember=form.remember.data)
             auth_service.update_last_login(user)
+
+            if client_timezone and user.timezone != client_timezone:
+                user.timezone = client_timezone
+                db.session.commit()
             return redirect(url_for('dashboard.index'))
 
         flash('Invalid email or password', 'danger')

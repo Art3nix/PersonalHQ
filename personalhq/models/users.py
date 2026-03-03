@@ -21,6 +21,7 @@ class User(UserMixin, db.Model):
     last_login: Mapped[datetime | None]
     date_of_birth: Mapped[date | None]
     life_expectancy: Mapped[int | None]
+    timezone: Mapped[str] = mapped_column(default="UTC", server_default="UTC")
 
     subscriptions = relationship("Subscription",
         back_populates="user",
@@ -55,6 +56,7 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    
 
     def check_password(self, password: str) -> bool:
         """Verifies if the provided plain-text password matches the hash."""

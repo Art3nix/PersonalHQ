@@ -1,8 +1,9 @@
 """Module defining SQLAlchemy models for Journal entries."""
 
-from datetime import datetime, timezone
+from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from personalhq.services.time_service import get_local_now
 
 from personalhq.extensions import db
 
@@ -14,6 +15,6 @@ class JournalEntry(db.Model):
     journal_id: Mapped[int] = mapped_column(ForeignKey('journals.id'), nullable=False)
 
     content: Mapped[str] = mapped_column(nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(timezone.utc))
+    created_at: Mapped[datetime] = mapped_column(default=get_local_now)
 
     journal = relationship("Journal", back_populates="entries")

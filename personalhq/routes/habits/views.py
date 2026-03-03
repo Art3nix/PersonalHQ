@@ -1,7 +1,7 @@
 """Module defining the HTML View routes for Habit Management."""
 
 import json
-from datetime import date, timedelta
+from datetime import timedelta
 from sqlalchemy import func
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
@@ -9,6 +9,7 @@ from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
+from personalhq.services.time_service import get_local_today
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 
@@ -24,7 +25,7 @@ def manage():
     weekly_count = total_habits - daily_count
 
     # 30-Day Heatmap Logic
-    today = date.today()
+    today = get_local_today()
     thirty_days_ago = today - timedelta(days=29)
 
     # Query completion counts grouped by date for the last 30 days

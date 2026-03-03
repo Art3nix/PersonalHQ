@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
+from personalhq.services.time_service import get_local_now
 
 def _is_same_day(date1: datetime, date2: datetime) -> bool:
     """Helper to check if two datetimes fall on the exact same calendar day."""
@@ -40,7 +41,7 @@ def toggle_habit(habit_id: int, user_id: int) -> dict:
     if not habit:
         return {"error": "Habit not found"}
 
-    now = datetime.now()
+    now = get_local_now()
     is_daily = habit.frequency == HabitFrequency.DAILY
 
     # Determine if the habit is already completed for the current cycle

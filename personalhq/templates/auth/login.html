@@ -15,6 +15,7 @@
         <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-2xl shadow-stone-200/40">
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
+                <input type="hidden" name="timezone" id="timezone-input" value="UTC">
 
                 <div class="space-y-6">
                     <div>
@@ -58,4 +59,10 @@
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+    // Grabs the IANA timezone string (e.g., "Europe/Prague" or "America/New_York")
+    document.getElementById('timezone-input').value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+</script>
 {% endblock %}

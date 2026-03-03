@@ -1,11 +1,11 @@
 """Module defining the main dashboard view."""
 
-from datetime import date
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
+from personalhq.services.time_service import get_local_today
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -15,8 +15,8 @@ def index():
     """Renders the main command center dashboard."""
     # Habits
     habits = Habit.query.filter_by(user_id=current_user.id).all()
-    today = date.today()
-    
+    today = get_local_today()
+
     # Fetch all deep work sessions scheduled for today that aren't finished
     queued_sessions = FocusSession.query.filter(
         FocusSession.user_id == current_user.id,
