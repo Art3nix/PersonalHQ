@@ -478,6 +478,16 @@
             if (data.status === 'success') {
                 const elapsed = data.data.elapsed_seconds || 0;
                 const remainingSeconds = current.durationSeconds - elapsed;
+
+                if (remainingSeconds <= 0) {
+                    document.getElementById('timer-display').textContent = formatTimer(0);
+                    
+                    // If it hit zero while running, auto-end it
+                    if (current.status === 'IN_PROGRESS') {
+                        endSession();
+                    }
+                    return; // Stop the syncing loop
+                }
                 
                 document.getElementById('timer-display').textContent = formatTimer(remainingSeconds);
                 current.status = data.data.status;
