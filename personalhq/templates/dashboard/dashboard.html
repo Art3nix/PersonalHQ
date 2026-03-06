@@ -154,24 +154,46 @@
                     </div>
                     <div class="space-y-3">
                         {% for habit in habits %}
-                        {% set is_done = habit.last_completed and habit.last_completed.date() == current_date %}
-                        
-                        <div id="habit-row-{{ habit.id }}" class="flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group {% if is_done %}bg-indigo-50/50 border-indigo-100{% else %}bg-white border-slate-100 hover:border-indigo-200{% endif %}" onclick="toggleHabit({{ habit.id }})">
+                        {% set status = habit_statuses[habit.id] %}
+
+                        <div id="habit-row-{{ habit.id }}" class="flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
+                            {% if status == 'COMPLETED' %}bg-indigo-50/50 border-indigo-100
+                            {% elif status == 'EXPIRING' %}bg-white border-amber-200 ring-2 ring-amber-50
+                            {% else %}bg-white border-slate-100 hover:border-indigo-200{% endif %}" 
+                            onclick="toggleHabit({{ habit.id }})">
                             
                             <div class="flex items-center gap-4">
-                                <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors {% if is_done %}bg-indigo-600 text-white{% else %}bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600{% endif %}">
+                                <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors 
+                                    {% if status == 'COMPLETED' %}bg-indigo-600 text-white
+                                    {% elif status == 'EXPIRING' %}bg-amber-100 text-amber-600
+                                    {% else %}bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600{% endif %}">
                                     {{ habit.icon }}
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold {% if is_done %}text-indigo-900{% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
+                                    <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 
+                                        {% if status == 'COMPLETED' %}text-indigo-900
+                                        {% elif status == 'EXPIRING' %}text-amber-900
+                                        {% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
                                     {% if habit.identity %}
-                                        <p class="text-[10px] font-bold {% if is_done %}text-indigo-400{% else %}text-slate-400{% endif %} uppercase">{{ habit.identity.name }}</p>
+                                        <p id="habit-identity-{{ habit.id }}" class="text-[10px] font-bold 
+                                            {% if status == 'COMPLETED' %}text-indigo-400
+                                            {% elif status == 'EXPIRING' %}text-amber-500
+                                            {% else %}text-slate-400{% endif %} uppercase">{{ habit.identity.name }}</p>
                                     {% endif %}
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-4">
-                                <span id="streak-{{ habit.id }}" class="text-xs font-bold {% if is_done %}text-indigo-600{% else %}text-amber-500{% endif %}">🔥 {{ habit.streak }} day streak</span>
+                            <div class="flex flex-col items-end gap-1" id="streak-container-{{ habit.id }}">
+                                <span id="streak-{{ habit.id }}" class="text-xs font-bold 
+                                    {% if status == 'COMPLETED' %}text-indigo-600
+                                    {% else %}text-amber-500{% endif %}">
+                                    {% if habit.streak and habit.streak > 0 %}
+                                        🔥 {{ habit.streak }} day streak
+                                    {% endif %}
+                                </span>
+                                {% if status == 'EXPIRING' and habit.streak > 0 %}
+                                    <span id="expiring-badge-{{ habit.id }}" class="text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-md uppercase tracking-widest animate-pulse shadow-sm shadow-amber-200">Expiring</span>
+                                {% endif %}
                             </div>
                         </div>
                         {% else %}
@@ -310,24 +332,64 @@
             const data = await apiCall(`/actions/habits/${habitId}/toggle`);
 
             if (data.status === 'success') {
+                // 1. Grab all the elements we just added IDs to
                 const row = document.getElementById(`habit-row-${habitId}`);
                 const iconBox = document.getElementById(`habit-icon-${habitId}`);
+                const nameEl = document.getElementById(`habit-name-${habitId}`);
+                const identityEl = document.getElementById(`habit-identity-${habitId}`); // Might be null
                 const streakLabel = document.getElementById(`streak-${habitId}`);
-                
-                streakLabel.innerText = `🔥 ${data.streak} day streak`;
-                
-                if (data.is_done) {
-                    row.classList.replace('bg-white', 'bg-indigo-50/50');
-                    row.classList.replace('border-slate-100', 'border-indigo-100');
-                    iconBox.classList.replace('bg-slate-50', 'bg-indigo-600');
-                    iconBox.classList.replace('text-slate-400', 'text-white');
-                    streakLabel.classList.replace('text-amber-500', 'text-indigo-600');
+                const container = document.getElementById(`streak-container-${habitId}`);
+
+                // 2. Update Streak Math & Text
+                if (data.streak > 0) {
+                    streakLabel.innerText = `🔥 ${data.streak} day streak`;
                 } else {
-                    row.classList.replace('bg-indigo-50/50', 'bg-white');
-                    row.classList.replace('border-indigo-100', 'border-slate-100');
-                    iconBox.classList.replace('bg-indigo-600', 'bg-slate-50');
-                    iconBox.classList.replace('text-white', 'text-slate-400');
-                    streakLabel.classList.replace('text-indigo-600', 'text-amber-500');
+                    streakLabel.innerText = ``;
+                }
+
+                // 3. Handle the 'Expiring' Pulse Badge
+                let badge = document.getElementById(`expiring-badge-${habitId}`);
+                if (data.habit_status === 'EXPIRING' && data.streak > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.id = `expiring-badge-${habitId}`;
+                        badge.className = "text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-md uppercase tracking-widest animate-pulse shadow-sm shadow-amber-200 mt-1";
+                        badge.innerText = "Expiring";
+                        container.appendChild(badge);
+                    }
+                } else if (badge) {
+                    badge.remove(); // Kill the badge if it's completed or broken
+                }
+
+                // 4. Strip everything back to base layout classes
+                row.className = "flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group";
+                iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center transition-colors";
+                nameEl.className = "text-sm font-bold";
+                streakLabel.className = "text-xs font-bold";
+                if (identityEl) identityEl.className = "text-[10px] font-bold uppercase tracking-widest";
+
+                // 5. Apply the correct Color Palette based on the server's state
+                if (data.habit_status === 'COMPLETED') {
+                    row.classList.add('bg-indigo-50/50', 'border-indigo-100');
+                    iconBox.classList.add('bg-indigo-600', 'text-white');
+                    nameEl.classList.add('text-indigo-900');
+                    streakLabel.classList.add('text-indigo-600');
+                    if (identityEl) identityEl.classList.add('text-indigo-400');
+                    
+                } else if (data.habit_status === 'EXPIRING') {
+                    row.classList.add('bg-white', 'border-amber-200', 'ring-2', 'ring-amber-50');
+                    iconBox.classList.add('bg-amber-100', 'text-amber-600');
+                    nameEl.classList.add('text-amber-900');
+                    streakLabel.classList.add('text-amber-500');
+                    if (identityEl) identityEl.classList.add('text-amber-500');
+                    
+                } else {
+                    // Default "BROKEN" or "NOT_STARTED" State
+                    row.classList.add('bg-white', 'border-slate-100', 'hover:border-indigo-200');
+                    iconBox.classList.add('bg-slate-50', 'text-slate-400', 'group-hover:bg-indigo-50', 'group-hover:text-indigo-600');
+                    nameEl.classList.add('text-slate-800');
+                    streakLabel.classList.add('text-amber-500');
+                    if (identityEl) identityEl.classList.add('text-slate-400');
                 }
             }
         }

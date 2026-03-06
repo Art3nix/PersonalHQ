@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
-from personalhq.services.time_service import get_local_now
+from personalhq.services.time_service import get_local_now, get_local_today
 
 def _is_same_day(date1: datetime, date2: datetime) -> bool:
     """Helper to check if two datetimes fall on the exact same calendar day."""
@@ -86,3 +86,42 @@ def toggle_habit(habit_id: int, user_id: int) -> dict:
     db.session.commit()
     
     return {"status": "success", "is_completed": True, "streak": habit.streak}
+
+def get_habit_status_and_sync(habit) -> str:
+    """
+    Evaluates the current state of a habit and resets broken streaks.
+    Returns: 'COMPLETED', 'EXPIRING' (needs to be done this cycle), or 'BROKEN'.
+    """
+    if not habit.last_completed:
+        if habit.streak != 0:
+            habit.streak = 0
+        return "BROKEN"
+
+    today = get_local_today()
+    # Safely extract the date whether it's an old 'date' object or a new 'datetime' object
+    last_date = habit.last_completed.date() if hasattr(habit.last_completed, 'date') else habit.last_completed
+
+    if habit.frequency == HabitFrequency.DAILY:
+        days_diff = (today - last_date).days
+        if days_diff == 0:
+            return "COMPLETED"
+        elif days_diff == 1:
+            return "EXPIRING"
+        else:
+            if habit.streak != 0:
+                habit.streak = 0
+            return "BROKEN"
+    else: # WEEKLY
+        # Find the Monday of both dates to accurately measure calendar weeks apart
+        monday_this = today - timedelta(days=today.weekday())
+        monday_last = last_date - timedelta(days=last_date.weekday())
+        weeks_diff = (monday_this - monday_last).days // 7
+
+        if weeks_diff == 0:
+            return "COMPLETED"
+        elif weeks_diff == 1:
+            return "EXPIRING"
+        else:
+            if habit.streak != 0:
+                habit.streak = 0
+            return "BROKEN"

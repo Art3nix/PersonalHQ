@@ -10,6 +10,7 @@ from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
 from personalhq.services.time_service import get_local_today
+from personalhq.services.habit_service import get_habit_status_and_sync
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 
@@ -18,6 +19,12 @@ habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 def manage():
     """Renders the detailed habit analytics and management page."""
     all_habits = Habit.query.filter_by(user_id=current_user.id).all()
+
+    habit_statuses = {}
+    for habit in all_habits:
+        habit_statuses[habit.id] = get_habit_status_and_sync(habit)
+        
+    db.session.commit()
 
     total_habits = len(all_habits)
     best_streak = max([(h.streak if h.streak else 0) for h in all_habits], default=0)

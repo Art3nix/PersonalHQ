@@ -140,10 +140,16 @@
                     <div class="flex items-end justify-between mt-auto">
                         <div>
                             <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Current Streak</p>
-                            <div class="flex items-baseline gap-1">
-                                <span class="text-2xl font-black text-stone-900">{{ habit.streak }}</span>
-                                <span class="text-xs font-bold text-stone-400">🔥</span>
-                            </div>
+                            {% if habit.streak and habit.streak > 0 %}
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-2xl font-black text-stone-900">{{ habit.streak }}</span>
+                                    <span class="text-xs font-bold text-stone-400">🔥</span>
+                                </div>
+                            {% else %}
+                                <span class="inline-block mt-1 text-xs font-bold text-stone-400 bg-stone-50 border border-stone-200 border-dashed rounded-lg px-2 py-1">
+                                    None
+                                </span>
+                            {% endif %}
                         </div>
                         <div class="text-right">
                             <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Last Logged</p>
