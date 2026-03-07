@@ -17,14 +17,18 @@ def create_experience():
     name = request.form.get('name')
     bucket_id = request.form.get('bucket_id')
     details = request.form.get('details')
+    theme_id = request.form.get('theme_id', type=int)
+    emotion_id = request.form.get('emotional_value_id', type=int)
 
     if not name or not bucket_id:
         return redirect(url_for('time_buckets_view.manage'))
 
-    # 1. Create the base Experience
+    # 1. Create the base Experience using the foreign keys
     new_exp = Experience(
         name=name.strip(),
-        details=details.strip() if details else None
+        details=details.strip() if details else None,
+        theme_id=theme_id,
+        emotional_value_id=emotion_id
     )
     db.session.add(new_exp)
     db.session.flush()
@@ -125,10 +129,16 @@ def edit_experience(exp_id):
     name = request.form.get('name')
     details = request.form.get('details')
     new_bucket_id = request.form.get('bucket_id', type=int)
+    theme_id = request.form.get('theme_id', type=int)
+    emotion_id = request.form.get('emotional_value_id', type=int)
 
     if name and new_bucket_id:
         exp.name = name.strip()
         exp.details = details.strip() if details else None
+        
+        # Update the relational fields
+        exp.theme_id = theme_id
+        exp.emotional_value_id = emotion_id
         
         # Move it to a new decade if they changed the dropdown
         if bucket_link.bucket_id != new_bucket_id:
