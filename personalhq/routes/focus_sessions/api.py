@@ -157,5 +157,18 @@ def reorder_sessions():
             session_record.queue_order = new_queue_order
 
     db.session.commit()
-    
+
     return jsonify({"status": "success"})
+
+@focus_api_bp.route('/<int:session_id>/delete', methods=['POST'])
+@login_required
+def delete_session(session_id):
+    """Deletes a scheduled focus session."""
+    session = db.session.get(FocusSession, session_id)
+    
+    # Ensure users can only delete their own sessions
+    if session and session.user_id == current_user.id:
+        db.session.delete(session)
+        db.session.commit()
+        
+    return redirect(url_for('focus_view.planner'))

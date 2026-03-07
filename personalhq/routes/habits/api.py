@@ -112,3 +112,16 @@ def create_habit():
     db.session.commit()
 
     return redirect(url_for('habits_view.manage'))
+
+@habits_api_bp.route('/<int:habit_id>/delete', methods=['POST'])
+@login_required
+def delete_habit(habit_id):
+    """Deletes a habit and all associated logs via cascade."""
+    habit = db.session.get(Habit, habit_id)
+    
+    # Security check to ensure users can only delete their own habits
+    if habit and habit.user_id == current_user.id:
+        db.session.delete(habit)
+        db.session.commit()
+        
+    return redirect(url_for('habits_view.manage'))

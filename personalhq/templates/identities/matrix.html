@@ -31,9 +31,22 @@
                             {% endif %}
                         </div>
                         
-                        <div class="text-right shrink-0 bg-stone-50 border border-stone-100 rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shadow-inner">
-                            <span class="text-3xl font-black text-indigo-600 leading-none">{{ stat.total_evidence }}</span>
-                            <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-1">Total Votes</span>
+                        <div class="flex gap-3 items-start">
+                            <div class="text-right shrink-0 bg-stone-50 border border-stone-100 rounded-2xl p-4 min-w-[100px] flex flex-col items-center justify-center shadow-inner">
+                                <span class="text-3xl font-black text-indigo-600 leading-none">{{ stat.total_evidence }}</span>
+                                <span class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-1">Total Votes</span>
+                            </div>
+                            
+                            <form id="delete-identity-{{ stat.model.id }}" action="{{ url_for('identities_api.delete_identity', identity_id=stat.model.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="button" 
+                                        data-form-id="delete-identity-{{ stat.model.id }}" 
+                                        data-item-name="{{ stat.model.name }}"
+                                        onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                        class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2 mt-1 -mr-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
                         </div>
                     </div>
 

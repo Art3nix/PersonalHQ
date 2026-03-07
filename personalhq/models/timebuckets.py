@@ -20,4 +20,4 @@ class TimeBucket(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to
     end_date: Mapped[date] = mapped_column(nullable=False)
 
     user = relationship("User", back_populates="time_buckets")
-    experiences = relationship("BucketExperience", back_populates="bucket")
+    experiences = relationship("BucketExperience", back_populates="bucket", cascade="all, delete-orphan")

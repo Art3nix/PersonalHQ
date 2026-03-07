@@ -64,9 +64,13 @@
                                 {{ entry.created_at.strftime('%b %d, %Y') }}
                             </span>
                             
-                            <form action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <form id="delete-entry-{{ entry.id }}" action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity inline">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                <button type="submit" class="text-stone-300 hover:text-red-500 transition-colors" title="Delete Entry">
+                                <button type="button" 
+                                        data-form-id="delete-entry-{{ entry.id }}" 
+                                        data-item-name="Journal Entry"
+                                        onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                        class="text-stone-300 hover:text-red-500 transition-colors p-1" title="Delete Entry">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             </form>
@@ -117,9 +121,13 @@
                             <div class="flex justify-between items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl group hover:border-stone-200 transition-colors shadow-sm">
                                 <p class="text-sm font-medium text-stone-700 leading-snug">{{ prompt.text }}</p>
                                 
-                                <form action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST">
+                                <form id="delete-prompt-{{ prompt.id }}" action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST" class="inline">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                    <button type="submit" class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                    <button type="button" 
+                                            data-form-id="delete-prompt-{{ prompt.id }}" 
+                                            data-item-name="Journal Prompt"
+                                            onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                            class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                     </button>
                                 </form>

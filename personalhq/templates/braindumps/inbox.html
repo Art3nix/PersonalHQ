@@ -34,9 +34,16 @@
                             Convert...
                         </button>
                         
-                        <button onclick="deleteDump({{ dump.id }})" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                        </button>
+                        <form id="delete-dump-{{ dump.id }}" action="{{ url_for('braindumps_api.delete_dump', dump_id=dump.id) }}" method="POST" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="button" 
+                                    data-form-id="delete-dump-{{ dump.id }}" 
+                                    data-item-name="Thought: {{ dump.content[:20] }}..."
+                                    onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                    class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            </button>
+                        </form>
                     </div>
                     
                 </div>
@@ -154,29 +161,6 @@
 
 {% block extra_scripts %}
     <script>
-        async function deleteDump(dumpId) {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            try {
-                const response = await fetch(`/actions/braindumps/${dumpId}/delete`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken
-                    }
-                });
-
-                if (response.ok) {
-                    // Visually shrink and remove the element for a smooth UX
-                    const element = document.getElementById(`dump-${dumpId}`);
-                    element.style.transform = 'scale(0.95)';
-                    element.style.opacity = '0';
-                    setTimeout(() => element.remove(), 200);
-                }
-            } catch (error) {
-                console.error("Failed to delete thought:", error);
-            }
-        }
-
         function openConvertModal(dumpId, content) {
             // Set the URL so the form knows which dump to delete
             document.getElementById('convert-form').action = `/actions/braindumps/${dumpId}/convert`;

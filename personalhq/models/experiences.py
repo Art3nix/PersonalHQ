@@ -19,5 +19,5 @@ class Experience(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to
 
     core_theme = relationship("CoreTheme", back_populates="experiences")
     emotional_value = relationship("EmotionalValue", back_populates="experiences")
-    buckets = relationship("BucketExperience", back_populates="experience")
     tags = relationship("TagExperience", back_populates="experience")
+    buckets = relationship("BucketExperience", back_populates="experience", cascade="all, delete-orphan")

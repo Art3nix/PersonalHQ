@@ -44,6 +44,18 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </span>
                         </div>
+                        <div class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <form id="delete-journal-{{ journal.id }}" action="{{ url_for('journals_api.delete_journal', journal_id=journal.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="button" 
+                                        data-form-id="delete-journal-{{ journal.id }}" 
+                                        data-item-name="{{ journal.name }} Journal"
+                                        onclick="event.preventDefault(); confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                        class="p-2 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </a>
             {% else %}

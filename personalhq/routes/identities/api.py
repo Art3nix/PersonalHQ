@@ -43,5 +43,25 @@ def create_identity():
 
     db.session.commit()
     flash(f'Identity "{new_identity.name}" established.', 'success')
-    
+
+    return redirect(url_for('identities_view.matrix'))
+
+@identities_api_bp.route('/<int:identity_id>/delete', methods=['POST'])
+@login_required
+def delete_identity(identity_id):
+    """Deletes an Identity and safely unassigns its associated habits and focus sessions."""
+    identity = db.session.get(Identity, identity_id)
+
+    if identity and identity.user_id == current_user.id:
+        # Unassign habits so they don't get deleted or cause foreign key errors
+        for habit in identity.habits:
+            habit.identity_id = None
+
+        # Unassign focus sessions
+        for session in identity.focus_sessions:
+            session.identity_id = None
+
+        db.session.delete(identity)
+        db.session.commit()
+
     return redirect(url_for('identities_view.matrix'))

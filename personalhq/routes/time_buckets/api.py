@@ -77,8 +77,37 @@ def create_bucket():
         start_date=start_date,
         end_date=end_date
     )
-    
+
     db.session.add(new_bucket)
     db.session.commit()
 
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/buckets/<int:bucket_id>/delete', methods=['POST'])
+@login_required
+def delete_bucket(bucket_id):
+    """Deletes an entire Time Bucket (Decade) and its associated experiences."""
+    bucket = db.session.get(TimeBucket, bucket_id)
+
+    if bucket and bucket.user_id == current_user.id:
+        db.session.delete(bucket)
+        db.session.commit()
+
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/experiences/<int:exp_id>/delete', methods=['POST'])
+@login_required
+def delete_experience(exp_id):
+    """Deletes a specific experience from a Time Bucket."""
+    exp = db.session.get(Experience, exp_id)
+
+    if exp:
+        # Security check: Ensure the user owns the bucket this experience is in
+        bucket_link = BucketExperience.query.filter_by(experience_id=exp.id).first()
+        if bucket_link:
+            bucket = db.session.get(TimeBucket, bucket_link.bucket_id)
+            if bucket and bucket.user_id == current_user.id:
+                db.session.delete(exp)
+                db.session.commit()
+                
     return redirect(url_for('time_buckets_view.manage'))

@@ -39,8 +39,8 @@ def delete_dump(dump_id):
     if dump and dump.user_id == current_user.id:
         db.session.delete(dump)
         db.session.commit()
-        return jsonify({"status": "success"})
-    return jsonify({"status": "error"}), 404
+
+    return redirect(url_for('braindumps_view.index'))
 
 @braindumps_api_bp.route('/<int:dump_id>/convert', methods=['POST'])
 @login_required

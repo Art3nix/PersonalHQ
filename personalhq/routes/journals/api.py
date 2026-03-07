@@ -75,6 +75,18 @@ def create_journal():
         
     return redirect(url_for('journals_view.index'))
 
+@journals_api_bp.route('/<int:journal_id>/delete', methods=['POST'])
+@login_required
+def delete_journal(journal_id):
+    """Deletes an entire journal, along with its entries and prompts."""
+    journal = db.session.get(Journal, journal_id)
+    
+    if journal and journal.user_id == current_user.id:
+        db.session.delete(journal)
+        db.session.commit()
+        
+    return redirect(url_for('journals_view.index'))
+
 @journals_api_bp.route('/<int:journal_id>/prompts/create', methods=['POST'])
 @login_required
 def add_prompt(journal_id):

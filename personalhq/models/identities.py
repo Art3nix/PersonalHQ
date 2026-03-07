@@ -21,5 +21,5 @@ class Identity(db.Model):
     user = relationship("User", back_populates="identities")
     
     # The actions that serve as "votes" for this identity
-    habits = relationship("Habit", back_populates="identity", cascade="all, delete-orphan")
+    habits = relationship("Habit", back_populates="identity")
     focus_sessions = relationship("FocusSession", back_populates="identity")
