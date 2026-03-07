@@ -83,6 +83,61 @@ def create_bucket():
 
     return redirect(url_for('time_buckets_view.manage'))
 
+@time_buckets_api_bp.route('/buckets/<int:bucket_id>/edit', methods=['POST'])
+@login_required
+def edit_bucket(bucket_id):
+    """Updates an existing Time Bucket (Decade)."""
+    bucket = db.session.get(TimeBucket, bucket_id)
+    if not bucket or bucket.user_id != current_user.id:
+        return redirect(url_for('time_buckets_view.manage'))
+
+    name = request.form.get('name')
+    theme = request.form.get('theme')
+    start_date_str = request.form.get('start_date')
+    end_date_str = request.form.get('end_date')
+
+    if name and start_date_str and end_date_str:
+        bucket.name = name.strip()
+        bucket.theme = theme.strip() if theme else None
+        bucket.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        bucket.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        db.session.commit()
+
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/experiences/<int:exp_id>/edit', methods=['POST'])
+@login_required
+def edit_experience(exp_id):
+    """Updates an existing Experience and its bucket assignment."""
+    exp = db.session.get(Experience, exp_id)
+    if not exp:
+        return redirect(url_for('time_buckets_view.manage'))
+
+    # Security: Ensure the user owns the bucket this experience is currently in
+    bucket_link = BucketExperience.query.filter_by(experience_id=exp.id).first()
+    if not bucket_link:
+         return redirect(url_for('time_buckets_view.manage'))
+    
+    current_bucket = db.session.get(TimeBucket, bucket_link.bucket_id)
+    if not current_bucket or current_bucket.user_id != current_user.id:
+         return redirect(url_for('time_buckets_view.manage'))
+
+    name = request.form.get('name')
+    details = request.form.get('details')
+    new_bucket_id = request.form.get('bucket_id', type=int)
+
+    if name and new_bucket_id:
+        exp.name = name.strip()
+        exp.details = details.strip() if details else None
+        
+        # Move it to a new decade if they changed the dropdown
+        if bucket_link.bucket_id != new_bucket_id:
+            bucket_link.bucket_id = new_bucket_id
+            
+        db.session.commit()
+
+    return redirect(url_for('time_buckets_view.manage'))
+
 @time_buckets_api_bp.route('/buckets/<int:bucket_id>/delete', methods=['POST'])
 @login_required
 def delete_bucket(bucket_id):

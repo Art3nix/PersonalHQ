@@ -160,6 +160,33 @@ def reorder_sessions():
 
     return jsonify({"status": "success"})
 
+@focus_api_bp.route('/<int:session_id>/edit', methods=['POST'])
+@login_required
+def edit_session(session_id):
+    """Updates an existing focus session's details."""
+    session = db.session.get(FocusSession, session_id)
+    
+    if not session or session.user_id != current_user.id:
+        return redirect(url_for('focus_view.planner'))
+
+    name = request.form.get('name')
+    target_date_str = request.form.get('target_date')
+    duration = request.form.get('target_duration_minutes', type=int)
+    identity_id = request.form.get('identity_id', type=int)
+
+    if name and target_date_str:
+        session.name = name.strip()
+        # Convert HTML date string back to Python date object
+        session.target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+        
+        if duration:
+            session.target_duration_minutes = duration
+            
+        session.identity_id = identity_id or None
+        db.session.commit()
+
+    return redirect(url_for('focus_view.planner'))
+
 @focus_api_bp.route('/<int:session_id>/delete', methods=['POST'])
 @login_required
 def delete_session(session_id):

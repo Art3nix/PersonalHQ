@@ -45,6 +45,14 @@
                             </span>
                         </div>
                         <div class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <button type="button" 
+                                    data-id="{{ journal.id }}"
+                                    data-name="{{ journal.name }}"
+                                    data-desc="{{ journal.description or '' }}"
+                                    onclick="event.preventDefault(); openEditJournalModal(this.dataset)"
+                                    class="p-2 text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                            </button>
                             <form id="delete-journal-{{ journal.id }}" action="{{ url_for('journals_api.delete_journal', journal_id=journal.id) }}" method="POST" class="inline">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="button" 
@@ -123,4 +131,51 @@
             </div>
         </div>
     </div>
+    <div id="edit-journal-modal" class="hidden fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('edit-journal-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-journal-modal').classList.add('hidden'), 300);"></div>
+
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Edit Journal</h2>
+                </div>
+                <button onclick="document.getElementById('edit-journal-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-journal-modal').classList.add('hidden'), 300);" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <form id="edit-journal-form" action="" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Journal Name</label>
+                        <input type="text" name="name" id="edit-journal-name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Description</label>
+                        <textarea name="description" id="edit-journal-desc" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none"></textarea>
+                    </div>
+
+                    <div class="pt-6 mt-auto">
+                        <button type="submit" class="w-full bg-stone-900 text-white font-bold py-3.5 rounded-xl hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block extra_scripts %}
+    <script>
+        function openEditJournalModal(data) {
+            document.getElementById('edit-journal-form').action = `/actions/journals/${data.id}/edit`;
+            document.getElementById('edit-journal-name').value = data.name;
+            document.getElementById('edit-journal-desc').value = data.desc;
+            
+            const modal = document.getElementById('edit-journal-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('translate-x-full'), 10);
+        }
+    </script>
 {% endblock %}

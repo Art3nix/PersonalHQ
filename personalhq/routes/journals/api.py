@@ -31,6 +31,26 @@ def add_entry(journal_id):
     # Redirect back to the journal view after saving
     return redirect(url_for('journals_view.view_journal', journal_id=journal.id))
 
+@journals_api_bp.route('/entries/<int:entry_id>/edit', methods=['POST'])
+@login_required
+def edit_entry(entry_id):
+    """Updates the text of a specific journal entry."""
+    entry = db.session.get(JournalEntry, entry_id)
+    if not entry:
+        return redirect(request.referrer or url_for('journals_view.index'))
+        
+    # Security check: Ensure the user owns the journal this entry belongs to
+    journal = db.session.get(Journal, entry.journal_id)
+    if not journal or journal.user_id != current_user.id:
+         return redirect(url_for('journals_view.index'))
+
+    content = request.form.get('content')
+    if content:
+        entry.content = content.strip()
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('journals_view.index'))
+
 @journals_api_bp.route('/entries/<int:entry_id>/delete', methods=['POST'])
 @login_required
 def delete_entry(entry_id):
@@ -55,13 +75,13 @@ def create_journal():
     description = request.form.get('description')
     icon = request.form.get('icon', '📓')
     frequency_val = request.form.get('frequency', 'DAILY').upper()
-    
+
     # Safely convert the string from the form into your Enum
     try:
         frequency = JournalFrequency[frequency_val]
     except KeyError:
         frequency = JournalFrequency.DAILY
-        
+
     if name and name.strip():
         new_journal = Journal(
             user_id=current_user.id,
@@ -72,7 +92,25 @@ def create_journal():
         )
         db.session.add(new_journal)
         db.session.commit()
-        
+
+    return redirect(url_for('journals_view.index'))
+
+@journals_api_bp.route('/<int:journal_id>/edit', methods=['POST'])
+@login_required
+def edit_journal(journal_id):
+    """Updates an existing Journal's name and description."""
+    journal = db.session.get(Journal, journal_id)
+    if not journal or journal.user_id != current_user.id:
+        return redirect(url_for('journals_view.index'))
+
+    name = request.form.get('name')
+    description = request.form.get('description')
+
+    if name:
+        journal.name = name.strip()
+        journal.description = description.strip() if description else None
+        db.session.commit()
+
     return redirect(url_for('journals_view.index'))
 
 @journals_api_bp.route('/<int:journal_id>/delete', methods=['POST'])
@@ -80,11 +118,11 @@ def create_journal():
 def delete_journal(journal_id):
     """Deletes an entire journal, along with its entries and prompts."""
     journal = db.session.get(Journal, journal_id)
-    
+
     if journal and journal.user_id == current_user.id:
         db.session.delete(journal)
         db.session.commit()
-        
+
     return redirect(url_for('journals_view.index'))
 
 @journals_api_bp.route('/<int:journal_id>/prompts/create', methods=['POST'])
@@ -92,12 +130,12 @@ def delete_journal(journal_id):
 def add_prompt(journal_id):
     """Adds a new rotating prompt to a specific journal."""
     journal = db.session.get(Journal, journal_id)
-    
+
     if not journal or journal.user_id != current_user.id:
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
 
     text = request.form.get('text')
-    
+
     if text and text.strip():
         new_prompt = JournalPrompt(
             journal_id=journal.id,
@@ -105,20 +143,40 @@ def add_prompt(journal_id):
         )
         db.session.add(new_prompt)
         db.session.commit()
-        
+
     return redirect(url_for('journals_view.view_journal', journal_id=journal.id))
+
+@journals_api_bp.route('/prompts/<int:prompt_id>/edit', methods=['POST'])
+@login_required
+def edit_prompt(prompt_id):
+    """Updates the text of a specific journal prompt."""
+    prompt = db.session.get(JournalPrompt, prompt_id)
+    if not prompt:
+        return redirect(request.referrer or url_for('journals_view.index'))
+
+    # Security check: Ensure the user owns the journal this prompt belongs to
+    journal = db.session.get(Journal, prompt.journal_id)
+    if not journal or journal.user_id != current_user.id:
+        return redirect(url_for('journals_view.index'))
+
+    text = request.form.get('text')
+    if text:
+        prompt.text = text.strip()
+        db.session.commit()
+
+    return redirect(request.referrer or url_for('journals_view.index'))
 
 @journals_api_bp.route('/prompts/<int:prompt_id>/delete', methods=['POST'])
 @login_required
 def delete_prompt(prompt_id):
     """Deletes a specific prompt."""
     prompt = db.session.get(JournalPrompt, prompt_id)
-    
+
     # Security check using the relationship to the parent journal
     if prompt and prompt.journal.user_id == current_user.id:
         journal_id = prompt.journal_id
         db.session.delete(prompt)
         db.session.commit()
         return redirect(url_for('journals_view.view_journal', journal_id=journal_id))
-        
+
     return jsonify({"status": "error", "message": "Unauthorized"}), 403

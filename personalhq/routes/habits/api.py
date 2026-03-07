@@ -113,6 +113,31 @@ def create_habit():
 
     return redirect(url_for('habits_view.manage'))
 
+@habits_api_bp.route('/<int:habit_id>/edit', methods=['POST'])
+@login_required
+def edit_habit(habit_id):
+    """Updates an existing habit's details."""
+    habit = db.session.get(Habit, habit_id)
+    
+    if not habit or habit.user_id != current_user.id:
+        return redirect(url_for('habits_view.manage'))
+
+    name = request.form.get('name')
+    icon = request.form.get('icon')
+    frequency_str = request.form.get('frequency')
+    identity_id = request.form.get('identity_id', type=int)
+
+    if name and frequency_str and icon:
+        habit.name = name.strip()
+        habit.icon = icon.strip()
+        habit.frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
+        # If identity_id is 0 or empty, it sets it to None (Unassigned)
+        habit.identity_id = identity_id or None
+        
+        db.session.commit()
+
+    return redirect(url_for('habits_view.manage'))
+
 @habits_api_bp.route('/<int:habit_id>/delete', methods=['POST'])
 @login_required
 def delete_habit(habit_id):

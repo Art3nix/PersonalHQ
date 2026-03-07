@@ -26,24 +26,31 @@
                         <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-1.5">
                             Captured {{ dump.created_at.strftime('%b %d, %H:%M') }}
                         </p>
-                        <p class="text-stone-800 font-medium leading-relaxed">{{ dump.content }}</p>
+                        <p id="dump-content-{{ dump.id }}" class="text-sm font-medium text-stone-800 leading-relaxed whitespace-pre-wrap">{{ dump.content }}</p>
                     </div>
 
                     <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onclick="openConvertModal({{ dump.id }}, '{{ dump.content | escape }}')" class="px-4 py-2 bg-stone-50 text-stone-600 rounded-xl text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-stone-100 hover:border-indigo-100">
                             Convert...
                         </button>
-                        
-                        <form id="delete-dump-{{ dump.id }}" action="{{ url_for('braindumps_api.delete_dump', dump_id=dump.id) }}" method="POST" class="inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <div class="flex items-center gap-1">
                             <button type="button" 
-                                    data-form-id="delete-dump-{{ dump.id }}" 
-                                    data-item-name="Thought: {{ dump.content[:20] }}..."
-                                    onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                    class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                    data-id="{{ dump.id }}"
+                                    onclick="openEditDumpModal(this.dataset)"
+                                    class="p-2 text-stone-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors" title="Edit Thought">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                             </button>
-                        </form>
+                            <form id="delete-dump-{{ dump.id }}" action="{{ url_for('braindumps_api.delete_dump', dump_id=dump.id) }}" method="POST" class="inline">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="button" 
+                                        data-form-id="delete-dump-{{ dump.id }}" 
+                                        data-item-name="Thought: {{ dump.content[:20] }}..."
+                                        onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                        class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                     
                 </div>
@@ -60,6 +67,38 @@
         </section>
 
     </main>
+    <div id="edit-dump-modal" class="hidden fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('edit-dump-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-dump-modal').classList.add('hidden'), 300);"></div>
+
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Edit Thought</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Inbox Catcher</p>
+                </div>
+                <button onclick="document.getElementById('edit-dump-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-dump-modal').classList.add('hidden'), 300);" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto">
+                <form id="edit-dump-form" action="" method="POST" class="space-y-6 h-full flex flex-col">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Thought Content</label>
+                        <textarea name="content" id="edit-dump-content" required class="w-full h-48 bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none custom-scrollbar"></textarea>
+                    </div>
+
+                    <div class="pt-4 mt-auto">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div id="convert-modal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
         <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('convert-modal').classList.add('translate-x-full')"></div>
         
@@ -161,6 +200,20 @@
 
 {% block extra_scripts %}
     <script>
+        function openEditDumpModal(data) {
+            // 1. Set the dynamic form action
+            document.getElementById('edit-dump-form').action = `/actions/braindumps/${data.id}/edit`;
+            
+            // 2. Fetch the text safely from the DOM (preserves line breaks and avoids escaping issues)
+            const content = document.getElementById(`dump-content-${data.id}`).innerText;
+            document.getElementById('edit-dump-content').value = content;
+            
+            // 3. Slide the modal open
+            const modal = document.getElementById('edit-dump-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('translate-x-full'), 10);
+        }
+
         function openConvertModal(dumpId, content) {
             // Set the URL so the form knows which dump to delete
             document.getElementById('convert-form').action = `/actions/braindumps/${dumpId}/convert`;
@@ -168,7 +221,7 @@
             // Pre-fill inputs across all possible tabs
             document.getElementById('modal-title-input').value = content;
             document.getElementById('exp-details-input').value = content;
-            document.getElementById('journal-content-input').value = content; // New!
+            document.getElementById('journal-content-input').value = content;
             
             // Default date to today for Focus Sessions
             document.getElementById('focus-date').valueAsDate = new Date();

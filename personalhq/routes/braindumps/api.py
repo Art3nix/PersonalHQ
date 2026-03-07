@@ -31,6 +31,21 @@ def catch_thought():
 
     return jsonify(result), 201
 
+@braindumps_api_bp.route('/<int:dump_id>/edit', methods=['POST'])
+@login_required
+def edit_dump(dump_id):
+    """Updates the raw text of a thought in the Inbox."""
+    dump = db.session.get(BrainDump, dump_id)
+    if not dump or dump.user_id != current_user.id:
+         return redirect(url_for('braindumps_view.index'))
+
+    content = request.form.get('content')
+    if content:
+        dump.content = content.strip()
+        db.session.commit()
+
+    return redirect(url_for('braindumps_view.index'))
+
 @braindumps_api_bp.route('/<int:dump_id>/delete', methods=['POST'])
 @login_required
 def delete_dump(dump_id):

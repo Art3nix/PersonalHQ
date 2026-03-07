@@ -46,6 +46,25 @@ def create_identity():
 
     return redirect(url_for('identities_view.matrix'))
 
+@identities_api_bp.route('/<int:identity_id>/edit', methods=['POST'])
+@login_required
+def edit_identity(identity_id):
+    """Updates an existing Identity's core details."""
+    identity = db.session.get(Identity, identity_id)
+    
+    if not identity or identity.user_id != current_user.id:
+        return redirect(url_for('identities_view.matrix'))
+
+    name = request.form.get('name')
+    description = request.form.get('description')
+
+    if name:
+        identity.name = name.strip()
+        identity.description = description.strip() if description else None
+        db.session.commit()
+
+    return redirect(url_for('identities_view.matrix'))
+
 @identities_api_bp.route('/<int:identity_id>/delete', methods=['POST'])
 @login_required
 def delete_identity(identity_id):

@@ -37,17 +37,22 @@
                 </div>
                 {% endif %}
 
-                <form action="{{ url_for('journals_api.add_entry', journal_id=journal.id) }}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-8 shadow-2xl shadow-stone-200/40">
+                <form id="main-entry-form" action="{{ url_for('journals_api.add_entry', journal_id=journal.id) }}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-8 shadow-2xl shadow-stone-200/40">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     
-                    <textarea name="content" rows="8" placeholder="What's on your mind today?" required 
+                    <textarea id="main-entry-content" name="content" rows="8" placeholder="What's on your mind today?" required 
                               class="w-full bg-transparent text-stone-800 text-base placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed custom-scrollbar"></textarea>
                     
                     <div class="flex justify-between items-center mt-6 pt-6 border-t border-stone-50">
                         <p class="text-xs font-medium text-stone-400">Press <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Cmd</kbd> + <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Enter</kbd> to save</p>
-                        <button type="submit" class="px-6 py-3 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
-                            Save Entry
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button id="main-submit-btn" type="submit" class="px-6 py-3 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
+                                Save Entry
+                            </button>
+                            <button type="button" id="cancel-edit-btn" onclick="cancelEditMode()" class="hidden px-4 py-2 text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors">
+                                Cancel Edit
+                            </button>
+                        </div>
                     </div>
                 </form>
 
@@ -64,19 +69,27 @@
                                 {{ entry.created_at.strftime('%b %d, %Y') }}
                             </span>
                             
-                            <form id="delete-entry-{{ entry.id }}" action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity inline">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button type="button" 
-                                        data-form-id="delete-entry-{{ entry.id }}" 
-                                        data-item-name="Journal Entry"
-                                        onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                        class="text-stone-300 hover:text-red-500 transition-colors p-1" title="Delete Entry">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        data-id="{{ entry.id }}"
+                                        onclick="loadEntryIntoEditor(this.dataset)"
+                                        class="text-stone-300 hover:text-indigo-500 transition-colors p-1" title="Edit Entry">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                 </button>
-                            </form>
+                                <form id="delete-entry-{{ entry.id }}" action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                    <button type="button" 
+                                            data-form-id="delete-entry-{{ entry.id }}" 
+                                            data-item-name="Journal Entry"
+                                            onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                            class="text-stone-300 hover:text-red-500 transition-colors p-1" title="Delete Entry">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                         
-                        <p class="text-sm font-medium text-stone-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
+                        <p id="entry-content-{{ entry.id }}" class="text-sm font-medium text-stone-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
                     </div>
                     {% else %}
                     <div class="text-center py-10">
@@ -121,16 +134,25 @@
                             <div class="flex justify-between items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl group hover:border-stone-200 transition-colors shadow-sm">
                                 <p class="text-sm font-medium text-stone-700 leading-snug">{{ prompt.text }}</p>
                                 
-                                <form id="delete-prompt-{{ prompt.id }}" action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST" class="inline">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <div class="flex items-center gap-1 shrink-0">
                                     <button type="button" 
-                                            data-form-id="delete-prompt-{{ prompt.id }}" 
-                                            data-item-name="Journal Prompt"
-                                            onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                            class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                            data-id="{{ prompt.id }}"
+                                            data-text="{{ prompt.text }}"
+                                            onclick="openEditPromptModal(this.dataset)"
+                                            class="p-1.5 text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                     </button>
-                                </form>
+                                    <form id="delete-prompt-{{ prompt.id }}" action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST" class="inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="button" 
+                                                data-form-id="delete-prompt-{{ prompt.id }}" 
+                                                data-item-name="Journal Prompt"
+                                                onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                                class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                             {% else %}
                             <div class="text-center py-6 bg-stone-50 rounded-2xl border border-stone-100 border-dashed">
@@ -145,18 +167,88 @@
         </div>
 
     </div>
+    <div id="edit-prompt-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onclick="closeEditPromptModal()"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 border border-stone-100 transform scale-95 transition-transform duration-200" id="edit-prompt-box">
+            <h3 class="text-xl font-extrabold text-stone-900 mb-6">Edit Prompt</h3>
+            <form id="edit-prompt-form" action="" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="text" name="text" id="edit-prompt-text" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium mb-6">
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeEditPromptModal()" class="flex-1 py-3.5 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-    // Quick save shortcut matching your UI note
-    document.addEventListener('keydown', function(e) {
-        if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-            const activeElement = document.activeElement;
-            if (activeElement.tagName.toLowerCase() === 'textarea') {
-                activeElement.closest('form').submit();
+    <script>
+        // Quick save shortcut matching your UI note
+        document.addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName.toLowerCase() === 'textarea') {
+                    activeElement.closest('form').submit();
+                }
             }
+        });
+
+        // Store the original "Create New" URL so we can reset it later
+        const form = document.getElementById('main-entry-form');
+        const originalAction = form.action;
+        const originalButtonText = document.getElementById('main-submit-btn').innerText;
+
+        function loadEntryIntoEditor(data) {
+            // 1. Grab the exact text from the entry card
+            const content = document.getElementById(`entry-content-${data.id}`).innerText;
+            
+            // 2. Put it in the main composer box
+            document.getElementById('main-entry-content').value = content;
+            
+            // 3. Hijack the form to submit to the Edit Route instead of the New Route
+            form.action = `/actions/journals/entries/${data.id}/edit`;
+            
+            // 4. Update the UI to show we are editing
+            document.getElementById('main-submit-btn').innerText = "Update Entry";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+            
+            // 5. Scroll up and focus the box
+            document.getElementById('main-entry-content').focus();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    });
-</script>
+
+        function cancelEditMode() {
+            // Revert everything back to "New Entry" mode
+            document.getElementById('main-entry-content').value = '';
+            form.action = originalAction;
+            document.getElementById('main-submit-btn').innerText = originalButtonText;
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
+        function openEditPromptModal(data) {
+            document.getElementById('edit-prompt-form').action = `/actions/journals/prompts/${data.id}/edit`;
+            document.getElementById('edit-prompt-text').value = data.text;
+            
+            const modal = document.getElementById('edit-prompt-modal');
+            const box = document.getElementById('edit-prompt-box');
+            
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            });
+        }
+
+        function closeEditPromptModal() {
+            const modal = document.getElementById('edit-prompt-modal');
+            const box = document.getElementById('edit-prompt-box');
+            
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+    </script>
 {% endblock %}
