@@ -105,7 +105,7 @@ def schedule_session():
         total_paused_seconds=0,
         identity_id=identity_id
     )
-    
+
     db.session.add(new_session)
     db.session.commit()
 
@@ -139,12 +139,18 @@ def toggle_session(session_id):
 @focus_api_bp.route('/reorder', methods=['POST'])
 @login_required
 def reorder_sessions():
-    """Updates the queue_order of focus sessions after a drag-and-drop."""
+    """Updates the queue_order and target_date of focus sessions after a drag-and-drop."""
     data = request.get_json()
     session_ids = data.get('session_ids', [])
+    new_date_str = data.get('target_date') # Capture the new date
 
     if not session_ids:
         return jsonify({"status": "error", "message": "No session IDs provided"}), 400
+
+    # Parse the new date if it was provided
+    new_date = None
+    if new_date_str:
+        new_date = datetime.strptime(new_date_str, '%Y-%m-%d').date()
 
     # Loop through the new order and update the database
     for index, session_id in enumerate(session_ids):
@@ -155,6 +161,10 @@ def reorder_sessions():
         session_record = db.session.get(FocusSession, session_id)
         if session_record and session_record.user_id == current_user.id:
             session_record.queue_order = new_queue_order
+            
+            # If the session was dragged to a new day, update the date!
+            if new_date:
+                session_record.target_date = new_date
 
     db.session.commit()
 

@@ -7,91 +7,177 @@
 {% endblock %}
 
 {% block app_content %}
+
+    {% macro render_session(session, is_today=False, is_past=False) %}
+    <div data-id="{{ session.id }}" id="session-card-{{ session.id }}" class="bg-white border {% if session.status == SessionStatus.FINISHED %}border-emerald-200 bg-emerald-50/30{% else %}border-stone-100{% endif %} rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex items-start gap-4">
+        
+        {% if not is_past %}
+        <div class="drag-handle cursor-grab active:cursor-grabbing text-stone-200 hover:text-stone-400 mt-1 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+        </div>
+        {% endif %}
+
+        <button onclick="toggleSession({{ session.id }})" class="mt-0.5 shrink-0 transition-colors text-stone-300 hover:text-emerald-500">
+            <svg id="icon-empty-{{ session.id }}" class="w-6 h-6 {% if session.status == SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+            <svg id="icon-check-{{ session.id }}" class="w-6 h-6 text-emerald-500 {% if session.status != SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </button>
+
+        <div class="flex-1">
+            <div class="flex items-center gap-3 mb-1">
+                {% if is_today %}
+                    <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700">Today</span>
+                {% endif %}
+                
+                <span class="text-xs font-bold text-stone-400 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    {{ session.target_duration_minutes }}m
+                </span>
+
+                {% if session.identity %}
+                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-100 uppercase tracking-widest px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    {{ session.identity.name }}
+                </span>
+                {% endif %}
+
+                {% if not is_past %}
+                <span id="queue-badge-{{ session.id }}" class="queue-badge text-[10px] font-bold text-stone-300 uppercase tracking-widest ml-auto">
+                    Q-{{ session.queue_order }}
+                </span>
+                {% endif %}
+            </div>
+            <h4 id="session-title-{{ session.id }}" class="text-base font-bold text-stone-800 transition-all {% if session.status == SessionStatus.FINISHED %}line-through text-stone-400{% endif %}">
+                {{ session.name }}
+            </h4>
+        </div>
+
+        <div class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex items-center gap-1 shrink-0">
+            <button type="button" 
+                    data-id="{{ session.id }}"
+                    data-name="{{ session.name }}"
+                    data-date="{{ session.target_date.strftime('%Y-%m-%d') }}"
+                    data-duration="{{ session.target_duration_minutes }}"
+                    data-identity="{{ session.identity_id or '' }}"
+                    onclick="openEditSessionModal(this.dataset)"
+                    class="text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors p-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            </button>
+            <form id="delete-session-{{ session.id }}" action="{{ url_for('focus_api.delete_session', session_id=session.id) }}" method="POST" class="inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="button" 
+                        data-form-id="delete-session-{{ session.id }}" 
+                        data-item-name="{{ session.name }}"
+                        onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                        class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endmacro %}
     <main class="flex-1 max-w-4xl mx-auto px-12 py-12">
         
-        <header class="flex justify-between items-end mb-12 border-b border-stone-100 pb-6">
+        <header class="flex justify-between items-end mb-12">
             <div>
-                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Queue</h1>
-                <p class="text-sm font-medium text-stone-400 mt-2">Manage your scheduled focus sessions.</p>
+                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Planner</h1>
+                <p class="text-sm font-medium text-stone-400 mt-2">Design your days and execute your deep work.</p>
             </div>
             <button onclick="document.getElementById('slide-over-session').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
                 + Schedule Session
             </button>
         </header>
 
-        <section id="sortable-queue" class="space-y-4">
-            {% if sessions %}
-                {% for session in sessions %}
-                <div data-id="{{ session.id }}" id="session-card-{{ session.id }}" class="bg-white border {% if session.status == SessionStatus.FINISHED %}border-emerald-200 bg-emerald-50/30{% else %}border-stone-100{% endif %} rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex items-start gap-4">
-                    
-                    <div class="drag-handle cursor-grab active:cursor-grabbing text-stone-200 hover:text-stone-400 mt-1 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
-                    </div>
-
-                    <button onclick="toggleSession({{ session.id }})" class="mt-0.5 shrink-0 transition-colors text-stone-300 hover:text-emerald-500">
-                        <svg id="icon-empty-{{ session.id }}" class="w-6 h-6 {% if session.status == SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
-                        <svg id="icon-check-{{ session.id }}" class="w-6 h-6 text-emerald-500 {% if session.status != SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                    </button>
-
-                    <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-1">
-                            <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md 
-                                {% if session.target_date == today %} bg-indigo-100 text-indigo-700 
-                                {% elif session.target_date < today and session.status != SessionStatus.FINISHED %} bg-red-100 text-red-600 
-                                {% else %} bg-stone-100 text-stone-500 {% endif %}">
-                                {% if session.target_date == today %} Today
-                                {% elif session.target_date < today and session.status != SessionStatus.FINISHED %} Overdue
-                                {% else %} {{ session.target_date.strftime('%b %d') }} {% endif %}
-                            </span>
-                            <span class="text-xs font-bold text-stone-400 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                {{ session.target_duration_minutes }}m
-                            </span>
-                            <span id="queue-badge-{{ session.id }}" class="text-[10px] font-bold text-stone-300 uppercase tracking-widest ml-auto">
-                                Q-{{ session.queue_order }}
-                            </span>
-                        </div>
-                        <h4 id="session-title-{{ session.id }}" class="text-base font-bold text-stone-800 transition-all {% if session.status == SessionStatus.FINISHED %}line-through text-stone-400{% endif %}">
-                            {{ session.name }}
-                        </h4>
-                    </div>
-
-                    <div class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex items-center gap-1 shrink-0">
-                        <button type="button" 
-                                data-id="{{ session.id }}"
-                                data-name="{{ session.name }}"
-                                data-date="{{ session.target_date.strftime('%Y-%m-%d') }}"
-                                data-duration="{{ session.target_duration_minutes }}"
-                                data-identity="{{ session.identity_id or '' }}"
-                                onclick="openEditSessionModal(this.dataset)"
-                                class="text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                        </button>
-                        <form id="delete-session-{{ session.id }}" action="{{ url_for('focus_api.delete_session', session_id=session.id) }}" method="POST" class="inline">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="button" 
-                                    data-form-id="delete-session-{{ session.id }}" 
-                                    data-item-name="{{ session.name }}"
-                                    onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                    class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                            </button>
-                        </form>
-                    </div>
+        <section class="grid grid-cols-2 gap-6 mb-12">
+            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </div>
-                {% endfor %}
+                <div>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Lifetime Focus</p>
+                    <p class="text-2xl font-black text-stone-900">{{ stats.total_hours }} <span class="text-sm text-stone-400 font-bold">hrs</span></p>
+                </div>
+            </div>
+            
+            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest" title="Sessions finished in the last 7 days">7-Day Score</p>
+                    <p class="text-2xl font-black text-stone-900">{{ stats.week_completed }} <span class="text-sm text-stone-400 font-bold">/ {{ stats.week_scheduled }}</span></p>
+                </div>
+            </div>
+        </section>
+
+        <div class="mb-12">
+            <h2 class="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">Today's Focus</h2>
+            <section class="space-y-4 sortable-list min-h-[50px]" data-date="{{ today.strftime('%Y-%m-%d') }}">
+                {% if today_sessions %}
+                    {% for session in today_sessions %}
+                        {{ render_session(session, is_today=True, is_past=False) }}
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-12 border-2 border-dashed border-stone-100 rounded-3xl bg-stone-50/50 empty-state-msg pointer-events-none">
+                        <p class="text-sm font-medium text-stone-400">Nothing queued for today. Enjoy the rest.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <div class="mb-12">
+            <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">Upcoming Pipeline</h2>
+            {% if upcoming_grouped %}
+                <div class="space-y-8">
+                    {% for target_date, sessions in upcoming_grouped.items() %}
+                        <div>
+                            <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                {{ target_date.strftime('%A, %b %d') }}
+                            </h3>
+                            <div class="space-y-3 sortable-list min-h-[50px]" data-date="{{ target_date.strftime('%Y-%m-%d') }}">
+                                {% for session in sessions %}
+                                    {{ render_session(session, is_today=False, is_past=False) }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
             {% else %}
-                <div class="text-center py-20 border-2 border-dashed border-stone-100 rounded-3xl">
-                    <p class="text-sm font-medium text-stone-400">Your queue is empty. Time to plan ahead.</p>
+                <div class="text-center py-8">
+                    <p class="text-sm font-medium text-stone-400">Your future pipeline is clear.</p>
                 </div>
             {% endif %}
-        </section>
+        </div>
+
+        {% if past_grouped %}
+        <details class="group border border-stone-100 rounded-3xl bg-stone-50/30">
+            <summary class="text-sm font-bold text-stone-500 p-6 flex justify-between items-center cursor-pointer list-none hover:text-stone-900 transition-colors">
+                <span class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+                    View Recent Archive (Last 7 Days)
+                </span>
+                <svg class="w-4 h-4 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            </summary>
+            
+            <div class="px-6 pb-6 space-y-8">
+                {% for target_date, sessions in past_grouped.items() %}
+                    <div class="opacity-75 hover:opacity-100 transition-opacity">
+                        <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{{ target_date.strftime('%b %d, %Y') }}</h3>
+                        <div class="space-y-3">
+                            {% for session in sessions %}
+                                {{ render_session(session, is_today=False, is_past=True) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </details>
+        {% endif %}
 
     </main>
 
     <div id="slide-over-session" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
         <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-session').classList.add('translate-x-full')"></div>
-        
         <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
             <div class="p-8 border-b border-stone-100 flex justify-between items-center">
                 <div>
@@ -102,16 +188,13 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
-
             <div class="p-8 flex-1 overflow-y-auto">
                 <form action="{{ url_for('focus_api.schedule_session') }}" method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    
                     <div>
                         <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Session Name</label>
                         <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., Architect Database Schema">
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Date</label>
@@ -135,7 +218,6 @@
                             {% endfor %}
                         </select>
                     </div>
-
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
                             Add to Queue
@@ -145,9 +227,9 @@
             </div>
         </div>
     </div>
+
     <div id="edit-session-modal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
         <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('edit-session-modal').classList.add('translate-x-full')"></div>
-        
         <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
             <div class="p-8 border-b border-stone-100 flex justify-between items-center">
                 <div>
@@ -158,16 +240,13 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
-
             <div class="p-8 flex-1 overflow-y-auto">
                 <form id="edit-session-form" action="" method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    
                     <div>
                         <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Session Name</label>
                         <input type="text" name="name" id="edit-session-name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Date</label>
@@ -191,7 +270,6 @@
                             {% endfor %}
                         </select>
                     </div>
-
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
                             Save Changes
@@ -212,7 +290,7 @@
             if (isCurrentlyFinished) {
                 const confirmed = window.confirm("Are you sure you want to uncheck this session?\n\nThis will permanently erase the tracked deep work time.");
                 if (!confirmed) {
-                    return; // Stop the function from hitting the API
+                    return; 
                 }
             }
             try {
@@ -246,29 +324,23 @@
                 console.error('Failed to toggle session:', error);
             }
         }
-        // Initialize SortableJS
-        const queueList = document.getElementById('sortable-queue');
         
-        if (queueList) {
-            new Sortable(queueList, {
-                handle: '.drag-handle', // Only drag when clicking the 6-dot icon
-                animation: 150,         // Smooth sliding animation
-                ghostClass: 'opacity-50', // Dim the card being dragged
+        // Initialize SortableJS for ALL active and future day groups
+        document.querySelectorAll('.sortable-list').forEach(list => {
+            new Sortable(list, {
+                group: 'planner', // Allows dragging between different days
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'opacity-50',
                 
-                // Fires immediately when you drop the card
-                onEnd: async function () {
-                    // 1. Get the new visual order of IDs
-                    const items = Array.from(queueList.children);
-                    const newOrder = items.map(item => item.getAttribute('data-id'));
-                    
-                    // 2. Update the Q-badges visually right away so it feels instant
-                    items.forEach((item, index) => {
-                        const sessionId = item.getAttribute('data-id');
-                        const badge = document.getElementById(`queue-badge-${sessionId}`);
-                        if (badge) badge.innerText = `Q-${index + 1}`;
-                    });
+                onEnd: async function (evt) {
+                    const toList = evt.to;
+                    const items = Array.from(toList.children);
+                    // Filter out any empty state messages just in case
+                    const validItems = items.filter(item => item.hasAttribute('data-id'));
+                    const newOrder = validItems.map(item => item.getAttribute('data-id'));
+                    const targetDate = toList.getAttribute('data-date'); // The date bucket we landed in
 
-                    // 3. Save to database
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                     
                     try {
@@ -278,26 +350,36 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRFToken': csrfToken
                             },
-                            body: JSON.stringify({ session_ids: newOrder })
+                            body: JSON.stringify({ 
+                                session_ids: newOrder,
+                                target_date: targetDate 
+                            })
                         });
+                        
+                        // If it moved to a DIFFERENT day, reload to clean up the UI tags
+                        if (evt.from !== evt.to) {
+                            window.location.reload();
+                        } else {
+                            // If just reordered in the same day, update badges locally
+                            validItems.forEach((item, index) => {
+                                const badge = item.querySelector('.queue-badge') || item.querySelector('[id^="queue-badge-"]');
+                                if (badge) badge.innerText = `Q-${index + 1}`;
+                            });
+                        }
                     } catch (error) {
                         console.error('Failed to save new queue order:', error);
                     }
                 }
             });
-        }
+        });
 
         function openEditSessionModal(data) {
-            // 1. Set the form's action URL dynamically
             document.getElementById('edit-session-form').action = `/actions/focus/${data.id}/edit`;
-            
-            // 2. Pre-fill inputs
             document.getElementById('edit-session-name').value = data.name;
             document.getElementById('edit-session-date').value = data.date;
             document.getElementById('edit-session-duration').value = data.duration;
             document.getElementById('edit-session-identity').value = data.identity;
             
-            // 3. Open modal
             document.getElementById('edit-session-modal').classList.remove('translate-x-full');
         }
     </script>
