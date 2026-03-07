@@ -250,5 +250,43 @@
             box.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 200);
         }
+
+        // --- AUTO-SAVE & RECOVERY LOGIC ---
+        
+        // 1. Create a unique storage key for THIS specific journal
+        const draftKey = `journal_draft_{{ journal.id }}`;
+        let isDirty = false;
+        
+        const composer = document.getElementById('main-entry-content');
+        // REMOVED the duplicate 'const form' declaration here!
+
+        if (composer && form) {
+            // 2. RECOVERY: When the page loads, check if we have a saved draft
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                composer.value = savedDraft;
+                isDirty = true; // Flag it as dirty since there's unsaved recovered text
+            }
+
+            // 3. AUTO-SAVE: Every time they type, save it locally
+            composer.addEventListener('input', () => {
+                isDirty = true;
+                localStorage.setItem(draftKey, composer.value);
+            });
+
+            // 4. CLEANUP: When they actually click Save, wipe the local storage
+            form.addEventListener('submit', () => {
+                isDirty = false;
+                localStorage.removeItem(draftKey);
+            });
+
+            // 5. THE NET: Still show the browser warning just in case they click a link accidentally
+            window.addEventListener('beforeunload', (event) => {
+                if (isDirty) {
+                    event.preventDefault(); 
+                    event.returnValue = ''; 
+                }
+            });
+        }
     </script>
 {% endblock %}
