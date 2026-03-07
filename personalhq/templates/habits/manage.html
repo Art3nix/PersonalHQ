@@ -48,7 +48,7 @@
                 
                 <div class="flex flex-wrap gap-[4px] justify-end">
                     {% for day in heatmap_data %}
-                        <div class="w-3.5 h-3.5 rounded-[3px] transition-colors cursor-help
+                        <div class="w-3.5 h-3.5 rounded-[3px] transition-colors
                             {% if day.intensity == 0 %}bg-stone-100 hover:bg-stone-200
                             {% elif day.intensity == 1 %}bg-indigo-200 hover:bg-indigo-300
                             {% elif day.intensity == 2 %}bg-indigo-300 hover:bg-indigo-400
