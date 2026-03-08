@@ -18,7 +18,7 @@ habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 @login_required
 def manage():
     """Renders the detailed habit analytics and management page."""
-    all_habits = Habit.query.filter_by(user_id=current_user.id).all()
+    all_habits = Habit.query.filter_by(user_id=current_user.id).order_by(Habit.id).all()
 
     habit_statuses = {}
     for habit in all_habits:
@@ -118,6 +118,7 @@ def manage():
     return render_template(
         'habits/manage.html',
         habits=all_habits,
+        habit_statuses=habit_statuses,
         stats={
             "total": total_habits,
             "best_streak": best_streak,

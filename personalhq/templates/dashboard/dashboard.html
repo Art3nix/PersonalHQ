@@ -166,12 +166,18 @@
                 <section>
                     <div class="flex justify-between items-center mb-10 px-1">
                         <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">Habits</h3>
+                        
+                        <div class="flex items-center gap-4">
+                            <button onclick="switchHabitTab('DAILY')" id="tab-daily" class="text-[10px] font-bold uppercase tracking-widest text-indigo-600 transition-colors">Daily</button>
+                            <button onclick="switchHabitTab('WEEKLY')" id="tab-weekly" class="text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors">Weekly</button>
+                        </div>
                     </div>
+                    
                     <div class="space-y-3">
                         {% for habit in habits %}
                         {% set status = habit_statuses[habit.id] %}
 
-                        <div id="habit-row-{{ habit.id }}" class="flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
+                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
                             {% if status == 'COMPLETED' %}bg-indigo-50/50 border-indigo-100
                             {% elif status == 'EXPIRING' %}bg-white border-amber-200 ring-2 ring-amber-50
                             {% else %}bg-white border-slate-100 hover:border-indigo-200{% endif %}" 
@@ -399,6 +405,32 @@
                     if (identityEl) identityEl.classList.add('text-slate-400');
                 }
             }
+        }
+
+        function switchHabitTab(tab) {
+            const dailyBtn = document.getElementById('tab-daily');
+            const weeklyBtn = document.getElementById('tab-weekly');
+            
+            // The sleek, frameless classes
+            const activeClass = "text-[10px] font-bold uppercase tracking-widest text-indigo-600 transition-colors";
+            const inactiveClass = "text-[10px] font-bold uppercase tracking-widest text-stone-400 hover:text-stone-600 transition-colors";
+
+            if (tab === 'DAILY') {
+                dailyBtn.className = activeClass;
+                weeklyBtn.className = inactiveClass;
+            } else {
+                weeklyBtn.className = activeClass;
+                dailyBtn.className = inactiveClass;
+            }
+
+            // Show/Hide rows based on their data-freq attribute
+            document.querySelectorAll('.habit-row-item').forEach(row => {
+                if (row.dataset.freq === tab) {
+                    row.style.display = 'flex';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
         
         // --- DEEP WORK STATE MACHINE & QUEUE LOGIC ---
