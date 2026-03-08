@@ -85,6 +85,26 @@
               }
           }
       </script>
+      <script>
+        document.addEventListener('keydown', function(event) {
+            // Check if the user pressed the Escape key
+            if (event.key === 'Escape') {
+                
+                // Find any modal that is currently visible (not hidden, not translated away, and not invisible)
+                const activeModals = document.querySelectorAll('.fixed.inset-0:not(.hidden):not(.translate-x-full):not(.opacity-0)');
+                
+                activeModals.forEach(modal => {
+                    // Find the backdrop layer inside that specific modal
+                    const backdrop = modal.querySelector('.backdrop-blur-sm');
+                    
+                    if (backdrop) {
+                        // Simulate a mouse click to gracefully trigger your existing close animations!
+                        backdrop.click();
+                    }
+                });
+            }
+        });
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
