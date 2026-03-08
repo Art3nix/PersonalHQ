@@ -110,6 +110,7 @@
                             <span class="lore-box">CAL NEWPORT: 90 mins of undistracted concentration on your most cognitively demanding task.</span>
                         </h3>
                         
+                        {% if queued_sessions %}
                         <div class="relative">
                             <button onclick="toggleTaskDropdown()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-colors flex items-center gap-1">
                                 Change Task
@@ -121,8 +122,10 @@
                                     </div>
                             </div>
                         </div>
+                        {% endif %}
                     </div>
                     
+                    {% if queued_sessions %}
                     <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 transition-all duration-300">
                         <div class="flex flex-col md:flex-row justify-between items-center gap-10">
                             <div class="flex-1">
@@ -146,6 +149,18 @@
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <div class="bg-stone-50/50 border-2 border-dashed border-stone-100 rounded-[2.5rem] p-12 flex flex-col items-center justify-center text-center transition-all duration-300">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-stone-300 shadow-sm mb-4 border border-stone-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <h4 class="text-base font-extrabold text-stone-900 mb-1">Queue is clear</h4>
+                        <p class="text-sm font-medium text-stone-400 mb-6 max-w-sm">No deep work scheduled for today. Enjoy the breathing room, or plan a new session.</p>
+                        <a href="{{ url_for('focus_view.planner') }}" class="px-6 py-3 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-stone-50 hover:text-stone-900 transition-all shadow-sm">
+                            Open Planner
+                        </a>
+                    </div>
+                    {% endif %}
                 </section>
 
                 <section>
