@@ -243,61 +243,70 @@
                 <section class="mb-20">
                     <div class="flex justify-between items-end mb-6 px-1">
                         <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
-                            Time Buckets <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
-                            <span class="lore-box">DIE WITH ZERO: Maximize your life by assigning specific experiences to specific Time Buckets.</span>
+                            Active Life Chapter <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
+                            <span class="lore-box">DIE WITH ZERO: Your current time bucket. Maximize these specific experiences before this chapter closes.</span>
                         </h3>
                     </div>
-                    
-                    <div class="space-y-5">
-                        {% if time_buckets %}
-                            {% for bucket in time_buckets %}
-                            <div class="bg-white border border-stone-100 rounded-3xl p-7 shadow-xl shadow-stone-200/40 relative overflow-hidden group hover:border-indigo-100 transition-colors">
-                                <div class="absolute -right-12 -top-12 w-40 h-40 bg-gradient-to-br from-indigo-50 to-stone-50 rounded-full blur-2xl opacity-50 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                                
-                                <div class="relative z-10">
-                                    <div class="flex justify-between items-start mb-6">
-                                        <div>
-                                            <h4 class="text-xl font-extrabold text-stone-900 tracking-tight leading-none">{{ bucket.name }}</h4>
-                                            <p class="text-[9px] font-bold text-indigo-500 uppercase tracking-widest mt-2">{{ bucket.theme }}</p>
-                                        </div>
-                                        <div class="text-right shrink-0">
-                                            <span class="text-xs font-bold text-stone-500 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-100 shadow-sm">
-                                                {{ bucket.start_date.year }} — {{ bucket.end_date.year }}
-                                            </span>
-                                        </div>
-                                    </div>
 
-                                    <ul class="space-y-4">
-                                        {% if bucket.experiences %}
-                                            {% for link in bucket.experiences | sort(attribute='experience.is_completed') %}
-                                            <li class="flex items-start gap-3.5 group/item">                                                
-                                                <div>
-                                                    <p class="text-sm font-bold text-stone-700 group-hover/item:text-indigo-900 transition-colors">{{ link.experience.name }}</p>
-                                                    {% if link.experience.details %}
-                                                    <p class="text-[11px] font-medium text-stone-400 line-clamp-2 mt-1 leading-relaxed">{{ link.experience.details }}</p>
-                                                    {% endif %}
-                                                </div>
-                                            </li>
-                                            {% endfor %}
-                                        {% else %}
-                                            <li class="text-xs font-medium text-stone-400 italic bg-stone-50/50 p-3 rounded-xl border border-stone-100 border-dashed text-center">
-                                                No experiences planned for this Time Bucket yet.
-                                            </li>
+                    {% if active_bucket %}
+                    <div class="bg-white border border-stone-100 rounded-[2rem] p-7 shadow-xl shadow-stone-200/40 relative overflow-hidden group">
+                        
+                        <div class="mb-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-1">{{ active_bucket.theme or 'Current Phase' }}</p>
+                                    <h4 class="text-xl font-extrabold text-stone-900 tracking-tight leading-none">{{ active_bucket.name }}</h4>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="text-[10px] font-bold {% if is_urgent %}text-rose-600 bg-rose-50 border-rose-100{% else %}text-stone-500 bg-stone-50 border-stone-100{% endif %} px-2.5 py-1 rounded-lg border shadow-sm">
+                                        {{ time_left_str }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="w-full h-1.5 bg-stone-100 rounded-full overflow-hidden" title="{{ bucket_progress|round|int }}% complete">
+                                <div class="h-full {% if bucket_progress > 85 %}bg-rose-500{% else %}bg-indigo-500{% endif %} rounded-full transition-all duration-1000" style="width: {{ bucket_progress }}%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-100 pb-2 mb-3">Experiences to Fulfill</p>
+                            
+                            <ul class="space-y-3">
+                                {% for exp in upcoming_experiences %}
+                                <li class="flex items-start gap-2.5 group/item cursor-default">
+                                    <div class="w-1.5 h-1.5 rounded-full border border-stone-300 mt-1.5 group-hover/item:border-indigo-400 group-hover/item:bg-indigo-400 transition-colors"></div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-bold text-stone-700 group-hover/item:text-indigo-900 transition-colors">{{ exp.name }}</p>
+                                        {% if exp.core_theme %}
+                                            <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ exp.core_theme.name }}</p>
                                         {% endif %}
-                                    </ul>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <div class="bg-white border border-stone-100 border-dashed rounded-[2rem] p-10 text-center">
-                                <div class="w-12 h-12 bg-stone-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-stone-100">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-300"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                </div>
-                                <h4 class="text-sm font-extrabold text-stone-900">Your timeline is empty</h4>
-                                <p class="text-xs font-medium text-stone-400 mt-1 max-w-[200px] mx-auto">Start charting the experiences you want to have before time runs out.</p>
-                            </div>
-                        {% endif %}
+                                    </div>
+                                </li>
+                                {% else %}
+                                <li class="text-xs font-medium text-stone-400 italic bg-stone-50/50 p-3 rounded-xl border border-stone-100 border-dashed text-center">
+                                    All plotted experiences for this chapter are complete!
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        
+                        <a href="{{ url_for('time_buckets_view.manage') }}" class="block mt-6 text-center text-[10px] font-bold text-stone-400 hover:text-indigo-600 uppercase tracking-widest transition-colors">
+                            View Full Life Map →
+                        </a>
                     </div>
+                    {% else %}
+                    <div class="bg-stone-50 border-2 border-dashed border-stone-200 rounded-[2rem] p-8 text-center">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm border border-stone-100 text-stone-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <h4 class="text-xs font-bold text-stone-900">No Active Chapter</h4>
+                        <p class="text-[11px] font-medium text-stone-500 mt-1 mb-4">You don't have a time bucket spanning today's date.</p>
+                        <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-block px-4 py-2 bg-white border border-stone-200 text-stone-600 rounded-lg font-bold text-[10px] hover:bg-stone-50 transition-all shadow-sm uppercase tracking-widest">
+                            Update Map
+                        </a>
+                    </div>
+                    {% endif %}
                 </section>
             </aside>
         </div>
