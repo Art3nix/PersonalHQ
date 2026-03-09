@@ -1,6 +1,6 @@
 """API routes for handling Time Bucket data."""
 
-from datetime import datetime
+from datetime import date, timedelta
 from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from personalhq.extensions import db
@@ -61,18 +61,16 @@ def toggle_experience(exp_id):
 @time_buckets_api_bp.route('/buckets/create', methods=['POST'])
 @login_required
 def create_bucket():
-    """Creates a new Time Bucket (Decade) on the timeline."""
+    """Creates a new Time Bucket on the timeline."""
     name = request.form.get('name')
     theme = request.form.get('theme')
-    start_date_str = request.form.get('start_date')
-    end_date_str = request.form.get('end_date')
+    start_age = request.form.get('start_age')
+    end_age = request.form.get('end_age')
 
-    if not name or not start_date_str or not end_date_str:
+    if not name or not start_age or not end_age or not current_user.date_of_birth:
         return redirect(url_for('time_buckets_view.manage'))
 
-    # Convert the HTML 'YYYY-MM-DD' strings to Python date objects
-    start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-    end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    start_date, end_date = get_bucket_dates_from_age(start_age, end_age, current_user)
 
     new_bucket = TimeBucket(
         user_id=current_user.id,
@@ -81,30 +79,30 @@ def create_bucket():
         start_date=start_date,
         end_date=end_date
     )
-
     db.session.add(new_bucket)
     db.session.commit()
-
     return redirect(url_for('time_buckets_view.manage'))
 
 @time_buckets_api_bp.route('/buckets/<int:bucket_id>/edit', methods=['POST'])
 @login_required
 def edit_bucket(bucket_id):
-    """Updates an existing Time Bucket (Decade)."""
+    """Updates an existing Time Bucket."""
     bucket = db.session.get(TimeBucket, bucket_id)
     if not bucket or bucket.user_id != current_user.id:
         return redirect(url_for('time_buckets_view.manage'))
 
     name = request.form.get('name')
     theme = request.form.get('theme')
-    start_date_str = request.form.get('start_date')
-    end_date_str = request.form.get('end_date')
+    start_age = request.form.get('start_age')
+    end_age = request.form.get('end_age')
 
-    if name and start_date_str and end_date_str:
+    if name and start_age and end_age:
         bucket.name = name.strip()
         bucket.theme = theme.strip() if theme else None
-        bucket.start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        bucket.end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        start_date, end_date = get_bucket_dates_from_age(start_age, end_age, current_user)
+        bucket.start_date = start_date
+        bucket.end_date = end_date
         db.session.commit()
 
     return redirect(url_for('time_buckets_view.manage'))
@@ -140,7 +138,7 @@ def edit_experience(exp_id):
         exp.theme_id = theme_id
         exp.emotional_value_id = emotion_id
         
-        # Move it to a new decade if they changed the dropdown
+        # Move it to a new time bucket if they changed the dropdown
         if bucket_link.bucket_id != new_bucket_id:
             bucket_link.bucket_id = new_bucket_id
             
@@ -151,7 +149,7 @@ def edit_experience(exp_id):
 @time_buckets_api_bp.route('/buckets/<int:bucket_id>/delete', methods=['POST'])
 @login_required
 def delete_bucket(bucket_id):
-    """Deletes an entire Time Bucket (Decade) and its associated experiences."""
+    """Deletes an entire Time Bucket and its associated experiences."""
     bucket = db.session.get(TimeBucket, bucket_id)
 
     if bucket and bucket.user_id == current_user.id:
@@ -174,5 +172,29 @@ def delete_experience(exp_id):
             if bucket and bucket.user_id == current_user.id:
                 db.session.delete(exp)
                 db.session.commit()
-                
+
     return redirect(url_for('time_buckets_view.manage'))
+
+def get_bucket_dates_from_age(start_age, end_age, user):
+    """Calculates exact bucket dates based on the user's biological age."""
+    dob = user.date_of_birth
+    if not dob:
+        raise ValueError("User Date of Birth is required.")
+
+    # Start Date: Their birthday on the year they turn start_age
+    start_year = dob.year + int(start_age)
+    try:
+        start_date = date(start_year, dob.month, dob.day)
+    except ValueError:
+        start_date = date(start_year, 2, 28) # Leap year baby catch!
+        
+    # End Date: The day before they turn (end_age + 1)
+    end_year = dob.year + int(end_age) + 1
+    try:
+        next_bday = date(end_year, dob.month, dob.day)
+    except ValueError:
+        next_bday = date(end_year, 2, 28)
+        
+    end_date = next_bday - timedelta(days=1)
+    
+    return start_date, end_date

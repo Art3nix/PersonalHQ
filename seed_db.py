@@ -146,7 +146,7 @@ def run_seed():
             user_id=user_id,
             name="My 30s",
             theme="Wealth Building & Adventure",
-            start_date=date(2026, 1, 1), # Adjust to your actual decade dates
+            start_date=date(2026, 1, 1), # Adjust to your actual time bucket dates
             end_date=date(2035, 12, 31)
         )
         db.session.add(bucket_30s)

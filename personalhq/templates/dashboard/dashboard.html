@@ -244,7 +244,7 @@
                     <div class="flex justify-between items-end mb-6 px-1">
                         <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
                             Time Buckets <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
-                            <span class="lore-box">DIE WITH ZERO: Maximize your life by assigning specific experiences to specific decades.</span>
+                            <span class="lore-box">DIE WITH ZERO: Maximize your life by assigning specific experiences to specific Time Buckets.</span>
                         </h3>
                     </div>
                     
@@ -269,7 +269,7 @@
 
                                     <ul class="space-y-4">
                                         {% if bucket.experiences %}
-                                            {% for link in bucket.experiences %}
+                                            {% for link in bucket.experiences | sort(attribute='experience.is_completed') %}
                                             <li class="flex items-start gap-3.5 group/item">                                                
                                                 <div>
                                                     <p class="text-sm font-bold text-stone-700 group-hover/item:text-indigo-900 transition-colors">{{ link.experience.name }}</p>
@@ -281,7 +281,7 @@
                                             {% endfor %}
                                         {% else %}
                                             <li class="text-xs font-medium text-stone-400 italic bg-stone-50/50 p-3 rounded-xl border border-stone-100 border-dashed text-center">
-                                                No experiences planned for this decade yet.
+                                                No experiences planned for this Time Bucket yet.
                                             </li>
                                         {% endif %}
                                     </ul>
