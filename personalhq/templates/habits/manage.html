@@ -67,7 +67,7 @@
                     <h3 class="text-sm font-bold text-stone-900">Consistency by Day</h3>
                 </div>
                 <div class="relative h-48 w-full">
-                    <canvas id="dowChart"></canvas>
+                    <canvas id="dowChart" data-chart="{{ dow_counts | safe }}"></canvas>
                 </div>
             </div>
 
@@ -77,7 +77,7 @@
                     <h3 class="text-sm font-bold text-stone-900">4-Week Momentum</h3>
                 </div>
                 <div class="relative h-48 w-full">
-                    <canvas id="momentumChart"></canvas>
+                    <canvas id="momentumChart" data-chart="{{ weekly_trend | safe }}"></canvas>
                 </div>
             </div>
 
@@ -482,86 +482,120 @@
 {% block extra_scripts %}
     <script>
         // Set global Chart.js styling to match our font
+        // Set global Chart.js styling
         Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-        Chart.defaults.color = '#a8a29e'; // stone-400
+        Chart.defaults.color = '#a8a29e';
 
-        // --- 1. Day of Week Bar Chart ---
-        const dowCtx = document.getElementById('dowChart').getContext('2d');
-        const dowData = JSON.parse('{{ dow_counts | safe }}');
-        
-        new Chart(dowCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                datasets: [{
-                    label: 'Completions',
-                    data: dowData,
-                    backgroundColor: '#6366f1', // indigo-500
-                    borderRadius: 6,
-                    borderSkipped: false,
-                    barThickness: 24
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f5f5f4' }, border: { display: false } },
-                    x: { grid: { display: false }, border: { display: false } }
-                }
-            }
-        });
+        // Keep track of chart instances so we can destroy them before redrawing
+        let myDowChart = null;
+        let myMomentumChart = null;
 
-        // --- 2. Momentum Line Chart ---
-        const momentumCtx = document.getElementById('momentumChart').getContext('2d');
-        const momentumData = JSON.parse('{{ weekly_trend | safe }}');
-        
-        new Chart(momentumCtx, {
-            type: 'line',
-            data: {
-                labels: ['3 Wks Ago', '2 Wks Ago', 'Last Week', 'This Week'],
-                datasets: [{
-                    label: 'Total Completions',
-                    data: momentumData,
-                    borderColor: '#4f46e5', // indigo-600
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)', // Light indigo fill
-                    borderWidth: 3,
-                    tension: 0.4, // Makes the line smooth/curved
-                    fill: true,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#4f46e5',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#f5f5f4' }, border: { display: false } },
-                    x: { grid: { display: false }, border: { display: false } }
-                }
+        function initCharts() {
+            // Destroy existing charts if they exist to prevent hover glitches
+            if (myDowChart) myDowChart.destroy();
+            if (myMomentumChart) myMomentumChart.destroy();
+
+            // 1. Day of Week Bar Chart
+            const dowCanvas = document.getElementById('dowChart');
+            if (dowCanvas) {
+                const dowData = JSON.parse(dowCanvas.dataset.chart);
+                myDowChart = new Chart(dowCanvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Completions',
+                            data: dowData,
+                            backgroundColor: '#6366f1',
+                            borderRadius: 6,
+                            borderSkipped: false,
+                            barThickness: 24
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f5f5f4' }, border: { display: false } },
+                            x: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
             }
-        });
+
+            // 2. Momentum Line Chart
+            const momentumCanvas = document.getElementById('momentumChart');
+            if (momentumCanvas) {
+                const momentumData = JSON.parse(momentumCanvas.dataset.chart);
+                myMomentumChart = new Chart(momentumCanvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: ['3 Wks Ago', '2 Wks Ago', 'Last Week', 'This Week'],
+                        datasets: [{
+                            label: 'Total Completions',
+                            data: momentumData,
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#4f46e5',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: '#f5f5f4' }, border: { display: false } },
+                            x: { grid: { display: false }, border: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Run it immediately on page load
+        initCharts();
 
         async function toggleHabit(habitId) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             
+            const now = new Date();
+            const dateStr = now.getFullYear() + '-' + 
+                            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(now.getDate()).padStart(2, '0');
+            
             try {
-                // Assuming your API route is /actions/habits/<id>/toggle like your other modules
+                // 1. Tell the server to log the habit
                 const response = await fetch(`/actions/habits/${habitId}/toggle`, {
                     method: 'POST',
-                    headers: { 'X-CSRFToken': csrfToken }
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken 
+                    },
+                    body: JSON.stringify({ date: dateStr })
                 });
 
                 if (response.ok) {
-                    // Reload the page smoothly to instantly update the charts, sparklines, and heatmaps!
-                    window.location.reload();
-                } else {
-                    console.error('Failed to toggle habit');
+                    // 2. Fetch the newly recalculated page in the background
+                    const pageRes = await fetch(window.location.href);
+                    const html = await pageRes.text();
+                    
+                    // 3. Create a virtual HTML document in memory
+                    const parser = new DOMParser();
+                    const virtualDoc = parser.parseFromString(html, 'text/html');
+                    
+                    // 4. Swap the current <main> block with the newly calculated <main> block
+                    document.querySelector('main').innerHTML = virtualDoc.querySelector('main').innerHTML;
+                    
+                    // 5. Re-draw the charts with the new data embedded in the swapped HTML
+                    initCharts();
                 }
             } catch (error) {
                 console.error('Error toggling habit:', error);
