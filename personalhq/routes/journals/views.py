@@ -60,4 +60,9 @@ def entries(journal_id):
     # Grab all entries, newest first
     journal_entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(JournalEntry.created_at.desc()).all()
 
-    return render_template('journals/entries.html', journal=journal, entries=journal_entries)
+    return render_template(
+        'journals/entries.html',
+        journal=journal,
+        entries=journal_entries, 
+        JournalFrequency=JournalFrequency
+    )

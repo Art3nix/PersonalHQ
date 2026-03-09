@@ -12,7 +12,7 @@ class JournalFrequency(enum.Enum):
     WEEKLY = "weekly"
     MONTHLY = "monthly"
     YEARLY = "yearly"
-    ON_DEMAND = "on_demand"
+    ON_DEMAND = "random"
 
 class Journal(db.Model):
     """Class representing a specific journal category."""

@@ -38,7 +38,7 @@ def edit_entry(entry_id):
     entry = db.session.get(JournalEntry, entry_id)
     if not entry:
         return redirect(request.referrer or url_for('journals_view.index'))
-        
+
     # Security check: Ensure the user owns the journal this entry belongs to
     journal = db.session.get(Journal, entry.journal_id)
     if not journal or journal.user_id != current_user.id:
@@ -98,20 +98,30 @@ def create_journal():
 @journals_api_bp.route('/<int:journal_id>/edit', methods=['POST'])
 @login_required
 def edit_journal(journal_id):
-    """Updates an existing Journal's name and description."""
+    """Updates an existing Journal's name, description, and frequency."""
     journal = db.session.get(Journal, journal_id)
     if not journal or journal.user_id != current_user.id:
         return redirect(url_for('journals_view.index'))
 
     name = request.form.get('name')
     description = request.form.get('description')
+    frequency_val = request.form.get('frequency')
 
     if name:
         journal.name = name.strip()
         journal.description = description.strip() if description else None
+
+        # Safely update the frequency enum
+        if frequency_val:
+            try:
+                journal.frequency = JournalFrequency[frequency_val.upper()]
+            except KeyError:
+                pass
+
         db.session.commit()
 
-    return redirect(url_for('journals_view.index'))
+    # Bounce back to the page they clicked Edit from
+    return redirect(request.referrer or url_for('journals_view.index'))
 
 @journals_api_bp.route('/<int:journal_id>/delete', methods=['POST'])
 @login_required
