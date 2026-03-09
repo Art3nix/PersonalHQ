@@ -105,6 +105,24 @@
             }
         });
     </script>
+    <script>
+        function togglePassword(button) {
+            // Find the input field inside the same wrapper
+            const input = button.parentElement.querySelector('input');
+            const eyeOpen = button.querySelector('.eye-open');
+            const eyeClosed = button.querySelector('.eye-closed');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+            } else {
+                input.type = 'password';
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+            }
+        }
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
