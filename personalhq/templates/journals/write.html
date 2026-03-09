@@ -7,7 +7,7 @@
         
         <header class="h-24 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
             <div class="flex items-center gap-4">
-                <a href="{{ url_for('journals_view.index') }}" class="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
+                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 </a>
                 <div>
@@ -24,80 +24,44 @@
             </button>
         </header>
 
-        <div class="flex-1 flex overflow-hidden">
-            <main class="w-[60%] overflow-y-auto custom-scrollbar p-12">
+        <div class="flex-1 flex flex-col min-h-0 bg-[#FDFDFB]">
+            
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-8">
                 
-                {% if active_prompt %}
-                <div class="mb-10 p-6 bg-indigo-50 border border-indigo-100 rounded-3xl">
-                    <h3 class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        Current Prompt
-                    </h3>
-                    <p class="text-lg font-bold text-indigo-900 leading-snug">{{ active_prompt.text }}</p>
-                </div>
-                {% endif %}
-
-                <form id="main-entry-form" action="{{ url_for('journals_api.add_entry', journal_id=journal.id) }}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-8 shadow-2xl shadow-stone-200/40">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                    
-                    <textarea id="main-entry-content" name="content" rows="8" placeholder="What's on your mind today?" required 
-                              class="w-full bg-transparent text-stone-800 text-base placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed custom-scrollbar"></textarea>
-                    
-                    <div class="flex justify-between items-center mt-6 pt-6 border-t border-stone-50">
-                        <p class="text-xs font-medium text-stone-400">Press <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Cmd</kbd> + <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Enter</kbd> to save</p>
-                        <div class="flex items-center gap-2">
-                            <button id="main-submit-btn" type="submit" class="px-6 py-3 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
-                                Save Entry
-                            </button>
-                            <button type="button" id="cancel-edit-btn" onclick="cancelEditMode()" class="hidden px-4 py-2 text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors">
-                                Cancel Edit
-                            </button>
-                        </div>
+                <div class="max-w-3xl mx-auto w-full pt-8 pb-32">
+                    <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-10">Today's Entry</h2>
+                    {% if active_prompt %}
+                    <div class="mb-10 p-8 bg-indigo-50/50 border border-indigo-100 rounded-3xl">
+                        <h3 class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            Current Prompt
+                        </h3>
+                        <p class="text-xl font-bold text-indigo-900 leading-snug">{{ active_prompt.text }}</p>
                     </div>
-                </form>
+                    {% endif %}
 
-            </main>
-
-            <aside class="w-[40%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-12">
-                <h3 class="text-sm font-bold text-stone-900 mb-8">Previous Entries</h3>
-                
-                <div class="space-y-6">
-                    {% for entry in entries %}
-                    <div class="bg-white border border-stone-100 rounded-3xl p-6 shadow-sm group hover:border-indigo-100 transition-colors">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest bg-stone-50 px-2.5 py-1 rounded-md border border-stone-100">
-                                {{ entry.created_at.strftime('%b %d, %Y') }}
-                            </span>
-                            
-                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button type="button" 
-                                        data-id="{{ entry.id }}"
-                                        onclick="loadEntryIntoEditor(this.dataset)"
-                                        class="text-stone-300 hover:text-indigo-500 transition-colors p-1" title="Edit Entry">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    <form id="main-entry-form" action="{% if entry_to_edit %}{{ url_for('journals_api.edit_entry', entry_id=entry_to_edit.id) }}{% else %}{{ url_for('journals_api.add_entry', journal_id=journal.id) }}{% endif %}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-xl shadow-stone-200/30">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        
+                        <textarea id="main-entry-content" name="content" placeholder="What's on your mind today?" required 
+                                  class="w-full min-h-[40vh] bg-transparent text-stone-800 text-lg placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed overflow-hidden">{% if entry_to_edit %}{{ entry_to_edit.content }}{% endif %}</textarea>
+                        <div class="flex justify-between items-center mt-8 pt-8 border-t border-stone-50">
+                            <p class="text-xs font-medium text-stone-400">Press <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Cmd</kbd> + <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Enter</kbd> to save</p>
+                            <div class="flex items-center gap-3">
+                                {% if entry_to_edit %}
+                                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="px-5 py-3 text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors">
+                                    Cancel Edit
+                                </a>
+                                {% endif %}
+                                <button id="main-submit-btn" type="submit" class="px-8 py-3.5 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
+                                    {% if entry_to_edit %}Update Entry{% else %}Save Entry{% endif %}
                                 </button>
-                                <form id="delete-entry-{{ entry.id }}" action="{{ url_for('journals_api.delete_entry', entry_id=entry.id) }}" method="POST" class="opacity-0 group-hover:opacity-100 transition-opacity inline">
-                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                                    <button type="button" 
-                                            data-form-id="delete-entry-{{ entry.id }}" 
-                                            data-item-name="Journal Entry"
-                                            onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                            class="text-stone-300 hover:text-red-500 transition-colors p-1" title="Delete Entry">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                    </button>
-                                </form>
                             </div>
                         </div>
-                        
-                        <p id="entry-content-{{ entry.id }}" class="text-sm font-medium text-stone-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
-                    </div>
-                    {% else %}
-                    <div class="text-center py-10">
-                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest">It's quiet here.</p>
-                    </div>
-                    {% endfor %}
+                    </form>
+
                 </div>
-            </aside>
+            </main>
         </div>
         <div id="slide-over-prompts" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
             <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')"></div>
@@ -186,7 +150,27 @@
 
 {% block extra_scripts %}
     <script>
-        // Quick save shortcut matching your UI note
+        // 1. GLOBALS
+        const form = document.getElementById('main-entry-form');
+        const composer = document.getElementById('main-entry-content');
+        
+        // --- BULLETPROOF AUTO-EXPANDING TEXTAREA ---
+        function autoResize() {
+            if (!composer) return;
+            // The 1px trick forces all browsers to reliably reset their scrollHeight cache
+            composer.style.height = '1px'; 
+            // Snap it precisely to the new content height
+            composer.style.height = composer.scrollHeight + 'px';
+        }
+
+        if (composer) {
+            // Fire on typing
+            composer.addEventListener('input', autoResize);
+            // Fire on load (tiny delay to let Tailwind paint the DOM)
+            window.addEventListener('load', () => setTimeout(autoResize, 10));
+        }
+
+        // --- QUICK SAVE SHORTCUT ---
         document.addEventListener('keydown', function(e) {
             if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                 const activeElement = document.activeElement;
@@ -196,38 +180,7 @@
             }
         });
 
-        // Store the original "Create New" URL so we can reset it later
-        const form = document.getElementById('main-entry-form');
-        const originalAction = form.action;
-        const originalButtonText = document.getElementById('main-submit-btn').innerText;
-
-        function loadEntryIntoEditor(data) {
-            // 1. Grab the exact text from the entry card
-            const content = document.getElementById(`entry-content-${data.id}`).innerText;
-            
-            // 2. Put it in the main composer box
-            document.getElementById('main-entry-content').value = content;
-            
-            // 3. Hijack the form to submit to the Edit Route instead of the New Route
-            form.action = `/actions/journals/entries/${data.id}/edit`;
-            
-            // 4. Update the UI to show we are editing
-            document.getElementById('main-submit-btn').innerText = "Update Entry";
-            document.getElementById('cancel-edit-btn').classList.remove('hidden');
-            
-            // 5. Scroll up and focus the box
-            document.getElementById('main-entry-content').focus();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function cancelEditMode() {
-            // Revert everything back to "New Entry" mode
-            document.getElementById('main-entry-content').value = '';
-            form.action = originalAction;
-            document.getElementById('main-submit-btn').innerText = originalButtonText;
-            document.getElementById('cancel-edit-btn').classList.add('hidden');
-        }
-
+        // --- PROMPT MODAL LOGIC ---
         function openEditPromptModal(data) {
             document.getElementById('edit-prompt-form').action = `/actions/journals/prompts/${data.id}/edit`;
             document.getElementById('edit-prompt-text').value = data.text;
@@ -252,37 +205,32 @@
         }
 
         // --- AUTO-SAVE & RECOVERY LOGIC ---
-        
-        // 1. Create a unique storage key for THIS specific journal
         const draftKey = `journal_draft_{{ journal.id }}`;
+        // Tell the script if we are in Edit Mode
+        const isEditing = {{ 'true' if entry_to_edit else 'false' }};
         let isDirty = false;
         
-        const composer = document.getElementById('main-entry-content');
-        // REMOVED the duplicate 'const form' declaration here!
-
-        if (composer && form) {
-            // 2. RECOVERY: When the page loads, check if we have a saved draft
+        // ONLY run draft recovery if we are writing a NEW entry
+        if (composer && form && !isEditing) {
             const savedDraft = localStorage.getItem(draftKey);
             if (savedDraft) {
                 composer.value = savedDraft;
-                isDirty = true; // Flag it as dirty since there's unsaved recovered text
+                isDirty = true;
+                setTimeout(autoResize, 10);
             }
 
-            // 3. AUTO-SAVE: Every time they type, save it locally
             composer.addEventListener('input', () => {
                 isDirty = true;
                 localStorage.setItem(draftKey, composer.value);
             });
 
-            // 4. CLEANUP: When they actually click Save, wipe the local storage
             form.addEventListener('submit', () => {
                 isDirty = false;
                 localStorage.removeItem(draftKey);
             });
 
-            // 5. THE NET: Still show the browser warning just in case they click a link accidentally
             window.addEventListener('beforeunload', (event) => {
-                if (isDirty) {
+                if (isDirty && composer.value.trim().length > 0) {
                     event.preventDefault(); 
                     event.returnValue = ''; 
                 }

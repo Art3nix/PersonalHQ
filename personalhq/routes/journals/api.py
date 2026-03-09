@@ -29,7 +29,7 @@ def add_entry(journal_id):
         db.session.commit()
 
     # Redirect back to the journal view after saving
-    return redirect(url_for('journals_view.view_journal', journal_id=journal.id))
+    return redirect(url_for('journals_view.entries', journal_id=journal.id))
 
 @journals_api_bp.route('/entries/<int:entry_id>/edit', methods=['POST'])
 @login_required
@@ -42,14 +42,14 @@ def edit_entry(entry_id):
     # Security check: Ensure the user owns the journal this entry belongs to
     journal = db.session.get(Journal, entry.journal_id)
     if not journal or journal.user_id != current_user.id:
-         return redirect(url_for('journals_view.index'))
+        return redirect(url_for('journals_view.index'))
 
     content = request.form.get('content')
     if content:
         entry.content = content.strip()
         db.session.commit()
 
-    return redirect(request.referrer or url_for('journals_view.index'))
+    return redirect(url_for('journals_view.entries', journal_id=journal.id))
 
 @journals_api_bp.route('/entries/<int:entry_id>/delete', methods=['POST'])
 @login_required
@@ -62,7 +62,7 @@ def delete_entry(entry_id):
         journal_id = entry.journal_id
         db.session.delete(entry)
         db.session.commit()
-        return redirect(url_for('journals_view.view_journal', journal_id=journal_id))
+        return redirect(url_for('journals_view.entries', journal_id=journal_id))
 
     return jsonify({"status": "error"}), 403
 
@@ -144,7 +144,7 @@ def add_prompt(journal_id):
         db.session.add(new_prompt)
         db.session.commit()
 
-    return redirect(url_for('journals_view.view_journal', journal_id=journal.id))
+    return redirect(request.referrer or url_for('journals_view.write', journal_id=journal.id))
 
 @journals_api_bp.route('/prompts/<int:prompt_id>/edit', methods=['POST'])
 @login_required
@@ -177,6 +177,6 @@ def delete_prompt(prompt_id):
         journal_id = prompt.journal_id
         db.session.delete(prompt)
         db.session.commit()
-        return redirect(url_for('journals_view.view_journal', journal_id=journal_id))
+        return redirect(request.referrer or url_for('journals_view.write', journal_id=journal_id))
 
     return jsonify({"status": "error", "message": "Unauthorized"}), 403
