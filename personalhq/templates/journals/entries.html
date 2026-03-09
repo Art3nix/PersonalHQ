@@ -39,8 +39,9 @@
                         {% for entry in entries %}
                             <div class="archive-card mb-6 break-inside-avoid bg-white border border-stone-100 rounded-[2rem] p-8 shadow-xl shadow-stone-200/30 hover:border-indigo-100 transition-colors group">
                                 <div class="flex justify-between items-start mb-6">
-                                    <span class="archive-date text-[10px] font-bold text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg uppercase tracking-widest border border-indigo-100/50">
-                                        {{ entry.created_at.strftime('%A, %b %d, %Y') }}
+                                    <span class="archive-date text-[10px] font-bold text-indigo-500 bg-indigo-50 px-3 py-1.5 rounded-lg uppercase tracking-widest border border-indigo-100/50 flex items-center gap-1.5 w-fit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        {{ entry.created_at.strftime('%b %d, %Y • %I:%M %p') }}
                                     </span>
                                     
                                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
