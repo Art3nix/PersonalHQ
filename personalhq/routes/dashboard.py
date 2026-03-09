@@ -87,5 +87,5 @@ def index():
         upcoming_experiences=upcoming_experiences,
         time_left_str=time_left_str,
         is_urgent=is_urgent,
-        current_date=today
+        today=today
     )

@@ -85,10 +85,15 @@
 
 
         <section class="mb-12">
-            <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">
-                Daily Routines
-                <span class="bg-stone-100 text-stone-500 py-0.5 px-2 rounded-md text-[10px]">{{ stats.daily }}</span>
-            </h2>
+            <div class="flex items-end gap-4 mb-6">
+                <h2 class="text-sm font-bold text-stone-900 flex items-center gap-2">
+                    Daily Routines
+                    <span class="bg-stone-100 text-stone-500 py-0.5 px-2 rounded-md text-[10px]">{{ stats.daily }}</span>
+                </h2>
+                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100 uppercase tracking-widest mb-0.5">
+                    {{ today.strftime('%A, %b %d') }}
+                </span>
+            </div>
             <div class="grid grid-cols-2 gap-6">
                 {% for habit in habits %}
                     {% if habit.frequency.value == 'DAILY' %}
@@ -198,10 +203,15 @@
         </section>
 
         <section>
-            <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">
-                Weekly Goals
-                <span class="bg-stone-100 text-stone-500 py-0.5 px-2 rounded-md text-[10px]">{{ stats.weekly }}</span>
-            </h2>
+            <div class="flex items-end gap-4 mb-6">
+                <h2 class="text-sm font-bold text-stone-900 flex items-center gap-2">
+                    Weekly Goals
+                    <span class="bg-stone-100 text-stone-500 py-0.5 px-2 rounded-md text-[10px]">{{ stats.weekly }}</span>
+                </h2>
+                <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100 uppercase tracking-widest mb-0.5">
+                    {{ start_of_week.strftime('%b %d') }} - {{ end_of_week.strftime('%b %d') }}
+                </span>
+            </div>
             <div class="grid grid-cols-2 gap-6">
                 {% for habit in habits %}
                     {% if habit.frequency.value == 'WEEKLY' %}

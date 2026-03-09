@@ -34,6 +34,8 @@ def manage():
     # 30-Day Heatmap Logic
     today = get_local_today()
     thirty_days_ago = today - timedelta(days=29)
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
 
     # Query completion counts grouped by date for the last 30 days
     daily_counts = db.session.query(
@@ -130,5 +132,8 @@ def manage():
         weekly_trend=json.dumps(weekly_trend),
         habit_sparklines=habit_sparklines,
         HabitFrequency=HabitFrequency,
-        identities=identities
+        identities=identities,
+        today=today,
+        start_of_week=start_of_week,
+        end_of_week=end_of_week
     )
