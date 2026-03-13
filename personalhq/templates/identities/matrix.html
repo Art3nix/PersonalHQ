@@ -57,7 +57,8 @@
                     </div>
 
                     <div class="mt-auto border-t border-{{ stat.model.color }}-200/50 pt-6">
-                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">Supporting Systems</p>
+                        <p class="text-[10px] font-bold text-{{ stat.model.color }}-600/70 uppercase tracking-widest mb-3">Proof of Identity</p>
+                        
                         <div class="flex gap-2 flex-wrap">
                             {% for habit in stat.model.habits %}
                                 <span class="bg-white/50 border border-{{ stat.model.color }}-200 text-{{ stat.model.color }}-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
@@ -66,9 +67,9 @@
                             {% endfor %}
                             
                             {% if stat.focus_count > 0 %}
-                                <span class="bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm">
+                                <span class="bg-{{ stat.model.color }}-100 border border-{{ stat.model.color }}-200 text-{{ stat.model.color }}-800 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                    {{ stat.focus_count }} Focus Rules
+                                    {{ stat.focus_count }} Deep Work {% if stat.focus_count == 1 %}Session{% else %}Sessions{% endif %}
                                 </span>
                             {% endif %}
                         </div>
