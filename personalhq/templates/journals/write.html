@@ -3,7 +3,8 @@
 {% block title %}{{ journal.name }} - Life HQ{% endblock %}
 
 {% block app_content %}
-    <div class="flex-1 flex flex-col min-w-0">
+    {% set theme = journal.color or 'indigo' %}
+    <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50">
         
         <header class="h-24 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
             <div class="flex items-center gap-4">
@@ -31,12 +32,12 @@
                 <div class="max-w-3xl mx-auto w-full pt-8 pb-32">
                     <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-10">Today's Entry</h2>
                     {% if active_prompt %}
-                    <div class="mb-10 p-8 bg-indigo-50/50 border border-indigo-100 rounded-3xl">
-                        <h3 class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <div class="mb-10 p-8 bg-{{ theme }}-50/50 border border-{{ theme }}-100 rounded-3xl">
+                        <h3 class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest mb-3 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                             Current Prompt
                         </h3>
-                        <p class="text-xl font-bold text-indigo-900 leading-snug">{{ active_prompt.text }}</p>
+                        <p class="text-xl font-bold text-{{ theme }}-900 leading-snug">{{ active_prompt.text }}</p>
                     </div>
                     {% endif %}
 
@@ -53,7 +54,7 @@
                                     Cancel Edit
                                 </a>
                                 {% endif %}
-                                <button id="main-submit-btn" type="submit" class="px-8 py-3.5 bg-[#1A1C1E] text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">
+                                <button id="main-submit-btn" type="submit" class="px-8 py-3.5 bg-{{ theme }}-600 text-white rounded-xl text-sm font-bold hover:bg-{{ theme }}-700 transition-colors shadow-lg shadow-{{ theme }}-200">
                                     {% if entry_to_edit %}Update Entry{% else %}Save Entry{% endif %}
                                 </button>
                             </div>

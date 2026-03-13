@@ -13,13 +13,13 @@ class Identity(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
     # e.g., "The Athlete", "The System Architect", "The Writer"
-    name: Mapped[str] = mapped_column(nullable=False) 
-    
+    name: Mapped[str] = mapped_column(nullable=False)
     # A short reminder of the standard you hold yourself to
-    description: Mapped[str | None] 
+    description: Mapped[str | None]
+    color = db.Column(db.String(20), default='stone')
 
     user = relationship("User", back_populates="identities")
-    
+
     # The actions that serve as "votes" for this identity
     habits = relationship("Habit", back_populates="identity")
     focus_sessions = relationship("FocusSession", back_populates="identity")

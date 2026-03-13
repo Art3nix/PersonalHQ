@@ -10,5 +10,6 @@ class EmotionalValue(db.Model):  # pylint: disable=R0903; # sqlalchemy class use
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    color = db.Column(db.String(20), default='stone')
 
     experiences = relationship("Experience", back_populates="emotional_value")

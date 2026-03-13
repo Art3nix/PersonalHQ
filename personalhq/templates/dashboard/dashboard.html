@@ -183,37 +183,41 @@
                     <div class="space-y-3">
                         {% for habit in habits %}
                         {% set status = habit_statuses[habit.id] %}
+                        {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
 
-                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
-                            {% if status == 'COMPLETED' %}bg-indigo-50/50 border-indigo-100
+                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
+                            {% if status == 'COMPLETED' %}bg-{{ theme }}-50/50 border-{{ theme }}-100
                             {% elif status == 'EXPIRING' %}bg-white border-amber-200 ring-2 ring-amber-50
-                            {% else %}bg-white border-slate-100 hover:border-indigo-200{% endif %}" 
+                            {% else %}bg-white border-slate-100 hover:border-{{ theme }}-200{% endif %}" 
+                            style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}" 
                             onclick="toggleHabit({{ habit.id }})">
                             
                             <div class="flex items-center gap-4">
                                 <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors 
-                                    {% if status == 'COMPLETED' %}bg-indigo-600 text-white
+                                    {% if status == 'COMPLETED' %}bg-{{ theme }}-600 text-white
                                     {% elif status == 'EXPIRING' %}bg-amber-100 text-amber-600
-                                    {% else %}bg-slate-50 text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600{% endif %}">
+                                    {% else %}bg-slate-50 text-slate-400 group-hover:bg-{{ theme }}-50 group-hover:text-{{ theme }}-600{% endif %}">
                                     {{ habit.icon }}
                                 </div>
-                                <div>
+                                <div class="flex flex-col items-start gap-1.5">
                                     <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 
-                                        {% if status == 'COMPLETED' %}text-indigo-900
+                                        {% if status == 'COMPLETED' %}text-{{ theme }}-900
                                         {% elif status == 'EXPIRING' %}text-amber-900
                                         {% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
                                     {% if habit.identity %}
-                                        <p id="habit-identity-{{ habit.id }}" class="text-[10px] font-bold 
-                                            {% if status == 'COMPLETED' %}text-indigo-400
-                                            {% elif status == 'EXPIRING' %}text-amber-500
-                                            {% else %}text-slate-400{% endif %} uppercase">{{ habit.identity.name }}</p>
+                                        <span id="habit-identity-{{ habit.id }}" class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm
+                                            {% if status == 'COMPLETED' %}bg-{{ theme }}-100/50 text-{{ theme }}-600 border-{{ theme }}-200
+                                            {% elif status == 'EXPIRING' %}bg-amber-50 text-amber-600 border-amber-200
+                                            {% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200 group-hover:bg-{{ theme }}-100{% endif %}">
+                                            {{ habit.identity.name }}
+                                        </span>
                                     {% endif %}
                                 </div>
                             </div>
                             
                             <div class="flex flex-col items-end gap-1" id="streak-container-{{ habit.id }}">
                                 <span id="streak-{{ habit.id }}" class="text-xs font-bold 
-                                    {% if status == 'COMPLETED' %}text-indigo-600
+                                    {% if status == 'COMPLETED' %}text-{{ theme }}-600
                                     {% else %}text-amber-500{% endif %}">
                                     {% if habit.streak and habit.streak > 0 %}
                                         🔥 {{ habit.streak }} day streak
@@ -390,35 +394,38 @@
                     badge.remove(); // Kill the badge if it's completed or broken
                 }
 
-                // 4. Strip everything back to base layout classes
-                row.className = "flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group";
+                // 4. Read the dynamic theme from the HTML
+                const theme = row.dataset.theme || 'indigo';
+
+                // 5. Strip everything back to base layout classes
+                row.className = "habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group";
                 iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center transition-colors";
                 nameEl.className = "text-sm font-bold";
                 streakLabel.className = "text-xs font-bold";
-                if (identityEl) identityEl.className = "text-[10px] font-bold uppercase tracking-widest";
+                if (identityEl) identityEl.className = "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm";
 
-                // 5. Apply the correct Color Palette based on the server's state
+                // 6. Apply the correct Color Palette based on the server's state
                 if (data.habit_status === 'COMPLETED') {
-                    row.classList.add('bg-indigo-50/50', 'border-indigo-100');
-                    iconBox.classList.add('bg-indigo-600', 'text-white');
-                    nameEl.classList.add('text-indigo-900');
-                    streakLabel.classList.add('text-indigo-600');
-                    if (identityEl) identityEl.classList.add('text-indigo-400');
+                    row.classList.add(`bg-${theme}-50/50`, `border-${theme}-100`);
+                    iconBox.classList.add(`bg-${theme}-600`, `text-white`);
+                    nameEl.classList.add(`text-${theme}-900`);
+                    streakLabel.classList.add(`text-${theme}-600`);
+                    if (identityEl) identityEl.classList.add(`bg-${theme}-100/50`, `text-${theme}-600`, `border-${theme}-200`);
                     
                 } else if (data.habit_status === 'EXPIRING') {
                     row.classList.add('bg-white', 'border-amber-200', 'ring-2', 'ring-amber-50');
                     iconBox.classList.add('bg-amber-100', 'text-amber-600');
                     nameEl.classList.add('text-amber-900');
                     streakLabel.classList.add('text-amber-500');
-                    if (identityEl) identityEl.classList.add('text-amber-500');
+                    if (identityEl) identityEl.classList.add('bg-amber-50', 'text-amber-600', 'border-amber-200');
                     
                 } else {
                     // Default "BROKEN" or "NOT_STARTED" State
-                    row.classList.add('bg-white', 'border-slate-100', 'hover:border-indigo-200');
-                    iconBox.classList.add('bg-slate-50', 'text-slate-400', 'group-hover:bg-indigo-50', 'group-hover:text-indigo-600');
+                    row.classList.add('bg-white', 'border-slate-100', `hover:border-${theme}-200`);
+                    iconBox.classList.add('bg-slate-50', 'text-slate-400', `group-hover:bg-${theme}-50`, `group-hover:text-${theme}-600`);
                     nameEl.classList.add('text-slate-800');
                     streakLabel.classList.add('text-amber-500');
-                    if (identityEl) identityEl.classList.add('text-slate-400');
+                    if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`, `group-hover:bg-${theme}-100`);
                 }
             }
         }

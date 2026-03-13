@@ -5,6 +5,8 @@ from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.experiences import Experience
+from personalhq.models.coretheme import CoreTheme
+from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.bucket_experience import BucketExperience
 
@@ -187,14 +189,74 @@ def get_bucket_dates_from_age(start_age, end_age, user):
         start_date = date(start_year, dob.month, dob.day)
     except ValueError:
         start_date = date(start_year, 2, 28) # Leap year baby catch!
-        
+
     # End Date: The day before they turn (end_age + 1)
     end_year = dob.year + int(end_age) + 1
     try:
         next_bday = date(end_year, dob.month, dob.day)
     except ValueError:
         next_bday = date(end_year, 2, 28)
-        
+
     end_date = next_bday - timedelta(days=1)
-    
+
     return start_date, end_date
+
+@time_buckets_api_bp.route('/themes/create', methods=['POST'])
+@login_required
+def create_theme():
+    name = request.form.get('name')
+    color = request.form.get('color', 'stone')
+    if name:
+        new_theme = CoreTheme(name=name.strip(), color=color)
+        db.session.add(new_theme)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/emotions/create', methods=['POST'])
+@login_required
+def create_emotion():
+    name = request.form.get('name')
+    color = request.form.get('color', 'rose')
+    if name:
+        new_emotion = EmotionalValue(name=name.strip(), color=color)
+        db.session.add(new_emotion)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/themes/<int:id>/edit', methods=['POST'])
+@login_required
+def edit_theme(id):
+    theme = db.session.get(CoreTheme, id)
+    if theme:
+        theme.name = request.form.get('name', theme.name).strip()
+        theme.color = request.form.get('color', theme.color)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/themes/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_theme(id):
+    theme = db.session.get(CoreTheme, id)
+    if theme:
+        db.session.delete(theme)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/emotions/<int:id>/edit', methods=['POST'])
+@login_required
+def edit_emotion(id):
+    emotion = db.session.get(EmotionalValue, id)
+    if emotion:
+        emotion.name = request.form.get('name', emotion.name).strip()
+        emotion.color = request.form.get('color', emotion.color)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))
+
+@time_buckets_api_bp.route('/emotions/<int:id>/delete', methods=['POST'])
+@login_required
+def delete_emotion(id):
+    emotion = db.session.get(EmotionalValue, id)
+    if emotion:
+        db.session.delete(emotion)
+        db.session.commit()
+    return redirect(url_for('time_buckets_view.manage'))

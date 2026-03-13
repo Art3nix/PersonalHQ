@@ -10,5 +10,6 @@ class CoreTheme(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to 
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    color = db.Column(db.String(20), default='stone')
 
     experiences = relationship("Experience", back_populates="core_theme")

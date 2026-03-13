@@ -21,9 +21,10 @@ class Journal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
-    name: Mapped[str] = mapped_column(nullable=False) 
-    description: Mapped[str | None] 
-    icon: Mapped[str | None] 
+    name: Mapped[str] = mapped_column(nullable=False)
+    description: Mapped[str | None]
+    icon: Mapped[str | None]
+    color = db.Column(db.String(20), default='stone')
     frequency: Mapped[JournalFrequency] = mapped_column(Enum(JournalFrequency), default=JournalFrequency.DAILY)
 
     user = relationship("User", back_populates="journals")

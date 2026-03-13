@@ -74,6 +74,7 @@ def create_journal():
     name = request.form.get('name')
     description = request.form.get('description')
     icon = request.form.get('icon', '📓')
+    color = request.form.get('color', 'indigo')
     frequency_val = request.form.get('frequency', 'DAILY').upper()
 
     # Safely convert the string from the form into your Enum
@@ -87,6 +88,7 @@ def create_journal():
             user_id=current_user.id,
             name=name.strip(),
             description=description.strip() if description else None,
+            color=color,
             icon=icon.strip(),
             frequency=frequency
         )
@@ -105,11 +107,13 @@ def edit_journal(journal_id):
 
     name = request.form.get('name')
     description = request.form.get('description')
+    color = request.form.get('color')
     frequency_val = request.form.get('frequency')
 
     if name:
         journal.name = name.strip()
         journal.description = description.strip() if description else None
+        if color: journal.color = color
 
         # Safely update the frequency enum
         if frequency_val:

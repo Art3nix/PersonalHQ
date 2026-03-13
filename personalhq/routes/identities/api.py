@@ -14,9 +14,10 @@ def create_identity():
     """Creates a new Identity and optionally links existing unassigned habits."""
     name = request.form.get('name')
     description = request.form.get('description')
-    
+    color = request.form.get('color', 'stone')
+
     # getlist() captures all checked checkboxes sharing the 'habit_ids' name
-    habit_ids = request.form.getlist('habit_ids') 
+    habit_ids = request.form.getlist('habit_ids')
 
     if not name:
         flash('Identity name is required.', 'error')
@@ -25,9 +26,10 @@ def create_identity():
     new_identity = Identity(
         user_id=current_user.id,
         name=name.strip(),
-        description=description.strip() if description else None
+        description=description.strip() if description else None,
+        color=color
     )
-    
+
     db.session.add(new_identity)
     db.session.flush() # Flush to generate the new_identity.id without committing yet
 
@@ -37,7 +39,7 @@ def create_identity():
             Habit.id.in_(habit_ids), 
             Habit.user_id == current_user.id
         ).all()
-        
+
         for habit in habits_to_update:
             habit.identity_id = new_identity.id
 
@@ -57,10 +59,12 @@ def edit_identity(identity_id):
 
     name = request.form.get('name')
     description = request.form.get('description')
+    color = request.form.get('color', 'stone')
 
     if name:
         identity.name = name.strip()
         identity.description = description.strip() if description else None
+        identity.color = color
         db.session.commit()
 
     return redirect(url_for('identities_view.matrix'))

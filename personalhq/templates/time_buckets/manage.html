@@ -1,4 +1,5 @@
 {% extends "app_layout.html" %}
+{% from 'components/color_picker.html' import render_color_picker %}
 
 {% block title %}Time Buckets - Life HQ{% endblock %}
 
@@ -10,7 +11,10 @@
                 <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Life Map</h1>
                 <p class="text-sm font-medium text-stone-400 mt-2">Die With Zero: Maximize fulfillment by planning experiences for the right decades.</p>
             </div>
-            <div>
+            <div class="flex items-center gap-3">
+                <button onclick="document.getElementById('slide-over-labels').classList.remove('translate-x-full')" class="bg-white border border-stone-200 text-stone-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-50 transition-all shadow-sm">
+                    Manage Labels
+                </button>
                 <button onclick="document.getElementById('slide-over').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
                     + New Experience
                 </button>
@@ -97,14 +101,16 @@
                                                 {% if link.experience.core_theme or link.experience.emotional_value %}
                                                 <div class="flex items-center gap-2 mt-1.5 mb-1 transition-opacity {% if link.experience.is_completed %}opacity-50{% endif %}">
                                                     {% if link.experience.core_theme %}
-                                                    <span class="text-[9px] font-bold text-stone-500 bg-stone-100 border border-stone-200 uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-1" title="Core Theme">
+                                                    {% set theme_color = link.experience.core_theme.color or 'stone' %}
+                                                    <span class="text-[9px] font-bold text-{{ theme_color }}-600 bg-{{ theme_color }}-50 border border-{{ theme_color }}-200 uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-1" title="Core Theme">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
                                                         {{ link.experience.core_theme.name }}
                                                     </span>
                                                     {% endif %}
                                                     
                                                     {% if link.experience.emotional_value %}
-                                                    <span class="text-[9px] font-bold text-rose-500 bg-rose-50 border border-rose-100 uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-1" title="Emotional Value">
+                                                    {% set emotion_color = link.experience.emotional_value.color or 'rose' %}
+                                                    <span class="text-[9px] font-bold text-{{ emotion_color }}-600 bg-{{ emotion_color }}-50 border border-{{ emotion_color }}-200 uppercase tracking-widest px-1.5 py-0.5 rounded-md flex items-center gap-1" title="Emotional Value">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                                         {{ link.experience.emotional_value.name }}
                                                     </span>
@@ -236,7 +242,6 @@
                             Plot on Timeline
                         </button>
                     </div>
-                </form>
                 </form>
             </div>
         </div>
@@ -401,6 +406,147 @@
             </div>
         </div>
     </div>
+    <div id="slide-over-labels" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-labels').classList.add('translate-x-full')"></div>
+        
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Manage Labels</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Themes & Emotions</p>
+                </div>
+                <button onclick="document.getElementById('slide-over-labels').classList.add('translate-x-full')" class="p-2 bg-white border border-stone-200 text-stone-400 rounded-xl hover:bg-stone-50 transition-colors shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto custom-scrollbar space-y-12">
+                
+                <section>
+                    <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-2">
+                        <h3 class="text-sm font-extrabold text-stone-900">Core Themes</h3>
+                        <button onclick="document.getElementById('add-theme-form').classList.toggle('hidden')" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors">
+                            + Add New
+                        </button>
+                    </div>
+                    
+                    <form id="add-theme-form" action="{{ url_for('time_buckets_api.create_theme') }}" method="POST" onsubmit="submitNewLabel(event, 'add-theme-form')" class="hidden mb-6 bg-stone-50 p-5 rounded-2xl border border-stone-100 shadow-inner">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="text" name="name" required class="w-full bg-white border border-stone-200 rounded-xl py-2.5 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none mb-4 font-medium" placeholder="e.g., Adventure">
+                        <div class="mb-5 scale-90 origin-top-left -ml-1">
+                            {{ render_color_picker(input_name='color', selected_color='stone', label_text='Color') }}
+                        </div>
+                        <button type="submit" class="w-full bg-stone-900 text-white font-bold py-2.5 rounded-xl hover:bg-stone-800 transition-colors text-xs shadow-md">Save Theme</button>
+                    </form>
+
+                    <div class="space-y-2">
+                        {% for theme in core_themes %}
+                            {% set tc = theme.color or 'stone' %}
+                            <div>
+                                <button type="button" id="row-btn-theme-{{ theme.id }}" onclick="toggleInlineEdit('theme', {{ theme.id }})" class="w-full group flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-stone-50 transition-colors border border-transparent hover:border-stone-100 focus:outline-none focus:bg-stone-50">
+                                    <div class="flex items-center gap-3">
+                                        <span class="label-color-dot w-3 h-3 rounded-full bg-{{ tc }}-500 shadow-sm ring-1 ring-black/5 transition-colors duration-300"></span>
+                                        <span class="label-name text-sm font-bold text-stone-700 transition-colors duration-300">{{ theme.name }}</span>
+                                    </div>
+                                    <div class="text-stone-300 group-hover:text-indigo-500 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </div>
+                                </button>
+
+                                <div id="inline-edit-theme-{{ theme.id }}" class="hidden mt-2 bg-stone-50 border border-stone-100 rounded-2xl p-4 shadow-inner">
+                                    <form id="form-theme-{{ theme.id }}" action="{{ url_for('time_buckets_api.edit_theme', id=theme.id) }}" method="POST" onsubmit="event.preventDefault(); autoSaveLabel('theme', {{ theme.id }});" onchange="autoSaveLabel('theme', {{ theme.id }})">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <input type="text" name="name" value="{{ theme.name }}" required 
+                                               onblur="autoSaveLabel('theme', {{ theme.id }})" 
+                                               class="w-full bg-white border border-stone-200 rounded-xl py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-none mb-4 font-medium">
+                                        
+                                        <div class="mb-3 scale-90 origin-top-left -ml-1">
+                                            {{ render_color_picker(input_name='color', selected_color=tc, label_text='Color') }}
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center pt-3 border-t border-stone-200">
+                                            <div class="flex items-center gap-1.5 text-stone-400 opacity-70">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                <span class="text-[9px] font-bold uppercase tracking-widest">Auto-saved</span>
+                                            </div>
+                                            <button type="button" onclick="confirmDelete('delete-theme-{{ theme.id }}', '{{ theme.name }}')" class="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <form id="delete-theme-{{ theme.id }}" action="{{ url_for('time_buckets_api.delete_theme', id=theme.id) }}" method="POST" class="hidden"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/></form>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-xs text-stone-400 italic px-3">No themes yet.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-2">
+                        <h3 class="text-sm font-extrabold text-stone-900">Emotional Values</h3>
+                        <button onclick="document.getElementById('add-emotion-form').classList.toggle('hidden')" class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors">
+                            + Add New
+                        </button>
+                    </div>
+                    
+                    <form id="add-emotion-form" action="{{ url_for('time_buckets_api.create_emotion') }}" method="POST" onsubmit="submitNewLabel(event, 'add-emotion-form')" class="hidden mb-6 bg-stone-50 p-5 rounded-2xl border border-stone-100 shadow-inner">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="text" name="name" required class="w-full bg-white border border-stone-200 rounded-xl py-2.5 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none mb-4 font-medium" placeholder="e.g., High Energy">
+                        <div class="mb-5 scale-90 origin-top-left -ml-1">
+                            {{ render_color_picker(input_name='color', selected_color='rose', label_text='Color') }}
+                        </div>
+                        <button type="submit" class="w-full bg-stone-900 text-white font-bold py-2.5 rounded-xl hover:bg-stone-800 transition-colors text-xs shadow-md">Save Emotion</button>
+                    </form>
+
+                    <div class="space-y-2">
+                        {% for ev in emotional_values %}
+                            {% set ec = ev.color or 'rose' %}
+                            <div>
+                                <button type="button" id="row-btn-emotion-{{ ev.id }}" onclick="toggleInlineEdit('emotion', {{ ev.id }})" class="w-full group flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-stone-50 transition-colors border border-transparent hover:border-stone-100 focus:outline-none focus:bg-stone-50">
+                                    <div class="flex items-center gap-3">
+                                        <span class="label-color-dot w-3 h-3 rounded-full bg-{{ ec }}-500 shadow-sm ring-1 ring-black/5 transition-colors duration-300"></span>
+                                        <span class="label-name text-sm font-bold text-stone-700 transition-colors duration-300">{{ ev.name }}</span>
+                                    </div>
+                                    <div class="text-stone-300 group-hover:text-indigo-500 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </div>
+                                </button>
+
+                                <div id="inline-edit-emotion-{{ ev.id }}" class="hidden mt-2 bg-stone-50 border border-stone-100 rounded-2xl p-4 shadow-inner">
+                                    <form id="form-emotion-{{ ev.id }}" action="{{ url_for('time_buckets_api.edit_emotion', id=ev.id) }}" method="POST" onsubmit="event.preventDefault(); autoSaveLabel('emotion', {{ ev.id }});" onchange="autoSaveLabel('emotion', {{ ev.id }})">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <input type="text" name="name" value="{{ ev.name }}" required 
+                                               onblur="autoSaveLabel('emotion', {{ ev.id }})" 
+                                               class="w-full bg-white border border-stone-200 rounded-xl py-2 px-3 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all outline-none mb-4 font-medium">
+                                        
+                                        <div class="mb-3 scale-90 origin-top-left -ml-1">
+                                            {{ render_color_picker(input_name='color', selected_color=ec, label_text='Color') }}
+                                        </div>
+                                        
+                                        <div class="flex justify-between items-center pt-3 border-t border-stone-200">
+                                            <div class="flex items-center gap-1.5 text-stone-400 opacity-70">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                <span class="text-[9px] font-bold uppercase tracking-widest">Auto-saved</span>
+                                            </div>
+                                            <button type="button" onclick="confirmDelete('delete-emotion-{{ ev.id }}', '{{ ev.name }}')" class="text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-700 transition-colors">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </form>
+                                    <form id="delete-emotion-{{ ev.id }}" action="{{ url_for('time_buckets_api.delete_emotion', id=ev.id) }}" method="POST" class="hidden"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/></form>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-xs text-stone-400 italic px-3">No emotions yet.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -472,6 +618,85 @@
             const modal = document.getElementById('edit-exp-modal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('translate-x-full'), 10);
+        }
+
+        function toggleInlineEdit(type, id) {
+            const targetId = `inline-edit-${type}-${id}`;
+            const targetForm = document.getElementById(targetId);
+            
+            // 1. Find every inline-edit panel that is currently open (not hidden)
+            const allOpenPanels = document.querySelectorAll('[id^="inline-edit-"]:not(.hidden)');
+            
+            // 2. Loop through and close them (unless it's the one we just clicked)
+            allOpenPanels.forEach(panel => {
+                if (panel.id !== targetId) {
+                    panel.classList.add('hidden');
+                }
+            });
+
+            // 3. Toggle the one we actually clicked
+            if (targetForm) {
+                targetForm.classList.toggle('hidden');
+            }
+        }
+
+        async function submitNewLabel(event, formId) {
+            event.preventDefault(); // Stop page reload completely
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch(form.action, { method: 'POST', body: formData });
+                if (response.ok) {
+                    // Fetch fresh HTML quietly
+                    const pageRes = await fetch(window.location.href);
+                    const html = await pageRes.text();
+                    const virtualDoc = new DOMParser().parseFromString(html, 'text/html');
+                    
+                    // 1. Swap the interior of the labels modal
+                    const currentLabels = document.querySelector('#slide-over-labels .custom-scrollbar');
+                    const newLabels = virtualDoc.querySelector('#slide-over-labels .custom-scrollbar');
+                    if (currentLabels && newLabels) currentLabels.innerHTML = newLabels.innerHTML;
+                    
+                    // 2. THE SNIPER FIX: Only swap the inner Life Map, completely ignoring the modals!
+                    const currentMap = document.querySelector('main.max-w-5xl');
+                    const newMap = virtualDoc.querySelector('main.max-w-5xl');
+                    if (currentMap && newMap) currentMap.innerHTML = newMap.innerHTML;
+                }
+            } catch (error) { console.error('Error creating:', error); }
+        }
+
+        async function autoSaveLabel(type, id) {
+            const form = document.getElementById(`form-${type}-${id}`);
+            if (!form) return; 
+            
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, { method: 'POST', body: formData });
+                if (response.ok) {
+                    // 1. Update row instantly so it feels blazing fast
+                    const newName = formData.get('name');
+                    const newColor = formData.get('color');
+                    const rowButton = document.getElementById(`row-btn-${type}-${id}`);
+                    
+                    if (rowButton) {
+                        const nameSpan = rowButton.querySelector('.label-name');
+                        const colorDot = rowButton.querySelector('.label-color-dot');
+                        if (nameSpan) nameSpan.innerText = newName;
+                        if (colorDot) colorDot.className = `label-color-dot w-3 h-3 rounded-full shadow-sm ring-1 ring-black/5 bg-${newColor}-500 transition-colors duration-300`;
+                    }
+
+                    // 2. THE SNIPER FIX: Update the background map colors without destroying the modal!
+                    const pageRes = await fetch(window.location.href);
+                    const html = await pageRes.text();
+                    const virtualDoc = new DOMParser().parseFromString(html, 'text/html');
+                    
+                    const currentMap = document.querySelector('main.max-w-5xl');
+                    const newMap = virtualDoc.querySelector('main.max-w-5xl');
+                    if (currentMap && newMap) currentMap.innerHTML = newMap.innerHTML;
+                }
+            } catch (error) { console.error('Error saving label:', error); }
         }
     </script>
 {% endblock %}
