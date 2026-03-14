@@ -38,9 +38,9 @@
         </header>
 
         <main class="flex-1 overflow-y-auto custom-scrollbar p-12">
-            <div class="max-w-7xl mx-auto">
+            <div class="max-w-[1400px] mx-auto">
                 {% if entries %}
-                    <div class="columns-1 md:columns-2 lg:columns-3 gap-6" id="archive-grid">
+                    <div class="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-6" id="archive-grid">
                         {% for entry in entries %}
                             <div onclick="window.location.href='{{ url_for('journals_view.write', journal_id=journal.id, edit_id=entry.id) }}'" class="archive-card mb-6 break-inside-avoid bg-white border border-stone-100 rounded-[2rem] p-8 shadow-xl shadow-stone-200/30 hover:border-indigo-200 hover:shadow-2xl transition-all duration-200 group cursor-pointer relative">
                                 
