@@ -75,6 +75,8 @@
 {% endblock %}
 
 {% block app_content %}
+    <div id="focus-overlay" class="fixed inset-0 bg-stone-950/85 backdrop-blur-md z-[100] opacity-0 pointer-events-none transition-all duration-700 ease-in-out"></div>
+
     <div class="flex-1 flex flex-col min-w-0">
         <header class="h-24 flex items-center justify-between px-12 z-20">
             <div class="flex-1"></div>
@@ -112,21 +114,20 @@
                         
                         {% if queued_sessions %}
                         <div class="relative">
-                            <button onclick="toggleTaskDropdown()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-colors flex items-center gap-1">
+                            <button id="change-task-btn" onclick="toggleTaskDropdown()" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-widest transition-all flex items-center gap-1">
                                 Change Task
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                             </button>
                             
-                            <div id="task-dropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-white border border-stone-100 rounded-2xl shadow-xl shadow-stone-200/50 z-50 overflow-hidden opacity-0 transform scale-95 transition-all duration-150 origin-top-right">
-                                <div class="p-2 space-y-1" id="task-dropdown-list">
-                                    </div>
+                            <div id="task-dropdown" class="hidden absolute right-0 top-full mt-2 w-64 bg-white border border-stone-100 rounded-2xl shadow-xl shadow-stone-200/50 z-[60] overflow-hidden opacity-0 transform scale-95 transition-all duration-150 origin-top-right">
+                                <div class="p-2 space-y-1" id="task-dropdown-list"></div>
                             </div>
                         </div>
                         {% endif %}
                     </div>
                     
                     {% if queued_sessions %}
-                    <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 transition-all duration-300">
+                    <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 transition-all duration-500 relative transform origin-top">
                         <div class="flex flex-col md:flex-row justify-between items-center gap-10">
                             <div class="flex-1">
                                 <div class="mb-8">
@@ -144,8 +145,10 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="text-center shrink-0 border-l border-stone-50 pl-12">
+                            
+                            <div class="text-center shrink-0 border-l border-stone-50 pl-10 min-w-[300px] flex flex-col items-center justify-center">
                                 <span id="timer-display" class="text-6xl font-black mono text-stone-900 tracking-tighter leading-none">00:00:00</span>
+                                <span id="timer-total-label" class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-4">0 Min Session</span>
                             </div>
                         </div>
                     </div>
@@ -482,60 +485,6 @@
             return `${h}:${m}:${s}`;
         }
 
-        function loadSessionUI() {
-            if (sessionQueue.length === 0) {
-                document.getElementById('session-title').textContent = "No Focus Planned Today";
-                document.getElementById('timer-controls').style.display = 'none';
-                return;
-            }
-
-            const current = sessionQueue[currentQueueIndex];
-            
-            document.getElementById('session-title').textContent = current.name;
-            document.getElementById('current-session-id').value = current.id;
-            document.getElementById('session-identity').textContent = current.identity ? current.identity : "Unassigned Focus";
-            
-            const card = document.getElementById('deep-work-card');
-            const mainBtn = document.getElementById('main-timer-btn');
-            const endBtn = document.getElementById('end-session-btn');
-            const btnText = document.getElementById('pause-btn-text');
-            
-            // Explicit UI painting based entirely on your Enum states
-            if (current.status === 'IN_PROGRESS') {
-                btnText.textContent = 'Pause Session';
-                mainBtn.className = "flex-grow bg-amber-500 text-white py-4 rounded-2xl font-bold text-base hover:bg-amber-600 transition-all shadow-xl shadow-amber-200/50";
-                // Hide End Button
-                endBtn.style.opacity = '0';
-                endBtn.style.pointerEvents = 'none';
-
-                card.classList.remove('border-stone-100');
-                card.classList.add('border-indigo-200', 'ring-4', 'ring-indigo-50');
-            } else {
-                // Styling for both NOT_STARTED and PAUSED
-                mainBtn.className = "flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200";
-                card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50');
-                card.classList.add('border-stone-100');
-                
-                // Differentiate text and End button visibility
-                if (current.status === 'NOT_STARTED') {
-                    btnText.textContent = 'Start Session';
-                    // Hide End Button
-                    endBtn.style.opacity = '0';
-                    endBtn.style.pointerEvents = 'none';
-                } else if (current.status === 'PAUSED') {
-                    btnText.textContent = 'Resume Session';
-                    // Show End Button
-                    endBtn.style.opacity = '1';
-                    endBtn.style.pointerEvents = 'auto';
-                }
-            }
-
-            renderDropdownList();
-            
-            // Trigger the server sync to start the countdown loop if needed
-            syncTimer(); 
-        }
-
         // --- Dropdown Controller ---
         function toggleTaskDropdown() {
             const dropdown = document.getElementById('task-dropdown');
@@ -599,6 +548,64 @@
             }
         }
 
+        function loadSessionUI() {
+            if (sessionQueue.length === 0) {
+                document.getElementById('session-title').textContent = "No Focus Planned Today";
+                document.getElementById('timer-controls').style.display = 'none';
+                return;
+            }
+
+            const current = sessionQueue[currentQueueIndex];
+            
+            document.getElementById('session-title').textContent = current.name;
+            document.getElementById('current-session-id').value = current.id;
+            document.getElementById('session-identity').textContent = current.identity ? current.identity : "Unassigned Focus";
+            
+            // Set the static total time label underneath the clock
+            const totalMins = Math.round(current.durationSeconds / 60);
+            document.getElementById('timer-total-label').textContent = `${totalMins} MIN SESSION`;
+            
+            const card = document.getElementById('deep-work-card');
+            const overlay = document.getElementById('focus-overlay');
+            const mainBtn = document.getElementById('main-timer-btn');
+            const endBtn = document.getElementById('end-session-btn');
+            const btnText = document.getElementById('pause-btn-text');
+            const changeTaskBtn = document.getElementById('change-task-btn');
+            
+            if (current.status === 'IN_PROGRESS') {
+                btnText.textContent = 'Pause Session';
+                mainBtn.className = "flex-grow bg-amber-500 text-white py-4 rounded-2xl font-bold text-base hover:bg-amber-600 transition-all shadow-xl shadow-amber-200/50";
+                
+                // Hide End Button & Change Task Button
+                endBtn.style.opacity = '0';
+                endBtn.style.pointerEvents = 'none';
+                if (changeTaskBtn) { changeTaskBtn.style.opacity = '0'; changeTaskBtn.style.pointerEvents = 'none'; }
+
+                // The Z-[110] punches the card above the dark overlay
+                card.classList.remove('border-stone-100');
+                card.classList.add('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            } else {
+                btnText.textContent = (current.status === 'NOT_STARTED') ? 'Start Session' : 'Resume Session';
+                mainBtn.className = "flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200";
+                
+                // Show/Hide End Button based on PAUSED state
+                endBtn.style.opacity = (current.status === 'PAUSED') ? '1' : '0';
+                endBtn.style.pointerEvents = (current.status === 'PAUSED') ? 'auto' : 'none';
+                
+                // Unlock Change Task Button
+                if (changeTaskBtn) { changeTaskBtn.style.opacity = '1'; changeTaskBtn.style.pointerEvents = 'auto'; }
+
+                // Disable Theater Mode
+                card.classList.add('border-stone-100');
+                card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            }
+
+            renderDropdownList();
+            syncTimer(); 
+        }
+
         let syncTimeout = null;
         async function syncTimer() {
             if (sessionQueue.length === 0) return;
@@ -610,28 +617,24 @@
                 const elapsed = data.data.elapsed_seconds || 0;
                 const remainingSeconds = current.durationSeconds - elapsed;
 
+                // Update Sleek Progress Text
+                document.getElementById('timer-elapsed').textContent = Math.floor(elapsed / 60);
+
                 if (remainingSeconds <= 0) {
                     document.getElementById('timer-display').textContent = formatTimer(0);
-                    
-                    // If it hit zero while running, auto-end it
-                    if (current.status === 'IN_PROGRESS') {
-                        endSession();
-                    }
-                    return; // Stop the syncing loop
+                    if (current.status === 'IN_PROGRESS') endSession();
+                    return; 
                 }
                 
                 document.getElementById('timer-display').textContent = formatTimer(remainingSeconds);
                 current.status = data.data.status;
                 
-                const btnText = document.getElementById('pause-btn-text');
-                
-                // Pure state-machine logic driven directly by your enum
                 if (current.status === 'IN_PROGRESS') {
-                    btnText.textContent = 'Pause Session';
+                    document.getElementById('pause-btn-text').textContent = 'Pause Session';
                 } else if (current.status === 'NOT_STARTED') {
-                    btnText.textContent = 'Start Session';
+                    document.getElementById('pause-btn-text').textContent = 'Start Session';
                 } else {
-                    btnText.textContent = 'Resume Session';
+                    document.getElementById('pause-btn-text').textContent = 'Resume Session';
                 }
                 
                 clearTimeout(syncTimeout);

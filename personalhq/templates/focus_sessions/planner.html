@@ -82,7 +82,7 @@
                 <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Planner</h1>
                 <p class="text-sm font-medium text-stone-400 mt-2">Design your days and execute your deep work.</p>
             </div>
-            <button onclick="document.getElementById('slide-over-session').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+            <button onclick="openNewSessionModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
                 + Schedule Session
             </button>
         </header>
@@ -198,7 +198,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Date</label>
-                            <input type="date" name="target_date" required value="{{ today.strftime('%Y-%m-%d') }}" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium text-stone-600">
+                            <input type="date" name="target_date" id="new-session-date" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium text-stone-600">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Minutes</label>
@@ -283,6 +283,31 @@
 
 {% block extra_scripts %}
     <script>
+        // --- MIDNIGHT ROLLOVER WATCHER ---
+        function checkMidnightRollover() {
+            const todaySection = document.querySelector('section[data-date]');
+            if (!todaySection) return;
+
+            const serverDate = todaySection.getAttribute('data-date');
+            
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0');
+
+            // If the tab was left open and crossed midnight, silently fetch fresh HTML
+            if (serverDate && serverDate !== localDate) {
+                window.location.reload();
+            }
+        }
+
+        // Check every 60 seconds, and immediately whenever you switch back to this tab
+        setInterval(checkMidnightRollover, 60000);
+        window.addEventListener('focus', checkMidnightRollover);
+        
+        // Run once on load to catch back-button caching
+        checkMidnightRollover();
+        
         async function toggleSession(sessionId) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
             const checkIcon = document.getElementById(`icon-check-${sessionId}`);
@@ -381,6 +406,16 @@
             document.getElementById('edit-session-identity').value = data.identity;
             
             document.getElementById('edit-session-modal').classList.remove('translate-x-full');
+        }
+
+        function openNewSessionModal() {
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0');
+            
+            document.getElementById('new-session-date').value = localDate;
+            document.getElementById('slide-over-session').classList.remove('translate-x-full');
         }
     </script>
 {% endblock %}
