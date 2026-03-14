@@ -75,106 +75,111 @@
         </div>
     </div>
     {% endmacro %}
-    <main class="flex-1 max-w-4xl mx-auto px-12 py-12">
-        
-        <header class="flex justify-between items-end mb-12">
-            <div>
-                <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Planner</h1>
-                <p class="text-sm font-medium text-stone-400 mt-2">Design your days and execute your deep work.</p>
-            </div>
-            <button onclick="openNewSessionModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
-                + Schedule Session
-            </button>
-        </header>
-
-        <section class="grid grid-cols-2 gap-6 mb-12">
-            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                </div>
-                <div>
-                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Lifetime Focus</p>
-                    <p class="text-2xl font-black text-stone-900">{{ stats.total_hours }} <span class="text-sm text-stone-400 font-bold">hrs</span></p>
-                </div>
-            </div>
+    <div class="flex-1 flex overflow-hidden">
+        <main class="w-[70%] overflow-y-auto custom-scrollbar p-12">
             
-            <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
-                <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                </div>
+            <header class="flex justify-between items-end mb-12">
                 <div>
-                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest" title="Sessions finished in the last 7 days">7-Day Score</p>
-                    <p class="text-2xl font-black text-stone-900">{{ stats.week_completed }} <span class="text-sm text-stone-400 font-bold">/ {{ stats.week_scheduled }}</span></p>
+                    <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Planner</h1>
+                    <p class="text-sm font-medium text-stone-400 mt-2">Design your days and execute your deep work.</p>
                 </div>
-            </div>
-        </section>
+                <button onclick="openNewSessionModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+                    + Schedule Session
+                </button>
+            </header>
 
-        <div class="mb-12">
-            <h2 class="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">Today's Focus</h2>
-            <section class="space-y-4 sortable-list min-h-[50px]" data-date="{{ today.strftime('%Y-%m-%d') }}">
-                {% if today_sessions %}
-                    {% for session in today_sessions %}
-                        {{ render_session(session, is_today=True, is_past=False) }}
-                    {% endfor %}
+            <div class="mb-12">
+                <h2 class="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">Today's Focus</h2>
+                <section class="space-y-4 sortable-list min-h-[50px]" data-date="{{ today.strftime('%Y-%m-%d') }}">
+                    {% if today_sessions %}
+                        {% for session in today_sessions %}
+                            {{ render_session(session, is_today=True, is_past=False) }}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-12 border-2 border-dashed border-stone-100 rounded-3xl bg-stone-50/50 empty-state-msg pointer-events-none">
+                            <p class="text-sm font-medium text-stone-400">Nothing queued for today. Enjoy the rest.</p>
+                        </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">Upcoming Pipeline</h2>
+                {% if upcoming_grouped %}
+                    <div class="space-y-8">
+                        {% for target_date, sessions in upcoming_grouped.items() %}
+                            <div>
+                                <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                    {{ target_date.strftime('%A, %b %d') }}
+                                </h3>
+                                <div class="space-y-3 sortable-list min-h-[50px]" data-date="{{ target_date.strftime('%Y-%m-%d') }}">
+                                    {% for session in sessions %}
+                                        {{ render_session(session, is_today=False, is_past=False) }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                    <div class="text-center py-12 border-2 border-dashed border-stone-100 rounded-3xl bg-stone-50/50 empty-state-msg pointer-events-none">
-                        <p class="text-sm font-medium text-stone-400">Nothing queued for today. Enjoy the rest.</p>
+                    <div class="text-center py-8">
+                        <p class="text-sm font-medium text-stone-400">Your future pipeline is clear.</p>
                     </div>
                 {% endif %}
-            </section>
-        </div>
+            </div>
 
-        <div class="mb-12">
-            <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">Upcoming Pipeline</h2>
-            {% if upcoming_grouped %}
-                <div class="space-y-8">
-                    {% for target_date, sessions in upcoming_grouped.items() %}
-                        <div>
-                            <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
-                                {{ target_date.strftime('%A, %b %d') }}
-                            </h3>
-                            <div class="space-y-3 sortable-list min-h-[50px]" data-date="{{ target_date.strftime('%Y-%m-%d') }}">
+            {% if past_grouped %}
+            <details class="group border border-stone-100 rounded-3xl bg-stone-50/30">
+                <summary class="text-sm font-bold text-stone-500 p-6 flex justify-between items-center cursor-pointer list-none hover:text-stone-900 transition-colors">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+                        View Recent Archive (Last 7 Days)
+                    </span>
+                    <svg class="w-4 h-4 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                
+                <div class="px-6 pb-6 space-y-8">
+                    {% for target_date, sessions in past_grouped.items() %}
+                        <div class="opacity-75 hover:opacity-100 transition-opacity">
+                            <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{{ target_date.strftime('%b %d, %Y') }}</h3>
+                            <div class="space-y-3">
                                 {% for session in sessions %}
-                                    {{ render_session(session, is_today=False, is_past=False) }}
+                                    {{ render_session(session, is_today=False, is_past=True) }}
                                 {% endfor %}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="text-center py-8">
-                    <p class="text-sm font-medium text-stone-400">Your future pipeline is clear.</p>
-                </div>
+            </details>
             {% endif %}
-        </div>
-
-        {% if past_grouped %}
-        <details class="group border border-stone-100 rounded-3xl bg-stone-50/30">
-            <summary class="text-sm font-bold text-stone-500 p-6 flex justify-between items-center cursor-pointer list-none hover:text-stone-900 transition-colors">
-                <span class="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
-                    View Recent Archive (Last 7 Days)
-                </span>
-                <svg class="w-4 h-4 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
-            </summary>
+        </main>
+        
+        <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
+            <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-8">Performance Context</h3>
             
-            <div class="px-6 pb-6 space-y-8">
-                {% for target_date, sessions in past_grouped.items() %}
-                    <div class="opacity-75 hover:opacity-100 transition-opacity">
-                        <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{{ target_date.strftime('%b %d, %Y') }}</h3>
-                        <div class="space-y-3">
-                            {% for session in sessions %}
-                                {{ render_session(session, is_today=False, is_past=True) }}
-                            {% endfor %}
-                        </div>
+            <div class="space-y-6">
+                <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     </div>
-                {% endfor %}
+                    <div>
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Lifetime Focus</p>
+                        <p class="text-2xl font-black text-stone-900">{{ stats.total_hours }} <span class="text-sm text-stone-400 font-bold">hrs</span></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest" title="Sessions finished in the last 7 days">7-Day Score</p>
+                        <p class="text-2xl font-black text-stone-900">{{ stats.week_completed }} <span class="text-sm text-stone-400 font-bold">/ {{ stats.week_scheduled }}</span></p>
+                    </div>
+                </div>
             </div>
-        </details>
-        {% endif %}
-
-    </main>
+        </aside>
+    </div>
 
     <div id="slide-over-session" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
         <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-session').classList.add('translate-x-full')"></div>
