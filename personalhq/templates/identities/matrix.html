@@ -4,7 +4,7 @@
 {% block title %}Identity Matrix - Life HQ{% endblock %}
 
 {% block app_content %}
-    <main class="flex-1 max-w-6xl mx-auto px-12 py-12">
+    <main class="flex-1 w-full px-12 py-12 max-w-[1400px] mx-auto">
         
         <header class="flex justify-between items-end mb-12 border-b border-stone-100 pb-6">
             <div>
@@ -16,7 +16,7 @@
             </button>
         </header>
 
-        <section class="grid grid-cols-2 gap-8">
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {% if identity_stats %}
                 {% for stat in identity_stats %}
                 <div class="bg-{{ stat.model.color }}-50 border border-{{ stat.model.color }}-200 rounded-[2rem] p-8 shadow-xl shadow-{{ stat.model.color }}-200/40 flex flex-col relative overflow-hidden group hover:bg-{{ stat.model.color }}-100 hover:border-{{ stat.model.color }}-300 hover:shadow-2xl hover:shadow-{{ stat.model.color }}-300/40 transition-all duration-300">
