@@ -37,7 +37,7 @@ def edit_dump(dump_id):
     """Updates the raw text of a thought in the Inbox."""
     dump = db.session.get(BrainDump, dump_id)
     if not dump or dump.user_id != current_user.id:
-         return redirect(url_for('braindumps_view.index'))
+        return redirect(url_for('braindumps_view.index'))
 
     content = request.form.get('content')
     if content:

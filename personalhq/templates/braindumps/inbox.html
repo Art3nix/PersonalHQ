@@ -18,6 +18,22 @@
                 </div>
             </header>
 
+            <form id="quick-capture-form" class="mb-8 flex items-center gap-4" onsubmit="submitNewThought(event)">
+                <input type="hidden" id="capture-csrf" value="{{ csrf_token() }}">
+                
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-stone-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <input type="text" id="new-thought-input" required autocomplete="off" class="w-full bg-white border border-stone-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-medium shadow-sm transition-all placeholder:text-stone-300" placeholder="Capture a new thought... (Press Enter)">
+                </div>
+                
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-3.5 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 flex items-center gap-2 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add
+                </button>
+            </form>
+
             <section class="space-y-4">
                 {% if braindumps %}
                     {% for dump in braindumps %}
@@ -96,7 +112,7 @@
             <div class="bg-indigo-600 border border-indigo-700 rounded-2xl p-6 shadow-md text-center text-indigo-50 relative overflow-hidden">
                 <div class="absolute -right-6 -top-6 w-24 h-24 bg-white rounded-full opacity-10 blur-xl pointer-events-none"></div>
                 <p class="text-xs font-bold uppercase tracking-widest mb-2 opacity-80">Quick Capture</p>
-                <p class="text-sm font-medium">Press <kbd class="bg-indigo-800 text-white border border-indigo-500 px-2 py-0.5 rounded shadow-sm font-mono mx-1">/</kbd> anywhere on the dashboard to instantly drop a thought into this inbox.</p>
+                <p class="text-sm font-medium leading-relaxed">Use the bar on this page, or press <kbd class="bg-indigo-800 text-white border border-indigo-500 px-2 py-0.5 rounded shadow-sm font-mono mx-1">/</kbd> anywhere on the dashboard to instantly drop a thought into this inbox.</p>
             </div>
         </aside>
     </div>
@@ -157,7 +173,7 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <input type="hidden" name="convert_type" id="convert-type-input" value="focus">
                     
-                    <div>
+                    <div id="title-field-group">
                         <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Title</label>
                         <input type="text" name="name" id="modal-title-input" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
                     </div>
@@ -248,24 +264,42 @@
         }
 
         function openConvertModal(dumpId, content) {
-            // Set the URL so the form knows which dump to delete
+            // Set the URL so the form knows which dump to convert/delete
             document.getElementById('convert-form').action = `/actions/braindumps/${dumpId}/convert`;
             
-            // Pre-fill inputs across all possible tabs
+            // Pre-fill the relevant inputs
             document.getElementById('modal-title-input').value = content;
-            document.getElementById('exp-details-input').value = content;
             document.getElementById('journal-content-input').value = content;
+
+            // Clear the Experience Details (don't redundantly paste the title here)
+            document.getElementById('exp-details-input').value = ""; 
             
             // Default date to today for Focus Sessions
             document.getElementById('focus-date').valueAsDate = new Date();
 
-            // Slide it open!
+            // Always reset the modal to the 'focus' tab when opened
+            switchTab('focus');
+
+            // Slide it open
             document.getElementById('convert-modal').classList.remove('translate-x-full');
         }
 
         function switchTab(type) {
             document.getElementById('convert-type-input').value = type;
             
+            // 1. Handle the Title Field Visibility
+            const titleGroup = document.getElementById('title-field-group');
+            const titleInput = document.getElementById('modal-title-input');
+            
+            if (type === 'journal') {
+                titleGroup.classList.add('hidden');
+                titleInput.removeAttribute('required'); // Prevent HTML5 validation errors
+            } else {
+                titleGroup.classList.remove('hidden');
+                titleInput.setAttribute('required', 'required');
+            }
+            
+            // 2. Handle the Tab Panels
             const tabs = ['focus', 'experience', 'journal'];
             
             tabs.forEach(t => {
@@ -282,6 +316,61 @@
                     tabBtn.classList.add('border-transparent', 'text-stone-400');
                 }
             });
+        }
+
+        async function submitNewThought(event) {
+            event.preventDefault(); // Stop normal form submission
+            
+            const input = document.getElementById('new-thought-input');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const content = input.value.trim();
+            const csrfToken = document.getElementById('capture-csrf').value;
+            
+            if (!content) return;
+
+            // Give the user instant visual feedback
+            const originalBtnHTML = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="opacity-70">Saving...</span>';
+            submitBtn.disabled = true;
+
+            try {
+                // Send the thought to the Python backend
+                const response = await fetch('/actions/braindumps/catch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (response.ok) {
+                    // Fetch fresh HTML quietly in the background
+                    const pageRes = await fetch(window.location.href);
+                    const html = await pageRes.text();
+                    const virtualDoc = new DOMParser().parseFromString(html, 'text/html');
+                    
+                    // 1. Swap the list of thoughts (this also handles replacing the empty state!)
+                    const currentList = document.querySelector('section.space-y-4');
+                    const newList = virtualDoc.querySelector('section.space-y-4');
+                    if (currentList && newList) currentList.innerHTML = newList.innerHTML;
+                    
+                    // 2. Swap the header to update the badge count
+                    const currentHeader = document.querySelector('header');
+                    const newHeader = virtualDoc.querySelector('header');
+                    if (currentHeader && newHeader) currentHeader.innerHTML = newHeader.innerHTML;
+
+                    // Clear the input so you can keep typing
+                    input.value = '';
+                }
+            } catch (error) { 
+                console.error('Error creating thought:', error); 
+            } finally {
+                // Reset the button state
+                submitBtn.innerHTML = originalBtnHTML;
+                submitBtn.disabled = false;
+                input.focus(); // Keep the cursor in the box for rapid-fire logging
+            }
         }
     </script>
 {% endblock %}
