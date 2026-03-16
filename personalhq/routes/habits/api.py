@@ -7,7 +7,7 @@ from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.extensions import db
 from personalhq.services.time_service import get_local_today
-from personalhq.services.habit_service import get_habit_status_and_sync
+from personalhq.services.habit_service import get_habit_status_and_sync, recalculate_habit_streaks
 
 # We use the /actions/ namespace for the interactive JSON routes
 habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
@@ -15,73 +15,38 @@ habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
 @habits_api_bp.route('/<int:habit_id>/toggle', methods=['POST'])
 @login_required
 def toggle_habit(habit_id):
-    """Toggles a habit's completion status for today and logs the event."""
     habit = db.session.get(Habit, habit_id)
     if not habit or habit.user_id != current_user.id:
-        return {"status": "error", "message": "Habit not found"}, 404
+        return {"status": "error"}, 404
 
-    today = get_local_today()
-
-    # Check if a log already exists for today
-    existing_log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
-
-    if existing_log:
-        # UN-CHECKING THE HABIT
-        db.session.delete(existing_log)
-
-        # Revert the streak and last_completed date
-        habit.streak = max(0, (habit.streak or 0) - 1)
-
-        # Find the previous log to reset last_completed
-        previous_log = HabitLog.query.filter(
-            HabitLog.habit_id == habit.id,
-            HabitLog.completed_date < today
-        ).order_by(HabitLog.completed_date.desc()).first()
-
-        if previous_log:
-            # Revert last_completed to the previous log's date
-            habit.last_completed = datetime.combine(previous_log.completed_date, datetime.min.time())
-        else:
-            habit.last_completed = None
-
-        is_done = False
+    # Get target date from JSON (allows historical logging)
+    data = request.get_json() or {}
+    target_date_str = data.get('date')
+    if target_date_str:
+        target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
     else:
-        # CHECKING THE HABIT
-        new_log = HabitLog(habit_id=habit.id, completed_date=today)
-        db.session.add(new_log)
+        target_date = get_local_today()
 
-        # STREAK LOGIC
-        if habit.frequency == HabitFrequency.DAILY:
-            # If completed exactly yesterday, increment. Otherwise, reset to 1.
-            if habit.last_completed and (today - habit.last_completed.date()).days == 1:
-                habit.streak = (habit.streak or 0) + 1
-            else:
-                habit.streak = 1
-        else:
-            # WEEKLY LOGIC
-            if habit.last_completed:
-                last_week = habit.last_completed.date().isocalendar()[:2]
-                this_week = today.isocalendar()[:2]
-                
-                if last_week == this_week:
-                    # They checked a weekly habit twice in the same week. Maintain streak.
-                    pass 
-                elif (today - habit.last_completed.date()).days <= 14:
-                    # Completed last week, so increment streak.
-                    habit.streak = (habit.streak or 0) + 1
-                else:
-                    # Streak broken
-                    habit.streak = 1
-            else:
-                habit.streak = 1
+    # 1. Add or Remove the log for that specific day
+    existing_log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=target_date).first()
+    if existing_log:
+        db.session.delete(existing_log)
+    else:
+        db.session.add(HabitLog(habit_id=habit.id, completed_date=target_date))
 
-        habit.last_completed = today
-        is_done = True
+    db.session.commit()
+
+    recalculate_habit_streaks(habit)
 
     status_str = get_habit_status_and_sync(habit)
     db.session.commit()
 
-    return {"status": "success", "streak": habit.streak, "habit_status": status_str}
+    return {
+        "status": "success", 
+        "streak": habit.streak, 
+        "best": habit.best_streak, 
+        "habit_status": status_str
+    }
 
 @habits_api_bp.route('/create', methods=['POST'])
 @login_required
@@ -90,6 +55,8 @@ def create_habit():
     name = request.form.get('name')
     icon = request.form.get('icon')
     frequency_str = request.form.get('frequency')
+    description = request.form.get('description')
+    trigger = request.form.get('trigger')
 
     # Validation check
     if not name or not frequency_str or not icon:
@@ -105,7 +72,9 @@ def create_habit():
         icon=icon.strip(),
         frequency=frequency,
         identity_id=identity_id,
-        streak=0
+        streak=0,
+        description=description.strip() if description else None,
+        trigger=trigger.strip() if trigger else None
     )
 
     db.session.add(new_habit)
@@ -126,13 +95,17 @@ def edit_habit(habit_id):
     icon = request.form.get('icon')
     frequency_str = request.form.get('frequency')
     identity_id = request.form.get('identity_id', type=int)
+    description = request.form.get('description')
+    trigger = request.form.get('trigger')
 
     if name and frequency_str and icon:
         habit.name = name.strip()
         habit.icon = icon.strip()
         habit.frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
         # If identity_id is 0 or empty, it sets it to None (Unassigned)
-        habit.identity_id = identity_id or None
+        habit.identity_id = identity_id or None,
+        description=description.strip() if description else None,
+        trigger=trigger.strip() if trigger else None
         
         db.session.commit()
 

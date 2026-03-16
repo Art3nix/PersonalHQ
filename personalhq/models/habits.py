@@ -29,7 +29,10 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
         default=HabitFrequency.DAILY,
         nullable=False
     )
-    streak: Mapped[int | None]
+    streak: Mapped[int] = mapped_column(default=0, server_default="0")
+    best_streak: Mapped[int] = mapped_column(default=0, server_default="0")
+    description: Mapped[str | None]
+    trigger: Mapped[str | None]
     category: Mapped[str | None]
     last_completed: Mapped[datetime | None]
 
