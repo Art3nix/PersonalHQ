@@ -209,3 +209,20 @@ def delete_session(session_id):
         db.session.commit()
         
     return redirect(url_for('focus_view.planner'))
+
+@focus_api_bp.route('/<int:session_id>/reset', methods=['POST'])
+@login_required
+def reset_session(session_id):
+    """Wipes the progress of a session but keeps it in the planner."""
+    session = db.session.get(FocusSession, session_id)
+    if not session or session.user_id != current_user.id:
+        return jsonify({"status": "error"}), 404
+
+    session.status = SessionStatus.NOT_STARTED
+    session.start_time = None
+    session.end_time = None
+    session.total_paused_seconds = 0
+    session.last_paused_tick = None
+    
+    db.session.commit()
+    return jsonify({"status": "success"})

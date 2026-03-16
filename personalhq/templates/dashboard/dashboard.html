@@ -128,6 +128,10 @@
                     
                     {% if queued_sessions %}
                     <div id="deep-work-card" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-2xl shadow-stone-200/40 transition-all duration-500 relative transform origin-top">
+                        
+                        <button id="theater-toggle-btn" onclick="toggleTheaterMode()" class="absolute top-8 right-8 text-stone-300 hover:text-indigo-500 transition-colors hidden z-20" title="Toggle Focus Backdrop">
+                            </button>
+
                         <div class="flex flex-col md:flex-row justify-between items-center gap-10">
                             <div class="flex-1">
                                 <div class="mb-8">
@@ -140,7 +144,7 @@
                                     <button onclick="handlePauseResume()" id="main-timer-btn" class="w-2/3 bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200">
                                         <span id="pause-btn-text"></span>
                                     </button>
-                                    <button id="end-session-btn" style="opacity: 0; pointer-events: none;" onclick="endSession()" class="w-1/3 py-4 border border-stone-200 text-stone-400 rounded-2xl font-bold text-[10px] uppercase hover:bg-stone-50 transition-all">
+                                    <button id="end-session-btn" style="opacity: 0; pointer-events: none;" onclick="requestEndSession()" class="w-1/3 py-4 border border-stone-200 text-stone-400 rounded-2xl font-bold text-[10px] uppercase hover:bg-stone-50 transition-all">
                                         End Session
                                     </button>
                                 </div>
@@ -328,6 +332,67 @@
             </aside>
         </div>
     </div>
+    <div id="flow-toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-stone-900 text-white px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-500 transform translate-y-20 opacity-0 z-[150] pointer-events-none">
+        <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+        <span class="text-sm font-bold">Target reached. Tracking flow state...</span>
+    </div>
+
+    <div id="overtime-modal" class="hidden fixed inset-0 z-[120] items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeOvertimeModal()"></div>
+        <div class="relative bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-stone-100 transform scale-95 transition-all duration-200" id="overtime-modal-box">
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 border border-emerald-100 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"></path><path d="m17 7-5-5-5 5"></path><path d="m17 17-5 5-5-5"></path></svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-stone-900 mb-2">Deep Work Complete</h3>
+            <p class="text-sm font-medium text-stone-500 mb-8">You entered a flow state and worked past your target. How would you like to log this session?</p>
+            
+            <div class="space-y-3">
+                <button onclick="commitEndSession('TOTAL')" class="w-full py-4 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-200 flex justify-between items-center px-6">
+                    <span>Log Total Time</span>
+                    <span id="modal-total-time" class="bg-emerald-800/50 px-2 py-0.5 rounded text-xs mono"></span>
+                </button>
+                <button onclick="commitEndSession('TARGET')" class="w-full py-4 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-all border border-stone-200 flex justify-between items-center px-6">
+                    <span>Log Target Only</span>
+                    <span id="modal-target-time" class="bg-stone-200 px-2 py-0.5 rounded text-xs text-stone-500 mono"></span>
+                </button>
+                <button onclick="commitEndSession('DISCARD')" class="w-full py-4 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all border border-rose-200 flex items-center justify-center gap-2 px-6">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Discard Session</span>
+                </button>
+                <button onclick="closeOvertimeModal()" class="w-full py-3 text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase tracking-widest mt-2">
+                    Cancel & Keep Working
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="early-exit-modal" class="hidden fixed inset-0 z-[120] items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeEarlyExitModal()"></div>
+        <div class="relative bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl border border-stone-100 transform scale-95 transition-all duration-200" id="early-exit-modal-box">
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 border border-amber-100 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-stone-900 mb-2">End Session Early</h3>
+            <p class="text-sm font-medium text-stone-500 mb-8">You are stopping before your target duration. How do you want to handle this session?</p>
+            
+            <div class="space-y-3">
+                <button onclick="commitEndSession('TOTAL')" class="w-full py-4 bg-amber-500 text-white font-bold rounded-xl hover:bg-amber-600 transition-all shadow-md shadow-amber-200 flex justify-between items-center px-6">
+                    <span>Log Exact Time</span>
+                    <span id="early-modal-elapsed" class="bg-amber-700/50 px-2 py-0.5 rounded text-xs text-white mono"></span>
+                </button>
+                <button onclick="commitEndSession('TARGET')" class="w-full py-4 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-all border border-stone-200 flex justify-between items-center px-6">
+                    <span>Log Full Target</span>
+                    <span id="early-modal-target" class="bg-stone-200 px-2 py-0.5 rounded text-xs text-stone-500 mono"></span>
+                </button>
+                <button onclick="commitEndSession('DISCARD')" class="w-full py-4 bg-rose-50 text-rose-600 font-bold rounded-xl hover:bg-rose-100 transition-all border border-rose-200 flex items-center justify-center gap-2 px-6">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Discard Session</span>
+                </button>
+                <button onclick="closeEarlyExitModal()" class="w-full py-3 text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase tracking-widest mt-2">
+                    Cancel & Keep Working
+                </button>
+            </div>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -470,10 +535,11 @@
             {
                 id: {{ session.id }},
                 name: "{{ session.name }}",
+                date: "{{ session.target_date.strftime('%Y-%m-%d') }}",
                 durationSeconds: {{ session.target_duration_minutes * 60 }},
                 status: "{{ session.status.value }}",
-                // Pass the identity name safely
-                identity: "{% if session.identity %}{{ session.identity.name }}{% endif %}" 
+                identity: "{% if session.identity %}{{ session.identity.name }}{% endif %}",
+                identity_id: "{% if session.identity_id %}{{ session.identity_id }}{% endif %}"
             },
             {% endfor %}
         ];
@@ -543,73 +609,14 @@
             }
         }
 
-        async function endSession() {
-            const current = sessionQueue[currentQueueIndex];
-            const data = await apiCall(`/actions/focus/${current.id}/end`);
-            if (data.status === 'success') {
-                location.reload(); // Reload the whole page to clear the finished task from the queue
-            }
-        }
-
-        function loadSessionUI() {
-            if (sessionQueue.length === 0) {
-                document.getElementById('session-title').textContent = "No Focus Planned Today";
-                document.getElementById('timer-controls').style.display = 'none';
-                return;
-            }
-
-            const current = sessionQueue[currentQueueIndex];
-            
-            document.getElementById('session-title').textContent = current.name;
-            document.getElementById('current-session-id').value = current.id;
-            document.getElementById('session-identity').textContent = current.identity ? current.identity : "Unassigned Focus";
-            
-            // Set the static total time label underneath the clock
-            const totalMins = Math.round(current.durationSeconds / 60);
-            document.getElementById('timer-total-label').textContent = `${totalMins} MIN SESSION`;
-            
-            const card = document.getElementById('deep-work-card');
-            const overlay = document.getElementById('focus-overlay');
-            const mainBtn = document.getElementById('main-timer-btn');
-            const endBtn = document.getElementById('end-session-btn');
-            const btnText = document.getElementById('pause-btn-text');
-            const changeTaskBtn = document.getElementById('change-task-btn');
-            
-            if (current.status === 'IN_PROGRESS') {
-                btnText.textContent = 'Pause Session';
-                mainBtn.className = "flex-grow bg-amber-500 text-white py-4 rounded-2xl font-bold text-base hover:bg-amber-600 transition-all shadow-xl shadow-amber-200/50";
-                
-                // Hide End Button & Change Task Button
-                endBtn.style.opacity = '0';
-                endBtn.style.pointerEvents = 'none';
-                if (changeTaskBtn) { changeTaskBtn.style.opacity = '0'; changeTaskBtn.style.pointerEvents = 'none'; }
-
-                // The Z-[110] punches the card above the dark overlay
-                card.classList.remove('border-stone-100');
-                card.classList.add('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
-                overlay.classList.remove('opacity-0', 'pointer-events-none');
-            } else {
-                btnText.textContent = (current.status === 'NOT_STARTED') ? 'Start Session' : 'Resume Session';
-                mainBtn.className = "flex-grow bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200";
-                
-                // Show/Hide End Button based on PAUSED state
-                endBtn.style.opacity = (current.status === 'PAUSED') ? '1' : '0';
-                endBtn.style.pointerEvents = (current.status === 'PAUSED') ? 'auto' : 'none';
-                
-                // Unlock Change Task Button
-                if (changeTaskBtn) { changeTaskBtn.style.opacity = '1'; changeTaskBtn.style.pointerEvents = 'auto'; }
-
-                // Disable Theater Mode
-                card.classList.add('border-stone-100');
-                card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
-                overlay.classList.add('opacity-0', 'pointer-events-none');
-            }
-
-            renderDropdownList();
-            syncTimer(); 
-        }
-
         let syncTimeout = null;
+
+        function showFlowToast() {
+            const toast = document.getElementById('flow-toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 5000);
+        }
+
         async function syncTimer() {
             if (sessionQueue.length === 0) return;
             const current = sessionQueue[currentQueueIndex];
@@ -618,18 +625,30 @@
             
             if (data.status === 'success') {
                 const elapsed = data.data.elapsed_seconds || 0;
+                current.lastElapsed = elapsed; // Save this for the End Button logic!
+                
                 const remainingSeconds = current.durationSeconds - elapsed;
 
-                // Update Sleek Progress Text
-                document.getElementById('timer-elapsed').textContent = Math.floor(elapsed / 60);
-
                 if (remainingSeconds <= 0) {
-                    document.getElementById('timer-display').textContent = formatTimer(0);
-                    if (current.status === 'IN_PROGRESS') endSession();
-                    return; 
+                    // FLOW STATE OVERTIME LOGIC
+                    const overtimeSeconds = Math.abs(remainingSeconds);
+                    document.getElementById('timer-display').textContent = '+' + formatTimer(overtimeSeconds);
+                    
+                    const displayEl = document.getElementById('timer-display');
+                    if (!displayEl.classList.contains('text-emerald-500')) {
+                        displayEl.classList.remove('text-stone-900');
+                        displayEl.classList.add('text-emerald-500');
+                    }
+
+                    if (!current.notifiedFlow) {
+                        showFlowToast();
+                        current.notifiedFlow = true;
+                    }
+                } else {
+                    // NORMAL COUNTDOWN
+                    document.getElementById('timer-display').textContent = formatTimer(remainingSeconds);
                 }
                 
-                document.getElementById('timer-display').textContent = formatTimer(remainingSeconds);
                 current.status = data.data.status;
                 
                 if (current.status === 'IN_PROGRESS') {
@@ -645,6 +664,219 @@
                     syncTimeout = setTimeout(syncTimer, 1000);
                 }
             }
+        }
+
+        function requestEndSession() {
+            const current = sessionQueue[currentQueueIndex];
+            const elapsedSeconds = current.lastElapsed || 0;
+            const targetSeconds = current.durationSeconds;
+
+            // Helper to create a user-friendly string like "01:20:05" or "45:02"
+            const getDisplayTime = (totalSecs) => {
+                const h = Math.floor(totalSecs / 3600);
+                const m = Math.floor((totalSecs % 3600) / 60);
+                const s = totalSecs % 60;
+                if (h > 0) return `${h}h ${m}m ${s}s`;
+                return `${m}m ${s}s`;
+            };
+
+            const elapsedStr = getDisplayTime(elapsedSeconds);
+            const targetStr = getDisplayTime(targetSeconds);
+
+            if (elapsedSeconds < targetSeconds) {
+                document.getElementById('early-modal-elapsed').innerText = elapsedStr;
+                document.getElementById('early-modal-target').innerText = targetStr;
+                
+                showModal('early-exit-modal', 'early-exit-modal-box');
+            } 
+            else if (elapsedSeconds > targetSeconds) {
+                document.getElementById('modal-total-time').innerText = elapsedStr;
+                document.getElementById('modal-target-time').innerText = targetStr;
+                
+                showModal('overtime-modal', 'overtime-modal-box');
+            } 
+            else {
+                commitEndSession('TARGET');
+            }
+        }
+
+        // Helper to DRY up the modal opening logic
+        function showModal(modalId, boxId) {
+            const modal = document.getElementById(modalId);
+            const box = document.getElementById(boxId);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            }, 10);
+            lucide.createIcons(); // Refresh icons if any were added dynamically
+        }
+
+        function closeOvertimeModal() {
+            const modal = document.getElementById('overtime-modal');
+            const box = document.getElementById('overtime-modal-box');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        function closeEarlyExitModal() {
+            const modal = document.getElementById('early-exit-modal');
+            const box = document.getElementById('early-exit-modal-box');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 200);
+        }
+
+        async function commitEndSession(choice) {
+            const current = sessionQueue[currentQueueIndex];
+            
+            // UX Feedback: Disable ALL buttons across both modals
+            const buttons = document.querySelectorAll('.fixed button');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'cursor-not-allowed');
+            });
+
+            // DISCARD PROGRESS (Reset the timer, keep the task)
+            if (choice === 'DISCARD') {
+                await apiCall(`/actions/focus/${current.id}/reset`);
+                location.reload();
+                return; 
+            }
+
+            // COMPLETION ROUTE (Requires pause first)
+            if (current.status === 'IN_PROGRESS') {
+                await apiCall(`/actions/focus/${current.id}/pause`);
+                current.status = 'PAUSED';
+            }
+            
+            // If they chose to log exactly what they did (Early or Overtime)
+            if (choice === 'TOTAL') {
+                const elapsedMins = Math.floor((current.lastElapsed || 0) / 60);
+                
+                const formData = new URLSearchParams();
+                formData.append('name', current.name);
+                formData.append('target_date', current.date);
+                formData.append('target_duration_minutes', elapsedMins);
+                if (current.identity_id) formData.append('identity_id', current.identity_id);
+                
+                await fetch(`/actions/focus/${current.id}/edit`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData
+                });
+            }
+            
+            // Finalize the session
+            const data = await apiCall(`/actions/focus/${current.id}/end`);
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert("Something went wrong!");
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                });
+            }
+        }
+
+        let isTheaterMode = true; // Defaults to deep focus on start
+
+        function toggleTheaterMode() {
+            isTheaterMode = !isTheaterMode;
+            loadSessionUI(); // Re-render the visuals without interrupting the clock
+        }
+
+        function loadSessionUI() {
+            if (sessionQueue.length === 0) {
+                document.getElementById('session-title').textContent = "No Focus Planned Today";
+                document.getElementById('timer-controls').style.display = 'none';
+                return;
+            }
+
+            const current = sessionQueue[currentQueueIndex];
+            
+            document.getElementById('session-title').textContent = current.name;
+            document.getElementById('current-session-id').value = current.id;
+            document.getElementById('session-identity').textContent = current.identity ? current.identity : "Unassigned Focus";
+            
+            // Reset text colors on load
+            document.getElementById('timer-display').classList.remove('text-emerald-500');
+            document.getElementById('timer-display').classList.add('text-stone-900');
+            
+            const totalMins = Math.round(current.durationSeconds / 60);
+            document.getElementById('timer-total-label').textContent = `${totalMins} MIN SESSION`;
+            
+            const card = document.getElementById('deep-work-card');
+            const overlay = document.getElementById('focus-overlay');
+            const mainBtn = document.getElementById('main-timer-btn');
+            const endBtn = document.getElementById('end-session-btn');
+            const btnText = document.getElementById('pause-btn-text');
+            const changeTaskBtn = document.getElementById('change-task-btn');
+            const theaterBtn = document.getElementById('theater-toggle-btn');
+            
+            if (current.status === 'IN_PROGRESS') {
+                btnText.textContent = 'Pause Session';
+                mainBtn.className = "w-2/3 bg-amber-500 text-white py-4 rounded-2xl font-bold text-base hover:bg-amber-600 transition-all shadow-xl shadow-amber-200/50";
+                
+                // Show End Button while running
+                endBtn.style.opacity = '1';
+                endBtn.style.pointerEvents = 'auto';
+                
+                // Hide Change Task Button
+                if (changeTaskBtn) { changeTaskBtn.style.opacity = '0'; changeTaskBtn.style.pointerEvents = 'none'; }
+
+                // Manage Theater Mode Toggle Button
+                if (theaterBtn) {
+                    theaterBtn.classList.remove('hidden');
+                    theaterBtn.innerHTML = isTheaterMode 
+                        // Minimize Icon
+                        ? '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>'
+                        // Maximize Icon
+                        : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>';
+                }
+
+                if (isTheaterMode) {
+                    // Dim Background (Full Focus)
+                    card.classList.remove('border-stone-100');
+                    card.classList.add('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
+                    overlay.classList.remove('opacity-0', 'pointer-events-none');
+                } else {
+                    // Peek Mode (Normal Dashboard Layout)
+                    card.classList.add('border-stone-100');
+                    card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
+                    overlay.classList.add('opacity-0', 'pointer-events-none');
+                }
+
+            } else {
+                btnText.textContent = (current.status === 'NOT_STARTED') ? 'Start Session' : 'Resume Session';
+                mainBtn.className = "w-2/3 bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-base hover:bg-stone-800 transition-all shadow-xl shadow-stone-200";
+                
+                // Reset Theater Mode so it pops back up automatically on the next start
+                isTheaterMode = true; 
+                if (theaterBtn) theaterBtn.classList.add('hidden');
+
+                endBtn.style.opacity = (current.status === 'PAUSED') ? '1' : '0';
+                endBtn.style.pointerEvents = (current.status === 'PAUSED') ? 'auto' : 'none';
+                
+                if (changeTaskBtn) { changeTaskBtn.style.opacity = '1'; changeTaskBtn.style.pointerEvents = 'auto'; }
+
+                // Always remove theater mode visuals when paused/stopped
+                card.classList.add('border-stone-100');
+                card.classList.remove('border-indigo-200', 'ring-4', 'ring-indigo-50', 'z-[110]', 'scale-[1.02]');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            }
+
+            renderDropdownList();
+            syncTimer(); 
         }
 
         document.addEventListener("DOMContentLoaded", loadSessionUI);
