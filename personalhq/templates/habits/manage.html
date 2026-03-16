@@ -36,115 +36,114 @@
                     {% for habit in habits %}
                         {% if habit.frequency.value == 'DAILY' %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
-                        
-                        <div class="bg-white border border-stone-100 rounded-3xl p-6 shadow-lg shadow-stone-200/20 group hover:border-{{ theme }}-200 hover:shadow-{{ theme }}-200/20 transition-all duration-300 relative overflow-hidden flex flex-col">
-                        
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center gap-3">
-                                    
-                                    <button type="button" onclick="toggleHabit({{ habit.id }})" 
-                                            class="relative w-10 h-10 rounded-xl flex items-center justify-center text-xl border transition-all hover:scale-105 active:scale-95 group focus:outline-none
-                                            {% if habit_sparklines[habit.id] | last %}
-                                                bg-{{ theme }}-50 border-{{ theme }}-200
-                                            {% else %}
-                                                bg-stone-50 border-stone-200 hover:border-{{ theme }}-300 hover:bg-{{ theme }}-50 hover:shadow-sm
-                                            {% endif %}"
-                                            title="{% if habit_sparklines[habit.id] | last %}Undo today's log{% else %}Log habit for today{% endif %}">
-                                        
-                                        <span class="transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-40 grayscale{% endif %}">
-                                            {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>{% else %}🎯{% endif %}
-                                        </span>
-    
-                                        {% if habit_sparklines[habit.id] | last %}
-                                        <div class="absolute -top-1.5 -right-1.5 bg-{{ theme }}-500 text-white rounded-full p-0.5 border-2 border-white shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </div>
-                                        {% endif %}
-                                    </button>
-                                    
+                        {% set current_count = current_counts[habit.id] %} 
+                        {% set is_completed = current_count >= habit.target_count %}
+
+                        <div class="border rounded-[2rem] p-6 shadow-sm transition-all duration-300 relative group flex flex-col
+                            {% if is_completed %}
+                                bg-{{ theme }}-600 border-{{ theme }}-700 text-white shadow-{{ theme }}-600/30
+                            {% else %}
+                                bg-white border-stone-100 hover:border-{{ theme }}-300 text-stone-900 hover:shadow-{{ theme }}-200/20
+                            {% endif %}">
+
+                            <div class="flex justify-between items-start mb-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border transition-colors
+                                        {% if is_completed %}bg-white/20 border-white/20 text-white{% else %}bg-stone-50 border-stone-200 text-stone-500{% endif %}">
+                                        {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-6 h-6"></i>{% else %}🎯{% endif %}
+                                    </div>
                                     <div>
-                                        <h3 class="text-lg font-bold transition-all {% if habit_sparklines[habit.id] | last %}line-through text-stone-400{% else %}text-stone-900{% endif %}">
-                                            {{ habit.name }}
-                                        </h3>
-                                        <div class="flex items-center gap-2 mt-1.5 transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-50{% endif %}">
-                                            <p class="text-[10px] font-bold uppercase tracking-widest text-{{ theme }}-500">
-                                                {{ habit.frequency.value }}
-                                            </p>
-                                            
-                                            {% if habit.identity %}
-                                            <span class="w-1 h-1 rounded-full bg-stone-300"></span>
-                                            <span class="text-[9px] font-bold uppercase tracking-widest bg-{{ theme }}-50 text-{{ theme }}-600 border border-{{ theme }}-200 px-2 py-0.5 rounded-md shadow-sm">
-                                                {{ habit.identity.name }}
-                                            </span>
-                                            {% endif %}
-                                        </div>
+                                        <h3 class="text-xl font-extrabold tracking-tight">{{ habit.name }}</h3>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border mt-1 inline-block
+                                            {% if is_completed %}bg-white/20 border-white/20 text-white{% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200{% endif %}">
+                                            {{ habit.identity.name if habit.identity else 'Unassigned' }}
+                                        </span>
                                     </div>
                                 </div>
-    
-                                <div class="flex items-center gap-1 -mr-2">
+                                
+                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" 
-                                            data-id="{{ habit.id }}"
-                                            data-name="{{ habit.name }}"
-                                            data-icon="{{ habit.icon }}"
-                                            data-freq="{{ habit.frequency.name }}"
-                                            data-identity="{{ habit.identity_id or '' }}"
-                                            onclick="openEditHabitModal(this.dataset)"
-                                            class="text-stone-300 hover:text-{{ theme }}-500 hover:bg-{{ theme }}-50 rounded-lg transition-colors p-2">
+                                            onclick="openEditHabitModal({id: {{ habit.id }}, name: '{{ habit.name }}', icon: '{{ habit.icon }}', freq: '{{ habit.frequency.name }}', identity: '{{ habit.identity_id or '' }}', description: '{{ habit.description | replace('\n', '\\n') or '' }}', trigger: '{{ habit.trigger | replace('\n', '\\n') or '' }}', target: {{ habit.target_count }}})"
+                                            class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20{% else %}text-stone-300 hover:bg-stone-100 hover:text-stone-600{% endif %}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                     </button>
                                     <form id="delete-habit-{{ habit.id }}" action="{{ url_for('habits_api.delete_habit', habit_id=habit.id) }}" method="POST" class="inline">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                         <button type="button" 
-                                                data-form-id="delete-habit-{{ habit.id }}" 
-                                                data-item-name="{{ habit.name }}"
-                                                onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                                class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2">
+                                                onclick="if(confirm('Delete {{ habit.name }}?')) document.getElementById('delete-habit-{{ habit.id }}').submit();" 
+                                                class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20 hover:text-rose-200{% else %}text-stone-300 hover:bg-rose-50 hover:text-rose-500{% endif %}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                         </button>
                                     </form>
                                 </div>
                             </div>
-    
-                            <div class="mt-2 mb-6">
-                                <div class="flex items-center gap-1.5">
-                                    {% for is_completed in habit_sparklines[habit.id] %}
-                                        <div class="w-3.5 h-3.5 rounded-full border transition-all duration-300
-                                            {% if is_completed %}
-                                                bg-{{ theme }}-500 border-{{ theme }}-600 shadow-sm shadow-{{ theme }}-200
-                                            {% else %}
-                                                bg-stone-50 border-stone-200
-                                            {% endif %}">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-1.5 ml-0.5">Last 7 Days</p>
+
+                            <div class="mb-6 space-y-1.5 {% if is_completed %}text-white/80{% else %}text-stone-500{% endif %}">
+                                {% if habit.trigger %}
+                                    <p class="text-xs font-bold flex gap-2"><span class="{% if is_completed %}text-white{% else %}text-indigo-400{% endif %} uppercase text-[10px]">When</span> {{ habit.trigger }}</p>
+                                {% endif %}
+                                {% if habit.description %}
+                                    <p class="text-[11px] font-medium italic">"{{ habit.description }}"</p>
+                                {% endif %}
                             </div>
-    
-                            <div class="flex items-end justify-between mt-auto">
+
+                            <div class="flex gap-5 mb-6">
                                 <div>
-                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Current Streak</p>
-                                    {% if habit.streak and habit.streak > 0 %}
-                                        <div class="flex items-baseline gap-1">
-                                            <span class="text-2xl font-black text-stone-900">{{ habit.streak }}</span>
-                                            <span class="text-xs font-bold text-stone-400">🔥</span>
-                                        </div>
-                                    {% else %}
-                                        <span class="inline-block mt-1 text-xs font-bold text-stone-400 bg-stone-50 border border-stone-200 border-dashed rounded-lg px-2 py-1">
-                                            None
-                                        </span>
-                                    {% endif %}
+                                    <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">Current Streak</p>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-2xl font-black">{{ habit.streak or 0 }}</span>
+                                        <span class="text-xs {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Last Logged</p>
-                                    <p class="text-sm font-bold text-stone-700">
-                                        {% if habit.last_completed %}
-                                            {{ habit.last_completed.strftime('%b %d, %Y') }}
-                                        {% else %}
-                                            Never
-                                        {% endif %}
-                                    </p>
+                                <div class="border-l pl-5 {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">All-Time Best</p>
+                                    <span class="text-2xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
                                 </div>
                             </div>
+
+                            <div class="mt-auto pt-5 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
+                                
+                                {% if habit.target_count == 1 %}
+                                    <button onclick="toggleHabit({{ habit.id }})" 
+                                            class="w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2
+                                            {% if is_completed %} bg-white text-{{ theme }}-600 shadow-md hover:bg-stone-50 {% else %} bg-stone-50 text-stone-500 border border-stone-200 hover:border-{{ theme }}-400 hover:text-{{ theme }}-600 hover:bg-{{ theme }}-50 {% endif %}">
+                                        {% if is_completed %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            Completed {{ 'This Week' if habit.frequency.name == 'WEEKLY' else 'Today' }}
+                                        {% else %}
+                                            <div class="w-4 h-4 rounded-full border-2 border-current"></div>
+                                            Mark as Done
+                                        {% endif %}
+                                    </button>
+                                    
+                                {% else %}
+                                    <div class="flex items-center gap-3">
+                                        <button onclick="unlogHabitProgress({{ habit.id }})" 
+                                                {% if current_count == 0 %}disabled{% endif %}
+                                                class="w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center transition-all
+                                                {% if is_completed %} bg-white/20 text-white hover:bg-white/30 {% elif current_count == 0 %} opacity-30 cursor-not-allowed bg-stone-50 border border-stone-200 {% else %} bg-white border border-stone-200 text-stone-500 hover:border-rose-300 hover:text-rose-500 {% endif %}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                        
+                                        <div class="flex-1 text-center">
+                                            <span class="text-sm font-black {% if is_completed %}text-white{% else %}text-stone-900{% endif %}">{{ current_count }} / {{ habit.target_count }}</span>
+                                            <span class="block text-[9px] font-bold uppercase tracking-widest mt-0.5 {% if is_completed %}text-white/70{% else %}text-stone-400{% endif %}">
+                                                {{ 'This Week' if habit.frequency.name == 'WEEKLY' else 'Today' }}
+                                            </span>
+                                        </div>
+                                        
+                                        <button onclick="logHabitProgress({{ habit.id }})" 
+                                                class="w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center transition-all
+                                                {% if is_completed %} bg-white/20 text-white hover:bg-white/30 {% else %} bg-{{ theme }}-500 text-white hover:bg-{{ theme }}-600 shadow-md {% endif %}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-5 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
+                                View Consistency Calendar <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </a>
                         </div>
                         {% endif %}
                     {% endfor %}
@@ -165,115 +164,114 @@
                     {% for habit in habits %}
                         {% if habit.frequency.value == 'WEEKLY' %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
-                        
-                        <div class="bg-white border border-stone-100 rounded-3xl p-6 shadow-lg shadow-stone-200/20 group hover:border-{{ theme }}-200 hover:shadow-{{ theme }}-200/20 transition-all duration-300 relative overflow-hidden flex flex-col">
-                        
-                            <div class="flex justify-between items-start mb-4">
-                                <div class="flex items-center gap-3">
-                                    
-                                    <button type="button" onclick="toggleHabit({{ habit.id }})" 
-                                            class="relative w-10 h-10 rounded-xl flex items-center justify-center text-xl border transition-all hover:scale-105 active:scale-95 group focus:outline-none
-                                            {% if habit_sparklines[habit.id] | last %}
-                                                bg-{{ theme }}-50 border-{{ theme }}-200
-                                            {% else %}
-                                                bg-stone-50 border-stone-200 hover:border-{{ theme }}-300 hover:bg-{{ theme }}-50 hover:shadow-sm
-                                            {% endif %}"
-                                            title="{% if habit_sparklines[habit.id] | last %}Undo today's log{% else %}Log habit for today{% endif %}">
-                                        
-                                        <span class="transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-40 grayscale{% endif %}">
-                                            {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>{% else %}🎯{% endif %}
-                                        </span>
-    
-                                        {% if habit_sparklines[habit.id] | last %}
-                                        <div class="absolute -top-1.5 -right-1.5 bg-{{ theme }}-500 text-white rounded-full p-0.5 border-2 border-white shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </div>
-                                        {% endif %}
-                                    </button>
-                                    
+                        {% set current_count = current_counts[habit.id] %} 
+                        {% set is_completed = current_count >= habit.target_count %}
+
+                        <div class="border rounded-[2rem] p-6 shadow-sm transition-all duration-300 relative group flex flex-col
+                            {% if is_completed %}
+                                bg-{{ theme }}-600 border-{{ theme }}-700 text-white shadow-{{ theme }}-600/30
+                            {% else %}
+                                bg-white border-stone-100 hover:border-{{ theme }}-300 text-stone-900 hover:shadow-{{ theme }}-200/20
+                            {% endif %}">
+
+                            <div class="flex justify-between items-start mb-5">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border transition-colors
+                                        {% if is_completed %}bg-white/20 border-white/20 text-white{% else %}bg-stone-50 border-stone-200 text-stone-500{% endif %}">
+                                        {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-6 h-6"></i>{% else %}🎯{% endif %}
+                                    </div>
                                     <div>
-                                        <h3 class="text-lg font-bold transition-all {% if habit_sparklines[habit.id] | last %}line-through text-stone-400{% else %}text-stone-900{% endif %}">
-                                            {{ habit.name }}
-                                        </h3>
-                                        <div class="flex items-center gap-2 mt-1.5 transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-50{% endif %}">
-                                            <p class="text-[10px] font-bold uppercase tracking-widest text-{{ theme }}-500">
-                                                {{ habit.frequency.value }}
-                                            </p>
-                                            
-                                            {% if habit.identity %}
-                                            <span class="w-1 h-1 rounded-full bg-stone-300"></span>
-                                            <span class="text-[9px] font-bold uppercase tracking-widest bg-{{ theme }}-50 text-{{ theme }}-600 border border-{{ theme }}-200 px-2 py-0.5 rounded-md shadow-sm">
-                                                {{ habit.identity.name }}
-                                            </span>
-                                            {% endif %}
-                                        </div>
+                                        <h3 class="text-xl font-extrabold tracking-tight">{{ habit.name }}</h3>
+                                        <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border mt-1 inline-block
+                                            {% if is_completed %}bg-white/20 border-white/20 text-white{% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200{% endif %}">
+                                            {{ habit.identity.name if habit.identity else 'Unassigned' }}
+                                        </span>
                                     </div>
                                 </div>
-    
-                                <div class="flex items-center gap-1 -mr-2">
+                                
+                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button type="button" 
-                                            data-id="{{ habit.id }}"
-                                            data-name="{{ habit.name }}"
-                                            data-icon="{{ habit.icon }}"
-                                            data-freq="{{ habit.frequency.name }}"
-                                            data-identity="{{ habit.identity_id or '' }}"
-                                            onclick="openEditHabitModal(this.dataset)"
-                                            class="text-stone-300 hover:text-{{ theme }}-500 hover:bg-{{ theme }}-50 rounded-lg transition-colors p-2">
+                                            onclick="openEditHabitModal({id: {{ habit.id }}, name: '{{ habit.name }}', icon: '{{ habit.icon }}', freq: '{{ habit.frequency.name }}', identity: '{{ habit.identity_id or '' }}', description: '{{ habit.description | replace('\n', '\\n') or '' }}', trigger: '{{ habit.trigger | replace('\n', '\\n') or '' }}', target: {{ habit.target_count }}})"
+                                            class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20{% else %}text-stone-300 hover:bg-stone-100 hover:text-stone-600{% endif %}">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                                     </button>
                                     <form id="delete-habit-{{ habit.id }}" action="{{ url_for('habits_api.delete_habit', habit_id=habit.id) }}" method="POST" class="inline">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                         <button type="button" 
-                                                data-form-id="delete-habit-{{ habit.id }}" 
-                                                data-item-name="{{ habit.name }}"
-                                                onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                                class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2">
+                                                onclick="if(confirm('Delete {{ habit.name }}?')) document.getElementById('delete-habit-{{ habit.id }}').submit();" 
+                                                class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20 hover:text-rose-200{% else %}text-stone-300 hover:bg-rose-50 hover:text-rose-500{% endif %}">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                         </button>
                                     </form>
                                 </div>
                             </div>
-    
-                            <div class="mt-2 mb-6">
-                                <div class="flex items-center gap-1.5">
-                                    {% for is_completed in habit_sparklines[habit.id] %}
-                                        <div class="w-3.5 h-3.5 rounded-full border transition-all duration-300
-                                            {% if is_completed %}
-                                                bg-{{ theme }}-500 border-{{ theme }}-600 shadow-sm shadow-{{ theme }}-200
-                                            {% else %}
-                                                bg-stone-50 border-stone-200
-                                            {% endif %}">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest mt-1.5 ml-0.5">Last 7 Days</p>
+
+                            <div class="mb-6 space-y-1.5 {% if is_completed %}text-white/80{% else %}text-stone-500{% endif %}">
+                                {% if habit.trigger %}
+                                    <p class="text-xs font-bold flex gap-2"><span class="{% if is_completed %}text-white{% else %}text-indigo-400{% endif %} uppercase text-[10px]">When</span> {{ habit.trigger }}</p>
+                                {% endif %}
+                                {% if habit.description %}
+                                    <p class="text-[11px] font-medium italic">"{{ habit.description }}"</p>
+                                {% endif %}
                             </div>
-    
-                            <div class="flex items-end justify-between mt-auto">
+
+                            <div class="flex gap-5 mb-6">
                                 <div>
-                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Current Streak</p>
-                                    {% if habit.streak and habit.streak > 0 %}
-                                        <div class="flex items-baseline gap-1">
-                                            <span class="text-2xl font-black text-stone-900">{{ habit.streak }}</span>
-                                            <span class="text-xs font-bold text-stone-400">🔥</span>
-                                        </div>
-                                    {% else %}
-                                        <span class="inline-block mt-1 text-xs font-bold text-stone-400 bg-stone-50 border border-stone-200 border-dashed rounded-lg px-2 py-1">
-                                            None
-                                        </span>
-                                    {% endif %}
+                                    <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">Current Streak</p>
+                                    <div class="flex items-baseline gap-1">
+                                        <span class="text-2xl font-black">{{ habit.streak or 0 }}</span>
+                                        <span class="text-xs {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                    </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Last Logged</p>
-                                    <p class="text-sm font-bold text-stone-700">
-                                        {% if habit.last_completed %}
-                                            {{ habit.last_completed.strftime('%b %d, %Y') }}
-                                        {% else %}
-                                            Never
-                                        {% endif %}
-                                    </p>
+                                <div class="border-l pl-5 {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
+                                    <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">All-Time Best</p>
+                                    <span class="text-2xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
                                 </div>
                             </div>
+
+                            <div class="mt-auto pt-5 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
+                                
+                                {% if habit.target_count == 1 %}
+                                    <button onclick="toggleHabit({{ habit.id }})" 
+                                            class="w-full py-4 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2
+                                            {% if is_completed %} bg-white text-{{ theme }}-600 shadow-md hover:bg-stone-50 {% else %} bg-stone-50 text-stone-500 border border-stone-200 hover:border-{{ theme }}-400 hover:text-{{ theme }}-600 hover:bg-{{ theme }}-50 {% endif %}">
+                                        {% if is_completed %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            Completed {{ 'This Week' if habit.frequency.name == 'WEEKLY' else 'Today' }}
+                                        {% else %}
+                                            <div class="w-4 h-4 rounded-full border-2 border-current"></div>
+                                            Mark as Done
+                                        {% endif %}
+                                    </button>
+                                    
+                                {% else %}
+                                    <div class="flex items-center gap-3">
+                                        <button onclick="unlogHabitProgress({{ habit.id }})" 
+                                                {% if current_count == 0 %}disabled{% endif %}
+                                                class="w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center transition-all
+                                                {% if is_completed %} bg-white/20 text-white hover:bg-white/30 {% elif current_count == 0 %} opacity-30 cursor-not-allowed bg-stone-50 border border-stone-200 {% else %} bg-white border border-stone-200 text-stone-500 hover:border-rose-300 hover:text-rose-500 {% endif %}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                        
+                                        <div class="flex-1 text-center">
+                                            <span class="text-sm font-black {% if is_completed %}text-white{% else %}text-stone-900{% endif %}">{{ current_count }} / {{ habit.target_count }}</span>
+                                            <span class="block text-[9px] font-bold uppercase tracking-widest mt-0.5 {% if is_completed %}text-white/70{% else %}text-stone-400{% endif %}">
+                                                {{ 'This Week' if habit.frequency.name == 'WEEKLY' else 'Today' }}
+                                            </span>
+                                        </div>
+                                        
+                                        <button onclick="logHabitProgress({{ habit.id }})" 
+                                                class="w-12 h-12 flex-shrink-0 rounded-xl flex items-center justify-center transition-all
+                                                {% if is_completed %} bg-white/20 text-white hover:bg-white/30 {% else %} bg-{{ theme }}-500 text-white hover:bg-{{ theme }}-600 shadow-md {% endif %}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-5 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
+                                View Consistency Calendar <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                            </a>
                         </div>
                         {% endif %}
                     {% endfor %}
@@ -386,6 +384,19 @@
                         </label>
                     </div>
                 </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Count</label>
+                    <div class="flex items-center bg-stone-50 border border-stone-200 rounded-xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200 transition-all overflow-hidden">
+                        <input type="number" name="target_count" id="edit-target-count" value="1" min="1" max="99" required 
+                                class="w-full bg-transparent py-3 pl-4 pr-2 text-sm outline-none font-medium text-stone-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <div class="bg-transparent pr-4 whitespace-nowrap shrink-0 pointer-events-none">
+                            <span class="text-xs font-bold text-stone-400">times per cycle</span>
+                        </div>
+                        
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
                     <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
@@ -449,6 +460,18 @@
                             <input type="radio" name="frequency" value="WEEKLY" id="edit-freq-weekly" class="peer sr-only">
                             <div class="text-center py-3 border border-stone-200 rounded-xl text-sm font-bold text-stone-500 peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-colors">Weekly</div>
                         </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Count</label>
+                    <div class="flex items-center bg-stone-50 border border-stone-200 rounded-xl focus-within:bg-white focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200 transition-all overflow-hidden">
+                        <input type="number" name="target_count" id="edit-target-count" value="1" min="1" max="99" required 
+                                class="w-full bg-transparent py-3 pl-4 pr-2 text-sm outline-none font-medium text-stone-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <div class="bg-transparent pr-4 whitespace-nowrap shrink-0 pointer-events-none">
+                            <span class="text-xs font-bold text-stone-400">times per cycle</span>
+                        </div>
+                        
                     </div>
                 </div>
 
@@ -566,43 +589,64 @@
         // Run it immediately on page load
         initCharts();
 
+        // Reusable function to silently update the UI without flashing the screen
+        async function refreshDashboardUI() {
+            // 1. Capture the exact scroll position before doing anything
+            const mainScrollContainer = document.querySelector('main.overflow-y-auto');
+            const currentScrollPos = mainScrollContainer ? mainScrollContainer.scrollTop : 0;
+
+            // 2. Destroy charts
+            if (myDowChart) { myDowChart.destroy(); myDowChart = null; }
+            if (myMomentumChart) { myMomentumChart.destroy(); myMomentumChart = null; }
+            
+            // 3. Fetch fresh HTML
+            const pageRes = await fetch(window.location.href.split('?')[0] + '?t=' + new Date().getTime());
+            const html = await pageRes.text();
+            const parser = new DOMParser();
+            const virtualDoc = parser.parseFromString(html, 'text/html');
+            
+            // 4. Swap the DOM
+            document.getElementById('habit-content-wrapper').innerHTML = virtualDoc.getElementById('habit-content-wrapper').innerHTML;
+            
+            // 5. Instantly restore the scroll position on the brand new container
+            const newScrollContainer = document.querySelector('main.overflow-y-auto');
+            if (newScrollContainer) {
+                newScrollContainer.scrollTop = currentScrollPos;
+            }
+            
+            // 6. Safely initialize everything again
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            initCharts();
+        }
+
         async function toggleHabit(habitId) {
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
-            const now = new Date();
-            const dateStr = now.getFullYear() + '-' + 
-                            String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                            String(now.getDate()).padStart(2, '0');
-            
-            try {
-                // 1. Tell the server to log the habit
-                const response = await fetch(`/actions/habits/${habitId}/toggle`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken 
-                    },
-                    body: JSON.stringify({ date: dateStr })
-                });
+            await fetch(`/actions/habits/${habitId}/toggle`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({})
+            });
+            await refreshDashboardUI();
+        }
 
-                if (response.ok) {
-                    // 2. Fetch the newly recalculated page in the background
-                    const pageRes = await fetch(window.location.href);
-                    const html = await pageRes.text();
-                    
-                    // 3. Create a virtual HTML document in memory
-                    const parser = new DOMParser();
-                    const virtualDoc = parser.parseFromString(html, 'text/html');
-                    
-                    // 4. Swap the current wrapper block with the newly calculated wrapper block
-                    document.getElementById('habit-content-wrapper').innerHTML = virtualDoc.getElementById('habit-content-wrapper').innerHTML;
-                    
-                    // 5. Re-draw the charts with the new data embedded in the swapped HTML
-                    initCharts();
-                }
-            } catch (error) {
-                console.error('Error toggling habit:', error);
-            }
+        async function logHabitProgress(habitId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            await fetch(`/actions/habits/${habitId}/log`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({})
+            });
+            await refreshDashboardUI();
+        }
+
+        async function unlogHabitProgress(habitId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            await fetch(`/actions/habits/${habitId}/unlog`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({})
+            });
+            await refreshDashboardUI();
         }
 
         function openEditHabitModal(data) {
@@ -614,6 +658,7 @@
             document.getElementById('edit-identity-input').value = data.identity;
             document.getElementById('edit-description').value = data.description || '';
             document.getElementById('edit-trigger').value = data.trigger || '';
+            document.getElementById('edit-target-count').value = data.target || 1;
             
             // 3. Set Frequency Radio
             if (data.freq === 'DAILY') {

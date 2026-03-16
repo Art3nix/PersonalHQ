@@ -230,7 +230,7 @@
                                     {% if status == 'COMPLETED' %}text-{{ theme }}-600
                                     {% else %}text-amber-500{% endif %}">
                                     {% if habit.streak and habit.streak > 0 %}
-                                        🔥 {{ habit.streak }} day streak
+                                        🔥 {{ habit.streak }} {{ 'week' if habit.frequency.value == 'WEEKLY' else 'day' }} streak
                                     {% endif %}
                                 </span>
                                 {% if status == 'EXPIRING' and habit.streak > 0 %}
@@ -433,7 +433,7 @@
 
         // --- HABITS API SYNC ---
         async function toggleHabit(habitId) {
-            const data = await apiCall(`/actions/habits/${habitId}/toggle`);
+            const data = await apiCall(`/actions/habits/${habitId}/toggle`, 'POST', {});
 
             if (data.status === 'success') {
                 // 1. Grab all the elements we just added IDs to
@@ -445,8 +445,11 @@
                 const container = document.getElementById(`streak-container-${habitId}`);
 
                 // 2. Update Streak Math & Text
+                const freq = row.dataset.freq; // Reads 'DAILY' or 'WEEKLY' from the HTML
+                const streakUnit = freq === 'WEEKLY' ? 'week' : 'day';
+                
                 if (data.streak > 0) {
-                    streakLabel.innerText = `🔥 ${data.streak} day streak`;
+                    streakLabel.innerText = `🔥 ${data.streak} ${streakUnit} streak`;
                 } else {
                     streakLabel.innerText = ``;
                 }

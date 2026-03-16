@@ -57,6 +57,7 @@ def create_habit():
     frequency_str = request.form.get('frequency')
     description = request.form.get('description')
     trigger = request.form.get('trigger')
+    target_count = request.form.get('target_count', 1, type=int)
 
     # Validation check
     if not name or not frequency_str or not icon:
@@ -73,6 +74,7 @@ def create_habit():
         frequency=frequency,
         identity_id=identity_id,
         streak=0,
+        target_count=target_count,
         description=description.strip() if description else None,
         trigger=trigger.strip() if trigger else None
     )
@@ -87,7 +89,7 @@ def create_habit():
 def edit_habit(habit_id):
     """Updates an existing habit's details."""
     habit = db.session.get(Habit, habit_id)
-    
+
     if not habit or habit.user_id != current_user.id:
         return redirect(url_for('habits_view.manage'))
 
@@ -95,18 +97,19 @@ def edit_habit(habit_id):
     icon = request.form.get('icon')
     frequency_str = request.form.get('frequency')
     identity_id = request.form.get('identity_id', type=int)
-    description = request.form.get('description')
-    trigger = request.form.get('trigger')
+    description = request.form.get('description', '').strip()
+    trigger = request.form.get('trigger', '').strip()
+    target_count = request.form.get('target_count', 1, type=int)
 
     if name and frequency_str and icon:
         habit.name = name.strip()
         habit.icon = icon.strip()
         habit.frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
-        # If identity_id is 0 or empty, it sets it to None (Unassigned)
-        habit.identity_id = identity_id or None,
-        description=description.strip() if description else None,
-        trigger=trigger.strip() if trigger else None
-        
+        habit.identity_id = identity_id or None
+        habit.description = description if description else None
+        habit.trigger = trigger if trigger else None
+        habit.target_count = target_count
+
         db.session.commit()
 
     return redirect(url_for('habits_view.manage'))
@@ -123,3 +126,60 @@ def delete_habit(habit_id):
         db.session.commit()
         
     return redirect(url_for('habits_view.manage'))
+
+@habits_api_bp.route('/<int:habit_id>/log', methods=['POST'])
+@login_required
+def log_habit_progress(habit_id):
+    """Adds a single progress log for a habit on a specific date."""
+    habit = db.session.get(Habit, habit_id)
+    if not habit or habit.user_id != current_user.id:
+        return {"status": "error"}, 404
+
+    data = request.get_json() or {}
+    target_date_str = data.get('date')
+    if target_date_str:
+        target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
+    else:
+        target_date = get_local_today()
+
+    # Simply add a new row every time they click the button
+    new_log = HabitLog(habit_id=habit.id, completed_date=target_date)
+    db.session.add(new_log)
+    db.session.commit()
+
+    recalculate_habit_streaks(habit)
+    
+    status_str = get_habit_status_and_sync(habit)
+    db.session.commit()
+
+    return {
+        "status": "success", 
+        "habit_status": status_str
+    }
+
+@habits_api_bp.route('/<int:habit_id>/unlog', methods=['POST'])
+@login_required
+def unlog_habit_progress(habit_id):
+    """Removes the most recent log for a specific date (Undo for target > 1)."""
+    habit = db.session.get(Habit, habit_id)
+    if not habit or habit.user_id != current_user.id:
+        return {"status": "error"}, 404
+
+    data = request.get_json() or {}
+    target_date_str = data.get('date')
+    target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date() if target_date_str else get_local_today()
+
+    # Find the most recently clicked log for this date and delete it
+    latest_log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=target_date)\
+                               .order_by(HabitLog.logged_at.desc()).first()
+    
+    if latest_log:
+        db.session.delete(latest_log)
+        db.session.commit()
+
+    recalculate_habit_streaks(habit)
+    
+    status_str = get_habit_status_and_sync(habit)
+    db.session.commit()
+
+    return {"status": "success", "habit_status": status_str}

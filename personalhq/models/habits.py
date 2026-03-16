@@ -35,6 +35,7 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     trigger: Mapped[str | None]
     category: Mapped[str | None]
     last_completed: Mapped[datetime | None]
+    target_count: Mapped[int] = mapped_column(db.Integer, default=1, server_default="1", nullable=False)
 
     identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")
