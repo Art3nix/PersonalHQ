@@ -185,13 +185,14 @@
                                 <input type="date" name="target_date" id="focus-date" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium text-stone-600">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Duration</label>
-                                <select name="target_duration_minutes" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
-                                    <option value="25">25 min</option>
-                                    <option value="50" selected>50 min</option>
-                                    <option value="90">90 min</option>
-                                </select>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Minutes</label>
+                            <div class="relative">
+                                <input type="number" name="target_duration_minutes" value="50" min="1" max="720" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium pr-12 text-stone-900">
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span class="text-xs font-bold text-stone-400">min</span>
+                                </div>
                             </div>
+                        </div>
                         </div>
 
                         <div>
