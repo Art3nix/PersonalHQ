@@ -1,4 +1,5 @@
 {% extends "app_layout.html" %}
+{% from 'components/icon_picker.html' import render_icon_picker %}
 
 {% block title %}Habits & Analytics - Life HQ{% endblock %}
 
@@ -51,7 +52,7 @@
                                             title="{% if habit_sparklines[habit.id] | last %}Undo today's log{% else %}Log habit for today{% endif %}">
                                         
                                         <span class="transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-40 grayscale{% endif %}">
-                                            {% if habit.icon %}{{ habit.icon }}{% else %}🎯{% endif %}
+                                            {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>{% else %}🎯{% endif %}
                                         </span>
     
                                         {% if habit_sparklines[habit.id] | last %}
@@ -180,7 +181,7 @@
                                             title="{% if habit_sparklines[habit.id] | last %}Undo today's log{% else %}Log habit for today{% endif %}">
                                         
                                         <span class="transition-opacity {% if habit_sparklines[habit.id] | last %}opacity-40 grayscale{% endif %}">
-                                            {% if habit.icon %}{{ habit.icon }}{% else %}🎯{% endif %}
+                                            {% if habit.icon %}<i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>{% else %}🎯{% endif %}
                                         </span>
     
                                         {% if habit_sparklines[habit.id] | last %}
@@ -361,63 +362,15 @@
             
             <form action="{{ url_for('habits_api.create_habit') }}" method="POST" class="space-y-6">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Choose an Icon</label>
-                    <div class="grid grid-cols-6 gap-2">
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="📚" class="peer sr-only" required checked>
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📚</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🏋️‍♂️" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🏋️‍♂️</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🏃‍♂️" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🏃‍♂️</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="💧" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💧</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🧘‍♂️" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🧘‍♂️</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🥗" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🥗</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="💻" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💻</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🛌" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🛌</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="📓" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📓</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="🚶‍♂️" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">🚶‍♂️</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="📵" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">📵</div>
-                        </label>
-                        <label class="cursor-pointer relative">
-                            <input type="radio" name="icon" value="💊" class="peer sr-only">
-                            <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">💊</div>
-                        </label>
-                    </div>
-                </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Habit Name</label>
-                    <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., Read 10 Pages">
+                <div class="flex gap-4">
+                    <div class="shrink-0">
+                        {{ render_icon_picker(input_name='icon', selected_icon='target', label_text='Icon', picker_id='create_habit_icon') }}
+                    </div>
+                    <div class="flex-1 flex flex-col justify-end">
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Habit Name</label>
+                        <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium h-14" placeholder="e.g., Read 10 Pages">
+                    </div>
                 </div>
                 
                 <div>
@@ -463,15 +416,14 @@
             <form id="edit-habit-form" action="" method="POST" class="space-y-6">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 
-                <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Choose an Icon</label>
-                    <div class="grid grid-cols-6 gap-2" id="edit-icon-grid">
-                        </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Habit Name</label>
-                    <input type="text" name="name" id="edit-name-input" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
+                <div class="flex gap-4">
+                    <div class="shrink-0">
+                        {{ render_icon_picker(input_name='icon', selected_icon='target', label_text='Icon', picker_id='edit_habit_icon') }}
+                    </div>
+                    <div class="flex-1 flex flex-col justify-end">
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Habit Name</label>
+                        <input type="text" name="name" id="edit-name-input" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium h-14">
+                    </div>
                 </div>
                 
                 <div>
@@ -629,8 +581,6 @@
             }
         }
 
-        const habitIcons = ['📚', '🏋️‍♂️', '🏃‍♂️', '💧', '🧘‍♂️', '🥗', '💻', '🛌', '📓', '🚶‍♂️', '📵', '💊'];
-
         function openEditHabitModal(data) {
             // 1. Set the form's destination URL
             document.getElementById('edit-habit-form').action = `/actions/habits/${data.id}/edit`;
@@ -645,20 +595,9 @@
             } else {
                 document.getElementById('edit-freq-weekly').checked = true;
             }
-
-            // 4. Generate the Icon Grid and select the correct one
-            const iconGrid = document.getElementById('edit-icon-grid');
-            iconGrid.innerHTML = ''; // Clear old icons
             
-            habitIcons.forEach(icon => {
-                const isChecked = (icon === data.icon) ? 'checked' : '';
-                iconGrid.innerHTML += `
-                    <label class="cursor-pointer relative">
-                        <input type="radio" name="icon" value="${icon}" class="peer sr-only" ${isChecked} required>
-                        <div class="h-10 w-10 flex items-center justify-center text-xl bg-stone-50 border border-stone-200 rounded-xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-200 transition-all hover:bg-stone-100">${icon}</div>
-                    </label>
-                `;
-            });
+            // 4. Update the icon picker visually and logically
+            selectPickerIcon('edit_habit_icon', data.icon);
 
             // 5. Open the modal with animation
             const modal = document.getElementById('edit-habit-modal');

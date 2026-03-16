@@ -62,7 +62,7 @@
                         <div class="flex gap-2 flex-wrap">
                             {% for habit in stat.model.habits %}
                                 <span class="bg-white/50 border border-{{ stat.model.color }}-200 text-{{ stat.model.color }}-700 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-sm backdrop-blur-sm">
-                                    {{ habit.icon }} {{ habit.name }}
+                                    <i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i> {{ habit.name }}
                                 </span>
                             {% endfor %}
                             
@@ -126,7 +126,7 @@
                             {% for habit in unassigned_habits %}
                             <label class="flex items-center p-3 border border-stone-100 rounded-xl cursor-pointer hover:bg-stone-50 transition-colors group">
                                 <input type="checkbox" name="habit_ids" value="{{ habit.id }}" class="w-4 h-4 text-indigo-600 bg-stone-100 border-stone-300 rounded focus:ring-indigo-500 cursor-pointer">
-                                <span class="ml-3 text-sm font-bold text-stone-700 group-hover:text-stone-900">{{ habit.icon }} {{ habit.name }}</span>
+                                <span class="ml-3 text-sm font-bold text-stone-700 group-hover:text-stone-900"><i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i> {{ habit.name }}</span>
                             </label>
                             {% endfor %}
                         </div>

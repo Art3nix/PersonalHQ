@@ -100,7 +100,7 @@ def create_journal():
 @journals_api_bp.route('/<int:journal_id>/edit', methods=['POST'])
 @login_required
 def edit_journal(journal_id):
-    """Updates an existing Journal's name, description, and frequency."""
+    """Updates an existing Journal's name, description, icon, and frequency."""
     journal = db.session.get(Journal, journal_id)
     if not journal or journal.user_id != current_user.id:
         return redirect(url_for('journals_view.index'))
@@ -108,12 +108,18 @@ def edit_journal(journal_id):
     name = request.form.get('name')
     description = request.form.get('description')
     color = request.form.get('color')
+    icon = request.form.get('icon') # Now we grab the icon!
     frequency_val = request.form.get('frequency')
 
     if name:
         journal.name = name.strip()
         journal.description = description.strip() if description else None
-        if color: journal.color = color
+        
+        if color: 
+            journal.color = color
+            
+        if icon: 
+            journal.icon = icon.strip() # Now we save it!
 
         # Safely update the frequency enum
         if frequency_val:

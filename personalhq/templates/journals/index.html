@@ -1,10 +1,11 @@
 {% extends "app_layout.html" %}
+{% from 'components/icon_picker.html' import render_icon_picker %}
 {% from 'components/color_picker.html' import render_color_picker %}
 
 {% block title %}Journals - Life HQ{% endblock %}
 
 {% block app_content %}
-    <main class="flex-1 w-full max-w-[1400px] mx-auto px-12 py-12">
+    <main class="flex-1 w-full max-w-[1400px] mx-auto px-6 py-8 lg:px-10 lg:py-10">
         
         <header class="flex justify-between items-end mb-10 border-b border-stone-100 pb-6">
             <div>
@@ -22,13 +23,14 @@
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {% for journal in journals %}
                 {% set theme = journal.color or 'indigo' %}
-                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="bg-{{ theme }}-50 border border-{{ theme }}-200 rounded-[2rem] p-8 shadow-xl shadow-{{ theme }}-200/40 hover:bg-{{ theme }}-100 hover:border-{{ theme }}-300 hover:shadow-2xl hover:shadow-{{ theme }}-300/40 transition-all duration-300 group block relative overflow-hidden">
+                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="bg-{{ theme }}-50 border border-{{ theme }}-200 rounded-3xl p-6 shadow-xl shadow-{{ theme }}-200/40 hover:bg-{{ theme }}-100 hover:border-{{ theme }}-300 hover:shadow-2xl hover:shadow-{{ theme }}-300/40 transition-all duration-300 group flex flex-col min-h-[15rem] relative overflow-hidden">
                     
-                    <div class="absolute -right-8 -top-8 w-32 h-32 bg-gradient-to-br from-{{ theme }}-300 to-transparent rounded-full blur-2xl opacity-40 group-hover:opacity-80 transition-opacity pointer-events-none"></div>
+                    <div class="absolute -right-4 -top-4 w-32 h-32 bg-gradient-to-br from-{{ theme }}-300 to-transparent rounded-full blur-2xl opacity-40 group-hover:opacity-80 transition-opacity pointer-events-none"></div>
 
-                    <div class="relative z-10">
-                        <div class="w-12 h-12 bg-white/60 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 border border-{{ theme }}-200 group-hover:bg-white group-hover:text-{{ theme }}-700 transition-colors text-{{ theme }}-600 text-xl shadow-sm">
-                            {{ journal.icon or '📓' }}
+                    <div class="relative z-10 flex flex-col flex-1 h-full">
+                        
+                        <div class="w-12 h-12 bg-white/60 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-6 border border-{{ theme }}-200 group-hover:bg-white group-hover:text-{{ theme }}-700 transition-colors text-{{ theme }}-600 shadow-sm shrink-0">
+                            <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-6 h-6"></i>
                         </div>
                         
                         <h3 class="text-xl font-extrabold text-stone-900 tracking-tight mb-2">{{ journal.name }}</h3>
@@ -37,7 +39,7 @@
                             <p class="text-xs font-medium text-stone-500 line-clamp-2 mb-6 leading-relaxed">{{ journal.description }}</p>
                         {% endif %}
 
-                        <div class="flex items-center justify-between mt-auto">
+                        <div class="flex items-center justify-between mt-auto pt-4">
                             <span class="text-[10px] font-bold text-{{ theme }}-700 uppercase tracking-widest bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-{{ theme }}-200 shadow-sm">
                                 {{ journal.frequency.value }}
                             </span>
@@ -46,24 +48,26 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
                             </span>
                         </div>
-                        <div class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                        
+                        <div class="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity z-20 flex items-center gap-1 bg-white/80 backdrop-blur-md p-1 rounded-2xl shadow-sm border border-white/50">
                             <button type="button" 
                                     data-id="{{ journal.id }}"
                                     data-name="{{ journal.name }}"
                                     data-desc="{{ journal.description or '' }}"
                                     data-freq="{{ journal.frequency.name }}"
                                     data-color="{{ journal.color or 'indigo' }}"
+                                    data-icon="{{ journal.icon or 'book-open' }}" 
                                     onclick="event.preventDefault(); openEditJournalModal(this.dataset)"
-                                    class="p-2 text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors">
+                                    class="p-2 text-{{ theme }}-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-none hover:shadow-sm" title="Edit Journal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                             </button>
-                            <form id="delete-journal-{{ journal.id }}" action="{{ url_for('journals_api.delete_journal', journal_id=journal.id) }}" method="POST" class="inline">
+                            <form id="delete-journal-{{ journal.id }}" action="{{ url_for('journals_api.delete_journal', journal_id=journal.id) }}" method="POST" class="inline m-0">
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                                 <button type="button" 
                                         data-form-id="delete-journal-{{ journal.id }}" 
                                         data-item-name="{{ journal.name }} Journal"
                                         onclick="event.preventDefault(); confirmDelete(this.dataset.formId, this.dataset.itemName)" 
-                                        class="p-2 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                                        class="p-2 text-{{ theme }}-600 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-none hover:shadow-sm" title="Delete Journal">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             </form>
@@ -101,14 +105,13 @@
                 <form action="{{ url_for('journals_api.create_journal') }}" method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     
-                    <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-3">
-                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Icon</label>
-                            <input type="text" name="icon" value="📓" class="w-full text-center bg-stone-50 border border-stone-200 rounded-xl py-3 text-xl focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none">
+                    <div class="flex gap-4">
+                        <div class="shrink-0">
+                            {{ render_icon_picker(input_name='icon', selected_icon='book-open', label_text='Icon', picker_id='create_journal_icon') }}
                         </div>
-                        <div class="col-span-9">
+                        <div class="flex-1 flex flex-col justify-end">
                             <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Name</label>
-                            <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., Daily Gratitude">
+                            <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium h-14" placeholder="e.g., Daily Gratitude">
                         </div>
                     </div>
 
@@ -156,9 +159,14 @@
                 <form id="edit-journal-form" action="" method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-                    <div>
-                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Journal Name</label>
-                        <input type="text" name="name" id="edit-journal-name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
+                    <div class="flex gap-4">
+                        <div class="shrink-0">
+                            {{ render_icon_picker(input_name='icon', selected_icon='book-open', label_text='Icon', picker_id='edit_journal_icon') }}
+                        </div>
+                        <div class="flex-1 flex flex-col justify-end">
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Journal Name</label>
+                            <input type="text" name="name" id="edit-journal-name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium h-14">
+                        </div>
                     </div>
 
                     <div>
@@ -194,10 +202,19 @@
             document.getElementById('edit-journal-name').value = data.name;
             document.getElementById('edit-journal-desc').value = data.desc;
             document.getElementById('edit-journal-frequency').value = data.freq;
+            
             // Check the correct color radio
             const colorRadios = document.getElementById('edit-journal-form').querySelectorAll('input[name="color"]');
             colorRadios.forEach(radio => radio.checked = (radio.value === data.color));
             
+            // Safely fetch the icon (with bulletproof fallback for missing data or old emojis)
+            let iconName = data.icon;
+            if (!iconName || typeof iconName !== 'string' || iconName.length < 3) {
+                iconName = 'book-open';
+            }
+            
+            selectPickerIcon('edit_journal_icon', iconName);
+
             const modal = document.getElementById('edit-journal-modal');
             modal.classList.remove('hidden');
             setTimeout(() => modal.classList.remove('translate-x-full'), 10);

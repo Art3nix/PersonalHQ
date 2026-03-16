@@ -1,0 +1,61 @@
+{% macro render_icon_picker(input_name='icon', selected_icon='target', label_text='Select Icon', picker_id=None) %}
+    {% set p_id = picker_id if picker_id else input_name %}
+    
+    {% set icons = [
+        'activity', 'alarm-clock', 'alert-circle', 'alert-triangle', 'anchor', 'apple', 'archive', 'arrow-up-right',
+        'at-sign', 'award', 'bar-chart-2', 'bar-chart', 'battery-charging', 'battery', 'bed', 'bell', 'bike', 'bluetooth',
+        'book-open', 'book', 'bookmark', 'brain', 'briefcase', 'calendar-check', 'calendar-days', 'calendar', 'camera',
+        'car', 'carrot', 'check-circle-2', 'check-circle', 'check-square', 'check', 'clipboard-check', 'clipboard-list',
+        'clipboard', 'clock', 'cloud-lightning', 'cloud-rain', 'cloud', 'coffee', 'coins', 'compass', 'credit-card',
+        'crosshair', 'crown', 'download', 'droplet', 'dumbbell', 'edit-2', 'edit-3', 'edit', 'eye-off', 'eye', 'feather',
+        'file-text', 'flag', 'flame', 'folder', 'footprints', 'gamepad-2', 'gift', 'glass-water', 'glasses', 'globe',
+        'graduation-cap', 'hash', 'headphones', 'heart-pulse', 'heart', 'help-circle', 'home', 'hourglass', 'image',
+        'inbox', 'info', 'kanban', 'key', 'laptop', 'layout-dashboard', 'leaf', 'library', 'lightbulb', 'line-chart',
+        'link', 'list-todo', 'list', 'lock', 'luggage', 'mail', 'map-pin', 'map', 'medal', 'menu', 'message-circle',
+        'message-square', 'mic-off', 'mic', 'monitor', 'moon', 'mountain', 'music', 'navigation', 'palette', 'paperclip',
+        'party-popper', 'pen-tool', 'pencil', 'pie-chart', 'piggy-bank', 'pill', 'plane', 'plus', 'printer', 'quote',
+        'rocket', 'salad', 'save', 'scissors', 'search', 'send', 'settings', 'share-2', 'shield-alert', 'shield-check',
+        'shield', 'shopping-bag', 'shopping-cart', 'smartphone', 'smile', 'snowflake', 'sparkles', 'star', 'sun',
+        'sunrise', 'sunset', 'target', 'tent', 'terminal', 'thermometer', 'thumbs-down', 'thumbs-up', 'timer-reset',
+        'timer', 'trash-2', 'trending-up', 'trophy', 'tv', 'umbrella', 'unlock', 'upload', 'user-plus', 'user', 'users',
+        'video-off', 'video', 'volume-2', 'wallet', 'wifi', 'wind', 'x', 'zap'
+    ] %}
+
+    <div class="relative icon-picker-container" data-picker-id="{{ p_id }}">
+        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">{{ label_text }}</label>
+
+        <input type="hidden" name="{{ input_name }}" id="hidden-{{ p_id }}" value="{{ selected_icon }}">
+
+        <button type="button" onclick="toggleIconDropdown('dropdown-{{ p_id }}')" class="w-14 h-14 bg-stone-50 border border-stone-200 rounded-2xl flex items-center justify-center text-stone-600 hover:bg-stone-100 hover:border-stone-300 transition-all focus:ring-2 focus:ring-indigo-200 outline-none shadow-sm group">
+            <div id="display-container-{{ p_id }}">
+                <i data-lucide="{{ selected_icon }}" class="w-6 h-6 transition-transform group-hover:scale-110 text-indigo-600"></i>
+            </div>
+        </button>
+
+        <div id="dropdown-{{ p_id }}" class="hidden absolute z-50 left-0 top-full mt-2 bg-white border border-stone-100 rounded-2xl shadow-2xl p-4 w-80 origin-top-left">
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-stone-50">
+                <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Choose Icon</span>
+                <button type="button" onclick="toggleIconDropdown('dropdown-{{ p_id }}')" class="text-stone-400 hover:text-stone-700 bg-stone-50 p-1 rounded-lg">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-6 gap-2 max-h-64 overflow-y-auto custom-scrollbar p-1 pr-2">
+                {% for icon_name in icons %}
+                <button type="button" 
+                        data-icon-name="{{ icon_name }}"
+                        onclick="selectPickerIcon('{{ p_id }}', '{{ icon_name }}')"
+                        class="w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-indigo-50 hover:text-indigo-600 hover:scale-110 shadow-sm
+                        {% if icon_name == selected_icon %}
+                            bg-indigo-100 text-indigo-700 border-2 border-indigo-400
+                        {% else %}
+                            text-stone-500 bg-stone-50 border border-stone-100
+                        {% endif %}"
+                        title="{{ icon_name | replace('-', ' ') | title }}">
+                    <i data-lucide="{{ icon_name }}" class="w-5 h-5"></i>
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endmacro %}

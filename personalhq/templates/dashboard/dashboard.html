@@ -203,7 +203,7 @@
                                     {% if status == 'COMPLETED' %}bg-{{ theme }}-600 text-white
                                     {% elif status == 'EXPIRING' %}bg-amber-100 text-amber-600
                                     {% else %}bg-slate-50 text-slate-400 group-hover:bg-{{ theme }}-50 group-hover:text-{{ theme }}-600{% endif %}">
-                                    {{ habit.icon }}
+                                    <i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>
                                 </div>
                                 <div class="flex flex-col items-start gap-1.5">
                                     <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 

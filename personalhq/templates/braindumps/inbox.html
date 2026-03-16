@@ -226,7 +226,7 @@
                             <select name="journal_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
                                 <option value="" disabled selected>Choose a journal...</option>
                                 {% for journal in journals %}
-                                    <option value="{{ journal.id }}">{{ journal.icon }} {{ journal.name }}</option>
+                                    <option value="{{ journal.id }}"><i data-lucide="{{ journal.icon }}" class="w-5 h-5"></i> {{ journal.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
