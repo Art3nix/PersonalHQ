@@ -38,6 +38,7 @@
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
                         {% set current_count = current_counts[habit.id] %} 
                         {% set is_completed = current_count >= habit.target_count %}
+                        {% set status = habit_statuses[habit.id] %}
 
                         <div class="border rounded-[2rem] p-6 shadow-sm transition-all duration-300 relative group flex flex-col
                             {% if is_completed %}
@@ -90,14 +91,25 @@
                             <div class="flex gap-5 mb-6">
                                 <div>
                                     <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">Current Streak</p>
-                                    <div class="flex items-baseline gap-1">
-                                        <span class="text-2xl font-black">{{ habit.streak or 0 }}</span>
-                                        <span class="text-xs {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-3xl font-black {% if status == 'EXPIRING' %}text-{{ theme }}-500{% elif is_completed %}text-white{% else %}text-stone-900{% endif %}">
+                                            {{ habit.streak or 0 }}
+                                        </span>
+                                        
+                                        {% if status == 'EXPIRING' and habit.streak and habit.streak > 0 %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-{{ theme }}-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        {% elif habit.streak and habit.streak > 0 %}
+                                            <span class="text-lg {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                        {% else %}
+                                            <span class="text-lg opacity-50 grayscale {% if is_completed %}text-white{% else %}text-stone-400{% endif %}" title="Ready to grow">🌱</span>
+                                        {% endif %}
                                     </div>
+                                    
                                 </div>
                                 <div class="border-l pl-5 {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
                                     <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">All-Time Best</p>
-                                    <span class="text-2xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
+                                    <span class="text-3xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
                                 </div>
                             </div>
 
@@ -166,6 +178,7 @@
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
                         {% set current_count = current_counts[habit.id] %} 
                         {% set is_completed = current_count >= habit.target_count %}
+                        {% set status = habit_statuses[habit.id] %}
 
                         <div class="border rounded-[2rem] p-6 shadow-sm transition-all duration-300 relative group flex flex-col
                             {% if is_completed %}
@@ -218,14 +231,25 @@
                             <div class="flex gap-5 mb-6">
                                 <div>
                                     <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">Current Streak</p>
-                                    <div class="flex items-baseline gap-1">
-                                        <span class="text-2xl font-black">{{ habit.streak or 0 }}</span>
-                                        <span class="text-xs {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                    
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-3xl font-black {% if status == 'EXPIRING' %}text-{{ theme }}-500{% elif is_completed %}text-white{% else %}text-stone-900{% endif %}">
+                                            {{ habit.streak or 0 }}
+                                        </span>
+                                        
+                                        {% if status == 'EXPIRING' and habit.streak and habit.streak > 0 %}
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="text-{{ theme }}-500"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                        {% elif habit.streak and habit.streak > 0 %}
+                                            <span class="text-lg {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">🔥</span>
+                                        {% else %}
+                                            <span class="text-lg opacity-50 grayscale {% if is_completed %}text-white{% else %}text-stone-400{% endif %}" title="Ready to grow">🌱</span>
+                                        {% endif %}
                                     </div>
+                                    
                                 </div>
                                 <div class="border-l pl-5 {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %}">
                                     <p class="text-[9px] font-bold uppercase tracking-widest mb-1 {% if is_completed %}text-white/60{% else %}text-stone-400{% endif %}">All-Time Best</p>
-                                    <span class="text-2xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
+                                    <span class="text-3xl font-black {% if is_completed %}text-white/80{% else %}text-stone-400{% endif %}">{{ habit.best_streak or 0 }}</span>
                                 </div>
                             </div>
 

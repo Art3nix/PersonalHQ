@@ -1,9 +1,11 @@
 """Module defining the main dashboard view."""
 
 import random
+from datetime import timedelta
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
-from personalhq.models.habits import Habit
+from personalhq.models.habits import Habit, HabitFrequency
+from personalhq.models.habit_logs import HabitLog
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.services.time_service import get_local_today
@@ -19,9 +21,24 @@ def index():
     # Habits
     habits = Habit.query.filter_by(user_id=current_user.id).all()
     today = get_local_today()
+    start_of_week = today - timedelta(days=today.weekday())
+    
     habit_statuses = {}
+    current_counts = {}
+    
     for habit in habits:
+        # 1. Get the visual status and sync the streak
         habit_statuses[habit.id] = get_habit_status_and_sync(habit)
+        
+        # 2. Fetch the actual partial progress count for the UI
+        if habit.frequency == HabitFrequency.DAILY:
+            count = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
+        else:
+            count = HabitLog.query.filter(
+                HabitLog.habit_id == habit.id,
+                HabitLog.completed_date >= start_of_week
+            ).count()
+        current_counts[habit.id] = count
         
     db.session.commit()
 
@@ -80,6 +97,7 @@ def index():
         'dashboard/dashboard.html', 
         habits=habits,
         habit_statuses=habit_statuses,
+        current_counts=current_counts, # 3. Pass the counts to Jinja!
         queued_sessions=queued_sessions,
         SessionStatus=SessionStatus,
         active_bucket=active_bucket,

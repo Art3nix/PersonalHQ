@@ -76,17 +76,24 @@ def recalculate_habit_streaks(habit):
 
 
 def get_habit_status_and_sync(habit) -> str:
-    """Evaluates current state for the UI styling (COMPLETED, EXPIRING, BROKEN)."""
+    """Evaluates current state for the UI styling (COMPLETED, PENDING, EXPIRING, BROKEN)."""
+    recalculate_habit_streaks(habit)
+
     today = get_local_today()
-    
+    current_hour = datetime.now().hour
+
     if habit.frequency == HabitFrequency.DAILY:
         count_today = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
         if count_today >= habit.target_count: return "COMPLETED"
-        
+
         yesterday = today - timedelta(days=1)
         count_yesterday = HabitLog.query.filter_by(habit_id=habit.id, completed_date=yesterday).count()
-        if count_yesterday >= habit.target_count: return "EXPIRING"
-        
+        if count_yesterday >= habit.target_count:
+            # Streak is alive. Only trigger the visual warning after 8:00 PM.
+            if current_hour >= 20: 
+                return "EXPIRING"
+            return "PENDING"
+
         return "BROKEN"
     else:
         start_of_week = today - timedelta(days=today.weekday())
@@ -94,13 +101,26 @@ def get_habit_status_and_sync(habit) -> str:
             HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week
         ).count()
         if count_this_week >= habit.target_count: return "COMPLETED"
-        
+
         start_of_last_week = start_of_week - timedelta(days=7)
         count_last_week = HabitLog.query.filter(
             HabitLog.habit_id == habit.id, 
             HabitLog.completed_date >= start_of_last_week, 
             HabitLog.completed_date < start_of_week
         ).count()
-        if count_last_week >= habit.target_count: return "EXPIRING"
-        
+        if count_last_week >= habit.target_count:
+            # Streak is alive. Warn only on Sunday after 8:00 PM.
+            if today.weekday() == 6 and current_hour >= 20:
+                return "EXPIRING"
+            return "PENDING"
+
         return "BROKEN"
+
+def get_habit_current_count(habit) -> int:
+    """Fetches the exact progress count for today or this week."""
+    today = get_local_today()
+    if habit.frequency == HabitFrequency.DAILY:
+        return HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
+    else:
+        start_of_week = today - timedelta(days=today.weekday())
+        return HabitLog.query.filter(HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week).count()

@@ -154,6 +154,8 @@ def log_habit_progress(habit_id):
 
     return {
         "status": "success", 
+        "streak": habit.streak, 
+        "best": habit.best_streak, 
         "habit_status": status_str
     }
 
@@ -182,4 +184,9 @@ def unlog_habit_progress(habit_id):
     status_str = get_habit_status_and_sync(habit)
     db.session.commit()
 
-    return {"status": "success", "habit_status": status_str}
+    return {
+        "status": "success", 
+        "streak": habit.streak, 
+        "best": habit.best_streak, 
+        "habit_status": status_str
+    }

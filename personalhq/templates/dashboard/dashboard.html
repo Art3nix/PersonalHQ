@@ -195,29 +195,31 @@
                         {% set status = habit_statuses[habit.id] %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
 
-                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group 
+                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" data-target="{{ habit.target_count }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all group 
                             {% if status == 'COMPLETED' %}bg-{{ theme }}-50/50 border-{{ theme }}-100
-                            {% elif status == 'EXPIRING' %}bg-white border-amber-200 ring-2 ring-amber-50
-                            {% else %}bg-white border-slate-100 hover:border-{{ theme }}-200{% endif %}" 
+                            {% elif status == 'EXPIRING' %}bg-white border-{{ theme }}-200 hover:border-{{ theme }}-300
+                            {% elif status == 'PENDING' %}bg-white border-slate-100 hover:border-{{ theme }}-200
+                            {% else %}bg-stone-50/50 border-stone-100 hover:border-stone-200{% endif %}
+                            {% if habit.target_count == 1 %}cursor-pointer{% endif %}" 
                             style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}" 
-                            onclick="toggleHabit({{ habit.id }})">
+                            {% if habit.target_count == 1 %}onclick="interactWithHabit({{ habit.id }}, 'toggle')"{% endif %}>
                             
                             <div class="flex items-center gap-4">
                                 <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors 
                                     {% if status == 'COMPLETED' %}bg-{{ theme }}-600 text-white
-                                    {% elif status == 'EXPIRING' %}bg-amber-100 text-amber-600
+                                    {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600
                                     {% else %}bg-slate-50 text-slate-400 group-hover:bg-{{ theme }}-50 group-hover:text-{{ theme }}-600{% endif %}">
                                     <i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>
                                 </div>
                                 <div class="flex flex-col items-start gap-1.5">
                                     <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 
                                         {% if status == 'COMPLETED' %}text-{{ theme }}-900
-                                        {% elif status == 'EXPIRING' %}text-amber-900
+                                        {% elif status == 'EXPIRING' %}text-{{ theme }}-900
                                         {% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
                                     {% if habit.identity %}
                                         <span id="habit-identity-{{ habit.id }}" class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm
                                             {% if status == 'COMPLETED' %}bg-{{ theme }}-100/50 text-{{ theme }}-600 border-{{ theme }}-200
-                                            {% elif status == 'EXPIRING' %}bg-amber-50 text-amber-600 border-amber-200
+                                            {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200
                                             {% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200 group-hover:bg-{{ theme }}-100{% endif %}">
                                             {{ habit.identity.name }}
                                         </span>
@@ -225,17 +227,45 @@
                                 </div>
                             </div>
                             
-                            <div class="flex flex-col items-end gap-1" id="streak-container-{{ habit.id }}">
-                                <span id="streak-{{ habit.id }}" class="text-xs font-bold 
-                                    {% if status == 'COMPLETED' %}text-{{ theme }}-600
-                                    {% else %}text-amber-500{% endif %}">
-                                    {% if habit.streak and habit.streak > 0 %}
-                                        🔥 {{ habit.streak }} {{ 'week' if habit.frequency.value == 'WEEKLY' else 'day' }} streak
-                                    {% endif %}
-                                </span>
-                                {% if status == 'EXPIRING' and habit.streak > 0 %}
-                                    <span id="expiring-badge-{{ habit.id }}" class="text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-md uppercase tracking-widest animate-pulse shadow-sm shadow-amber-200">Expiring</span>
+                            <div class="flex items-center gap-4">
+                                {% if habit.target_count > 1 %}
+                                    {% set current_count = current_counts[habit.id] if current_counts else 0 %}
+                                    <div class="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl p-1 shadow-sm" onclick="event.stopPropagation()">
+                                        <button id="minus-btn-{{ habit.id }}" onclick="interactWithHabit({{ habit.id }}, 'unlog')" {% if current_count == 0 %}disabled{% endif %} class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                        
+                                        <span id="count-display-{{ habit.id }}" class="text-[11px] font-black text-stone-700 w-8 text-center">{{ current_count }} / {{ habit.target_count }}</span>
+                                        
+                                        <button onclick="interactWithHabit({{ habit.id }}, 'log')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-50 text-{{ theme }}-600 shadow-sm border border-{{ theme }}-100 hover:border-{{ theme }}-200 hover:bg-{{ theme }}-100 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                        </button>
+                                    </div>
                                 {% endif %}
+
+                                <div class="flex flex-col items-end justify-center" id="streak-container-{{ habit.id }}">
+                                    {% set streak_unit = 'week' if habit.frequency.value == 'WEEKLY' else 'day' %}
+                                    
+                                    {% if status == 'COMPLETED' and habit.streak and habit.streak > 0 %}
+                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-700 bg-{{ theme }}-100 px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-sm border border-{{ theme }}-200">
+                                            🔥 {{ habit.streak }} {{ streak_unit }} streak
+                                        </span>
+                                    {% elif status == 'EXPIRING' and habit.streak and habit.streak > 0 %}
+                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-600 bg-white px-2 py-1 rounded-lg flex items-center gap-1.5 border-2 border-dashed border-{{ theme }}-300 shadow-sm">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            {{ habit.streak }} {{ streak_unit }}s at risk
+                                        </span>
+                                    {% elif status == 'PENDING' and habit.streak and habit.streak > 0 %}
+                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-500 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200 shadow-sm">
+                                            🔥 {{ habit.streak }} {{ streak_unit }} streak
+                                        </span>
+                                    {% else %}
+                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200">
+                                            <span class="opacity-50 grayscale text-sm leading-none" title="Ready to grow">🌱</span>
+                                            Ready to restart
+                                        </span>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
                         {% else %}
@@ -432,73 +462,87 @@
         updateClocks();
 
         // --- HABITS API SYNC ---
-        async function toggleHabit(habitId) {
-            const data = await apiCall(`/actions/habits/${habitId}/toggle`, 'POST', {});
+        async function interactWithHabit(habitId, action) {
+            const row = document.getElementById(`habit-row-${habitId}`);
+            const countDisplay = document.getElementById(`count-display-${habitId}`);
+            const minusBtn = document.getElementById(`minus-btn-${habitId}`);
+            const targetCount = parseInt(row.dataset.target || 1);
+
+            // 1. OPTIMISTIC UI: Update the math instantly before the server responds
+            if (targetCount > 1 && countDisplay) {
+                let currentCount = parseInt(countDisplay.innerText.split('/')[0].trim());
+                if (action === 'log') currentCount++;
+                if (action === 'unlog') currentCount--;
+                
+                // Prevent negatives
+                if (currentCount < 0) currentCount = 0;
+                
+                countDisplay.innerText = `${currentCount} / ${targetCount}`;
+                if (minusBtn) minusBtn.disabled = (currentCount === 0);
+            }
+
+            // 2. Fetch the true state from the Python backend
+            const data = await apiCall(`/actions/habits/${habitId}/${action}`, 'POST', {});
 
             if (data.status === 'success') {
-                // 1. Grab all the elements we just added IDs to
-                const row = document.getElementById(`habit-row-${habitId}`);
                 const iconBox = document.getElementById(`habit-icon-${habitId}`);
                 const nameEl = document.getElementById(`habit-name-${habitId}`);
-                const identityEl = document.getElementById(`habit-identity-${habitId}`); // Might be null
-                const streakLabel = document.getElementById(`streak-${habitId}`);
+                const identityEl = document.getElementById(`habit-identity-${habitId}`);
                 const container = document.getElementById(`streak-container-${habitId}`);
 
-                // 2. Update Streak Math & Text
-                const freq = row.dataset.freq; // Reads 'DAILY' or 'WEEKLY' from the HTML
+                const freq = row.dataset.freq;
                 const streakUnit = freq === 'WEEKLY' ? 'week' : 'day';
-                
-                if (data.streak > 0) {
-                    streakLabel.innerText = `🔥 ${data.streak} ${streakUnit} streak`;
-                } else {
-                    streakLabel.innerText = ``;
-                }
-
-                // 3. Handle the 'Expiring' Pulse Badge
-                let badge = document.getElementById(`expiring-badge-${habitId}`);
-                if (data.habit_status === 'EXPIRING' && data.streak > 0) {
-                    if (!badge) {
-                        badge = document.createElement('span');
-                        badge.id = `expiring-badge-${habitId}`;
-                        badge.className = "text-[9px] font-bold text-white bg-amber-500 px-2 py-0.5 rounded-md uppercase tracking-widest animate-pulse shadow-sm shadow-amber-200 mt-1";
-                        badge.innerText = "Expiring";
-                        container.appendChild(badge);
-                    }
-                } else if (badge) {
-                    badge.remove(); // Kill the badge if it's completed or broken
-                }
-
-                // 4. Read the dynamic theme from the HTML
                 const theme = row.dataset.theme || 'indigo';
 
-                // 5. Strip everything back to base layout classes
-                row.className = "habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all cursor-pointer group";
+                // 3. Rebuild the Status Pill
+                container.innerHTML = '';
+                const streakSpan = document.createElement('span');
+                streakSpan.id = `streak-${habitId}`;
+
+                if (data.habit_status === 'COMPLETED' && data.streak > 0) {
+                    streakSpan.className = `text-[11px] font-bold text-${theme}-700 bg-${theme}-100 px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-sm border border-${theme}-200`;
+                    streakSpan.innerHTML = `🔥 ${data.streak} ${streakUnit} streak`;
+                } else if (data.habit_status === 'EXPIRING' && data.streak > 0) {
+                    streakSpan.className = `text-[11px] font-bold text-${theme}-600 bg-white px-2 py-1 rounded-lg flex items-center gap-1.5 border-2 border-dashed border-${theme}-300 shadow-sm`;
+                    streakSpan.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${data.streak} ${streakUnit}s at risk`;
+                } else if (data.habit_status === 'PENDING' && data.streak > 0) {
+                    streakSpan.className = `text-[11px] font-bold text-stone-500 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200 shadow-sm`;
+                    streakSpan.innerHTML = `🔥 ${data.streak} ${streakUnit} streak`;
+                } else {
+                    streakSpan.className = `text-[11px] font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200`;
+                    streakSpan.innerHTML = `<span class="opacity-50 grayscale text-sm leading-none" title="Ready to grow">🌱</span> Ready to restart`;
+                }
+                container.appendChild(streakSpan);
+
+                // 4. Reset Row Layout Classes
+                row.className = "habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all group";
+                if (targetCount === 1) row.classList.add('cursor-pointer');
+                
                 iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center transition-colors";
                 nameEl.className = "text-sm font-bold";
-                streakLabel.className = "text-xs font-bold";
                 if (identityEl) identityEl.className = "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm";
 
-                // 6. Apply the correct Color Palette based on the server's state
+                // 5. Apply Colors (FIXED: Zero-streak states now retain hover colors!)
                 if (data.habit_status === 'COMPLETED') {
                     row.classList.add(`bg-${theme}-50/50`, `border-${theme}-100`);
                     iconBox.classList.add(`bg-${theme}-600`, `text-white`);
                     nameEl.classList.add(`text-${theme}-900`);
-                    streakLabel.classList.add(`text-${theme}-600`);
                     if (identityEl) identityEl.classList.add(`bg-${theme}-100/50`, `text-${theme}-600`, `border-${theme}-200`);
-                    
                 } else if (data.habit_status === 'EXPIRING') {
-                    row.classList.add('bg-white', 'border-amber-200', 'ring-2', 'ring-amber-50');
-                    iconBox.classList.add('bg-amber-100', 'text-amber-600');
-                    nameEl.classList.add('text-amber-900');
-                    streakLabel.classList.add('text-amber-500');
-                    if (identityEl) identityEl.classList.add('bg-amber-50', 'text-amber-600', 'border-amber-200');
-                    
-                } else {
-                    // Default "BROKEN" or "NOT_STARTED" State
+                    row.classList.add('bg-white', `border-${theme}-200`, `hover:border-${theme}-300`);
+                    iconBox.classList.add(`bg-${theme}-50`, `text-${theme}-600`);
+                    nameEl.classList.add(`text-${theme}-900`);
+                    if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`);
+                } else if (data.habit_status === 'PENDING') {
                     row.classList.add('bg-white', 'border-slate-100', `hover:border-${theme}-200`);
                     iconBox.classList.add('bg-slate-50', 'text-slate-400', `group-hover:bg-${theme}-50`, `group-hover:text-${theme}-600`);
                     nameEl.classList.add('text-slate-800');
-                    streakLabel.classList.add('text-amber-500');
+                    if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`, `group-hover:bg-${theme}-100`);
+                } else {
+                    // NEW BROKEN STATE: Identical to initial page load!
+                    row.classList.add('bg-stone-50/50', 'border-stone-100', 'hover:border-stone-200');
+                    iconBox.classList.add('bg-slate-50', 'text-slate-400', `group-hover:bg-${theme}-50`, `group-hover:text-${theme}-600`);
+                    nameEl.classList.add('text-slate-800');
                     if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`, `group-hover:bg-${theme}-100`);
                 }
             }
