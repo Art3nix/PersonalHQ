@@ -36,7 +36,7 @@ def matrix():
     identity_stats.sort(key=lambda x: x['total_evidence'], reverse=True)
 
     # Fetch habits that don't belong to an identity yet
-    unassigned_habits = Habit.query.filter_by(user_id=current_user.id, identity_id=None).all()
+    unassigned_habits = Habit.query.filter_by(user_id=current_user.id, identity_id=None, is_active=True).all()
 
     return render_template(
         'identities/matrix.html', 

@@ -19,7 +19,7 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 def index():
     """Renders the main command center dashboard."""
     # Habits
-    habits = Habit.query.filter_by(user_id=current_user.id).all()
+    habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
     today = get_local_today()
     start_of_week = today - timedelta(days=today.weekday())
     

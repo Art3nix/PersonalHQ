@@ -190,3 +190,27 @@ def unlog_habit_progress(habit_id):
         "best": habit.best_streak, 
         "habit_status": status_str
     }
+
+@habits_api_bp.route('/<int:habit_id>/archive', methods=['POST'])
+@login_required
+def archive_habit(habit_id):
+    """Soft-deletes a habit by setting it to inactive, preserving history."""
+    habit = db.session.get(Habit, habit_id)
+    
+    if habit and habit.user_id == current_user.id:
+        habit.is_active = False
+        db.session.commit()
+        
+    return redirect(url_for('habits_view.manage'))
+
+@habits_api_bp.route('/<int:habit_id>/unarchive', methods=['POST'])
+@login_required
+def unarchive_habit(habit_id):
+    """Restores an archived habit back to the active dashboard."""
+    habit = db.session.get(Habit, habit_id)
+    
+    if habit and habit.user_id == current_user.id:
+        habit.is_active = True
+        db.session.commit()
+        
+    return redirect(url_for('habits_view.manage'))

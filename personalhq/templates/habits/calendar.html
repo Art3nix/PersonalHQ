@@ -187,7 +187,7 @@
 <script id="day-counts-data" type="application/json">{{ day_counts_json | safe }}</script>
 
 <script>
-    const allHabits = JSON.parse(document.getElementById('habits-data').textContent);
+    let allHabits = JSON.parse(document.getElementById('habits-data').textContent);
     let dayCounts = JSON.parse(document.getElementById('day-counts-data').textContent);
     
     // Track what we are looking at so we can re-render seamlessly
@@ -330,6 +330,9 @@
         // 5. Update the hidden data payload for the panel
         document.getElementById('day-counts-data').textContent = virtualDoc.getElementById('day-counts-data').textContent;
         dayCounts = JSON.parse(document.getElementById('day-counts-data').textContent);
+        
+        document.getElementById('habits-data').textContent = virtualDoc.getElementById('habits-data').textContent;
+        allHabits = JSON.parse(document.getElementById('habits-data').textContent);
 
         // 6. Instantly re-render the side panel without closing it
         viewDayDetails(currentlySelectedDateStr, currentlySelectedDisplayDate);
@@ -358,6 +361,9 @@
         // 5. Update the hidden data payload for the side panel
         document.getElementById('day-counts-data').textContent = virtualDoc.getElementById('day-counts-data').textContent;
         dayCounts = JSON.parse(document.getElementById('day-counts-data').textContent);
+        
+        document.getElementById('habits-data').textContent = virtualDoc.getElementById('habits-data').textContent;
+        allHabits = JSON.parse(document.getElementById('habits-data').textContent);
 
         // 6. Refresh icons and keep the side panel open if you were looking at a day
         if (typeof lucide !== 'undefined') lucide.createIcons();

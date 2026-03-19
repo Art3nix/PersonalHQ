@@ -36,6 +36,7 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     category: Mapped[str | None]
     last_completed: Mapped[datetime | None]
     target_count: Mapped[int] = mapped_column(db.Integer, default=1, server_default="1", nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
 
     identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")

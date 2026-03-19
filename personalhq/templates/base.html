@@ -49,7 +49,21 @@
                 <button onclick="executeDelete()" class="flex-1 py-3.5 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-colors shadow-md shadow-red-200">Delete</button>
             </div>
         </div>
-      </div>
+    </div>
+    <div id="global-archive-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onclick="closeArchiveModal()"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-4 border border-stone-100 transform scale-95 transition-transform duration-200" id="global-archive-modal-box">
+            <div class="w-12 h-12 bg-indigo-50 text-indigo-500 rounded-2xl flex items-center justify-center mb-6 border border-indigo-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="5" rx="2" ry="2"></rect><path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"></path><path d="M10 13h4"></path></svg>
+            </div>
+            <h3 class="text-xl font-extrabold text-stone-900 mb-2">Archive Routine?</h3>
+            <p class="text-sm font-medium text-stone-500 mb-8">Are you sure you want to archive <span id="archive-item-name" class="font-bold text-stone-900">this</span>? It will be removed from your dashboard, but all history will be preserved.</p>
+            <div class="flex gap-3">
+                <button onclick="closeArchiveModal()" class="flex-1 py-3.5 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-colors">Cancel</button>
+                <button onclick="executeDelete()" class="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">Archive</button>
+            </div>
+        </div>
+    </div>
 
       <script>
           let formToSubmit = null;
@@ -87,6 +101,34 @@
                   formToSubmit.submit();
               }
           }
+
+          // Uses your existing global 'formToSubmit' variable and 'executeDelete' function!
+        function confirmArchive(formId, itemName) {
+            formToSubmit = document.getElementById(formId);
+            document.getElementById('archive-item-name').innerText = `"${itemName}"`;
+            
+            const modal = document.getElementById('global-archive-modal');
+            const box = document.getElementById('global-archive-modal-box');
+            
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            });
+        }
+
+        function closeArchiveModal() {
+            const modal = document.getElementById('global-archive-modal');
+            const box = document.getElementById('global-archive-modal-box');
+            
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                formToSubmit = null;
+            }, 200);
+        }
       </script>
       <script>
         document.addEventListener('keydown', function(event) {

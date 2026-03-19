@@ -37,7 +37,8 @@ def create_identity():
     if habit_ids:
         habits_to_update = Habit.query.filter(
             Habit.id.in_(habit_ids), 
-            Habit.user_id == current_user.id
+            Habit.user_id == current_user.id,
+            Habit.is_active == True
         ).all()
 
         for habit in habits_to_update:
