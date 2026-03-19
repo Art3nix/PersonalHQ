@@ -1,18 +1,17 @@
 """Module handling the business logic and streak calculations for Habits."""
 
 from datetime import datetime, timedelta
-from collections import Counter
+from collections import defaultdict
 from personalhq.extensions import db
-from personalhq.models.habits import HabitFrequency
+from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.services.time_service import get_local_today
 
 def recalculate_habit_streaks(habit):
-    """Scans all logs and strictly enforces target_count for streaks."""
-    logs = db.session.query(HabitLog.completed_date).filter_by(habit_id=habit.id).all()
-    log_dates_raw = [log[0] for log in logs]
+    """Scans all logs and strictly enforces target_count and progress for streaks."""
+    logs = HabitLog.query.filter_by(habit_id=habit.id).all()
     
-    if not log_dates_raw:
+    if not logs:
         habit.streak = 0
         habit.last_completed = None
         return
@@ -22,9 +21,8 @@ def recalculate_habit_streaks(habit):
     valid_dates = []
 
     if habit.frequency == HabitFrequency.DAILY:
-        # Count logs per day. Only keep days where count >= target_count
-        date_counts = Counter(log_dates_raw)
-        valid_dates = sorted([d for d, c in date_counts.items() if c >= habit.target_count], reverse=True)
+        # Valid dates are days where progress actually hit the target
+        valid_dates = sorted([l.completed_date for l in logs if l.progress >= l.target_at_time], reverse=True)
         
         if not valid_dates:
             habit.streak = 0
@@ -40,9 +38,15 @@ def recalculate_habit_streaks(habit):
                 else: break
 
     else: # WEEKLY
-        # Group logs by the Monday of their respective week
-        week_counts = Counter([d - timedelta(days=d.weekday()) for d in log_dates_raw])
-        valid_dates = sorted([w for w, c in week_counts.items() if c >= habit.target_count], reverse=True)
+        # Group progress by week (Monday)
+        week_progress = defaultdict(int)
+        week_targets = {}
+        for l in logs:
+            monday = l.completed_date - timedelta(days=l.completed_date.weekday())
+            week_progress[monday] += l.progress
+            week_targets[monday] = l.target_at_time 
+            
+        valid_dates = sorted([w for w, prog in week_progress.items() if prog >= week_targets.get(w, habit.target_count)], reverse=True)
         
         if not valid_dates:
             habit.streak = 0
@@ -83,44 +87,72 @@ def get_habit_status_and_sync(habit) -> str:
     current_hour = datetime.now().hour
 
     if habit.frequency == HabitFrequency.DAILY:
-        count_today = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
-        if count_today >= habit.target_count: return "COMPLETED"
+        # FIX: Check progress integer, not row count
+        log_today = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
+        if log_today and log_today.progress >= habit.target_count: return "COMPLETED"
 
         yesterday = today - timedelta(days=1)
-        count_yesterday = HabitLog.query.filter_by(habit_id=habit.id, completed_date=yesterday).count()
-        if count_yesterday >= habit.target_count:
-            # Streak is alive. Only trigger the visual warning after 8:00 PM.
-            if current_hour >= 20: 
-                return "EXPIRING"
+        log_yesterday = HabitLog.query.filter_by(habit_id=habit.id, completed_date=yesterday).first()
+        if log_yesterday and log_yesterday.progress >= habit.target_count:
+            if current_hour >= 20: return "EXPIRING"
             return "PENDING"
-
         return "BROKEN"
     else:
         start_of_week = today - timedelta(days=today.weekday())
-        count_this_week = HabitLog.query.filter(
-            HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week
-        ).count()
-        if count_this_week >= habit.target_count: return "COMPLETED"
+        logs_this_week = HabitLog.query.filter(HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week).all()
+        if sum(l.progress for l in logs_this_week) >= habit.target_count: return "COMPLETED"
 
         start_of_last_week = start_of_week - timedelta(days=7)
-        count_last_week = HabitLog.query.filter(
+        logs_last_week = HabitLog.query.filter(
             HabitLog.habit_id == habit.id, 
             HabitLog.completed_date >= start_of_last_week, 
             HabitLog.completed_date < start_of_week
-        ).count()
-        if count_last_week >= habit.target_count:
-            # Streak is alive. Warn only on Sunday after 8:00 PM.
-            if today.weekday() == 6 and current_hour >= 20:
-                return "EXPIRING"
+        ).all()
+        if sum(l.progress for l in logs_last_week) >= habit.target_count:
+            if today.weekday() == 6 and current_hour >= 20: return "EXPIRING"
             return "PENDING"
-
         return "BROKEN"
 
 def get_habit_current_count(habit) -> int:
     """Fetches the exact progress count for today or this week."""
     today = get_local_today()
     if habit.frequency == HabitFrequency.DAILY:
-        return HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
+        log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
+        return log.progress if log else 0
     else:
         start_of_week = today - timedelta(days=today.weekday())
-        return HabitLog.query.filter(HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week).count()
+        logs = HabitLog.query.filter(HabitLog.habit_id == habit.id, HabitLog.completed_date >= start_of_week).all()
+        return sum(l.progress for l in logs)
+
+def run_daily_ledger_catchup(user_id):
+    """Generates missing daily logs for active habits, capped at 30 days to prevent DDOS."""
+    today = get_local_today()
+    limit_date = today - timedelta(days=30)
+
+    active_habits = Habit.query.filter_by(user_id=user_id, is_active=True).all()
+    new_logs = []
+
+    for habit in active_habits:
+        start_date = max(limit_date, habit.created_at.date() if habit.created_at else limit_date)
+
+        existing_logs = HabitLog.query.filter(
+            HabitLog.habit_id == habit.id,
+            HabitLog.completed_date >= start_date
+        ).with_entities(HabitLog.completed_date).all()
+
+        existing_dates = {log[0] for log in existing_logs}
+
+        current_date = start_date
+        while current_date <= today:
+            if current_date not in existing_dates:
+                new_logs.append(HabitLog(
+                    habit_id=habit.id,
+                    completed_date=current_date,
+                    progress=0,
+                    target_at_time=habit.target_count 
+                ))
+            current_date += timedelta(days=1)
+
+    if new_logs:
+        db.session.bulk_save_objects(new_logs)
+        db.session.commit()

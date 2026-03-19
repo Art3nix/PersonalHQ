@@ -37,6 +37,7 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     last_completed: Mapped[datetime | None]
     target_count: Mapped[int] = mapped_column(db.Integer, default=1, server_default="1", nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
 
     identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")

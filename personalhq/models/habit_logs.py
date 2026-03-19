@@ -1,7 +1,7 @@
 """Module defining the SQLAlchemy model for Habit Logs."""
 
 from datetime import date, datetime
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from personalhq.services.time_service import get_local_now, get_local_today
 
@@ -16,10 +16,20 @@ class HabitLog(db.Model):
     # When habit is deleted, its entire history is wiped too
     habit_id: Mapped[int] = mapped_column(ForeignKey('habits.id', ondelete='CASCADE'), nullable=False)
 
-    # The calendar day this completion counts towards
+    # The calendar day this log belongs to
     completed_date: Mapped[date] = mapped_column(nullable=False, default=get_local_today)
 
-    # The exact timestamp the database recorded the click
-    logged_at: Mapped[datetime] = mapped_column(default=get_local_now)
+    # The Ledger Data
+    progress: Mapped[int] = mapped_column(default=0, nullable=False)
+    target_at_time: Mapped[int] = mapped_column(default=1, nullable=False) # Freezes historical target
+
+    # The exact timestamp the database last updated this log
+    logged_at: Mapped[datetime] = mapped_column(default=get_local_now, onupdate=get_local_now)
+    
     # Relationship back to the parent habit
     habit = relationship("Habit", back_populates="logs")
+
+    # Absolutely guarantees only ONE row can exist per habit, per day
+    __table_args__ = (
+        UniqueConstraint('habit_id', 'completed_date', name='uq_habit_date'),
+    )

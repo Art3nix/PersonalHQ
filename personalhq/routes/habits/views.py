@@ -11,7 +11,7 @@ from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
 from personalhq.services.time_service import get_local_today
-from personalhq.services.habit_service import get_habit_status_and_sync
+from personalhq.services.habit_service import get_habit_status_and_sync, run_daily_ledger_catchup
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 
@@ -19,6 +19,9 @@ habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
 @login_required
 def manage():
     """Renders the detailed habit analytics and management page."""
+    # Add this right here! Pad the DB before rendering anything.
+    run_daily_ledger_catchup(current_user.id)
+    
     all_habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).order_by(Habit.id).all()
     archived_habits = Habit.query.filter_by(user_id=current_user.id, is_active=False).order_by(Habit.id).all()
 
@@ -47,37 +50,44 @@ def manage():
 
     # Group logs by date, then by habit_id
     date_habit_counts = defaultdict(lambda: defaultdict(int))
+    daily_targets = defaultdict(int)
     for log in recent_logs:
         date_habit_counts[log.completed_date][log.habit_id] += 1
+        daily_targets[log.completed_date] += 1
 
     # Calculate strictly completed habits per day
     counts_dict = {}
     for d, h_counts in date_habit_counts.items():
         completed_today = 0
-        for h_id, count in h_counts.items():
+        for h_id, _ in h_counts.items():
             habit = next((h for h in all_habits if h.id == h_id), None)
             if not habit: continue
             
+            # We must look up the actual log to check its progress
+            log = next((l for l in recent_logs if l.habit_id == h_id and l.completed_date == d), None)
+            if not log: continue
+
             if habit.frequency == HabitFrequency.DAILY:
-                if count >= habit.target_count:
+                if log.progress >= log.target_at_time:
                     completed_today += 1
             else:
-                # For weekly habits, we award an activity point if they worked on it that day
-                if count > 0:
+                if log.progress > 0:
                     completed_today += 1
         counts_dict[d] = completed_today
 
     # Generate the 30-day grid data
     heatmap_data = []
-    max_possible = total_habits if total_habits > 0 else 1
 
     for i in range(30):
         current_date = thirty_days_ago + timedelta(days=i)
         count = counts_dict.get(current_date, 0)
+        
+        # Grab the exact target for this specific square
+        daily_target = daily_targets.get(current_date, 1)
 
         intensity = 0
         if count > 0:
-            ratio = count / max_possible
+            ratio = count / daily_target # <-- Use the dynamic target!
             if ratio <= 0.25: intensity = 1
             elif ratio <= 0.50: intensity = 2
             elif ratio <= 0.75: intensity = 3
@@ -114,7 +124,12 @@ def manage():
     # Build a fast lookup dictionary: { habit_id: set(dates_completed) }
     history_map = {h.id: set() for h in all_habits}
     for log in recent_logs:
-        history_map[log.habit_id].add(log.completed_date)
+        # Only add the dot to the sparkline if the target was actually met!
+        habit = next((h for h in all_habits if h.id == log.habit_id), None)
+        if habit:
+            if (habit.frequency == HabitFrequency.DAILY and log.progress >= log.target_at_time) or \
+               (habit.frequency == HabitFrequency.WEEKLY and log.progress > 0):
+                history_map[log.habit_id].add(log.completed_date)
 
     habit_history = {}
     for habit in all_habits:
@@ -132,15 +147,16 @@ def manage():
     current_counts = {}
     for habit in all_habits:
         if habit.frequency == HabitFrequency.DAILY:
-            # How many logs today?
-            count = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
+            # Read the ledger's progress integer, don't count the rows!
+            log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
+            current_counts[habit.id] = log.progress if log else 0
         else:
-            # How many logs since Monday?
-            count = HabitLog.query.filter(
+            # Sum up the progress from all ledgers this week
+            logs = HabitLog.query.filter(
                 HabitLog.habit_id == habit.id,
                 HabitLog.completed_date >= start_of_week
-            ).count()
-        current_counts[habit.id] = count
+            ).all()
+            current_counts[habit.id] = sum(l.progress for l in logs)
 
     return render_template(
         'habits/manage.html',
@@ -213,23 +229,30 @@ def habit_calendar():
         'theme': h.identity.color if h.identity and h.identity.color else 'indigo'
     } for h in active_habits]
 
-    date_habit_counts = defaultdict(lambda: defaultdict(int))
+    date_habit_logs = defaultdict(list)
     for log in logs:
-        date_habit_counts[log.completed_date.strftime('%Y-%m-%d')][str(log.habit_id)] += 1
+        date_habit_logs[log.completed_date.strftime('%Y-%m-%d')].append(log)
 
     counts_dict = {}
+    daily_targets = {} # NEW: Store the dynamic target for each day
     day_dots = defaultdict(set)
     
-    for d_str, h_counts in date_habit_counts.items():
+    for d_str, day_logs in date_habit_logs.items():
         d_obj = datetime.strptime(d_str, '%Y-%m-%d').date()
         completed_today = 0
         
-        for h_id_str, count in h_counts.items():
-            habit = next((h for h in active_habits if str(h.id) == h_id_str), None)
+        # 2. The Ledger Magic: The max possible is exactly how many ledgers exist!
+        daily_targets[d_obj] = len(day_logs) 
+        
+        for log in day_logs:
+            habit = next((h for h in active_habits if h.id == log.habit_id), None)
             if not habit: continue
             
-            if (habit.frequency == HabitFrequency.DAILY and count >= habit.target_count) or \
-               (habit.frequency == HabitFrequency.WEEKLY and count > 0):
+            # 3. Check if the ledger row actually hit the target
+            is_daily_done = habit.frequency == HabitFrequency.DAILY and log.progress >= log.target_at_time
+            is_weekly_done = habit.frequency == HabitFrequency.WEEKLY and log.progress > 0
+            
+            if is_daily_done or is_weekly_done:
                 completed_today += 1
                 theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo'
                 day_dots[d_obj].add(theme)
@@ -237,11 +260,18 @@ def habit_calendar():
         counts_dict[d_obj] = completed_today
 
     days_in_month = py_calendar.monthrange(year, month)[1]
-    total_possible = max_possible * days_in_month
+    total_possible = 0
+    perfect_days = 0
     total_completions_month = sum(counts_dict.values())
-    
-    consistency_score = int((total_completions_month / total_possible) * 100) if total_possible > 0 else 0
-    perfect_days = sum(1 for count in counts_dict.values() if count >= max_possible)
+
+    # Only grade them on days where the ledger proves a habit existed!
+    for d_obj, target in daily_targets.items():
+        total_possible += target
+        if counts_dict.get(d_obj, 0) >= target and target > 0:
+            perfect_days += 1
+            
+    # Prevent division by zero and cap at 100%
+    consistency_score = min(int((total_completions_month / total_possible) * 100), 100) if total_possible > 0 else 0
 
     identity_counts = defaultdict(int)
     for log in logs:
@@ -276,6 +306,7 @@ def habit_calendar():
                     'date_str': current_date.strftime('%Y-%m-%d'),
                     'display_date': current_date.strftime('%A, %B %d'),
                     'count': count,
+                    'max_possible': daily_targets.get(current_date, 1),
                     'is_today': current_date == today,
                     'dots': list(day_dots.get(current_date, []))[:5]
                 })
@@ -286,6 +317,11 @@ def habit_calendar():
     next_month = month + 1 if month < 12 else 1
     next_year = year if month < 12 else year + 1
 
+    # Build a clean, JSON-serializable dictionary for the frontend JS
+    frontend_day_counts = {}
+    for d_str, day_logs in date_habit_logs.items():
+        frontend_day_counts[d_str] = {log.habit_id: log.progress for log in day_logs}
+
     return render_template(
         'habits/calendar.html',
         calendar_data=calendar_data,
@@ -294,7 +330,7 @@ def habit_calendar():
         prev_month=prev_month, prev_year=prev_year,
         next_month=next_month, next_year=next_year,
         habits_json=json.dumps(habits_list),
-        day_counts_json=json.dumps(date_habit_counts),
+        day_counts_json=json.dumps(frontend_day_counts),
         max_possible=max_possible,
         consistency_score=consistency_score,
         perfect_days=perfect_days,

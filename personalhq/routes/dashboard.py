@@ -9,7 +9,7 @@ from personalhq.models.habit_logs import HabitLog
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.services.time_service import get_local_today
-from personalhq.services.habit_service import get_habit_status_and_sync
+from personalhq.services.habit_service import get_habit_status_and_sync, run_daily_ledger_catchup
 from personalhq.extensions import db
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
@@ -18,7 +18,9 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 @login_required
 def index():
     """Renders the main command center dashboard."""
-    # Habits
+    # 1. Pad the database with 0s for any missing days!
+    run_daily_ledger_catchup(current_user.id)
+
     habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
     today = get_local_today()
     start_of_week = today - timedelta(days=today.weekday())
@@ -27,19 +29,20 @@ def index():
     current_counts = {}
     
     for habit in habits:
-        # 1. Get the visual status and sync the streak
         habit_statuses[habit.id] = get_habit_status_and_sync(habit)
         
-        # 2. Fetch the actual partial progress count for the UI
+        # 2. Read the ledger's 'progress' column instead of counting rows
         if habit.frequency == HabitFrequency.DAILY:
-            count = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).count()
+            log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
+            current_counts[habit.id] = log.progress if log else 0
         else:
-            count = HabitLog.query.filter(
+            # For weekly, sum up all the progress they made this week
+            logs = HabitLog.query.filter(
                 HabitLog.habit_id == habit.id,
                 HabitLog.completed_date >= start_of_week
-            ).count()
-        current_counts[habit.id] = count
-        
+            ).all()
+            current_counts[habit.id] = sum(l.progress for l in logs)
+            
     db.session.commit()
 
     # Fetch all deep work sessions scheduled for today that aren't finished

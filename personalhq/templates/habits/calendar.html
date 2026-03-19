@@ -131,7 +131,7 @@
                                 {% if day == None %}
                                     <div class="aspect-square rounded-2xl bg-transparent"></div>
                                 {% else %}
-                                    {% set percent = (day.count / max_possible * 100) | round if max_possible > 0 else 0 %}
+                                    {% set percent = (day.count / day.max_possible * 100) | round if day.max_possible > 0 else 0 %}
                                     
                                     <button id="day-btn-{{ day.date_str }}"
                                             onclick="viewDayDetails('{{ day.date_str }}', '{{ day.display_date }}')" 
