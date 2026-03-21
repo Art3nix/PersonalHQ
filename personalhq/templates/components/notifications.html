@@ -1,0 +1,251 @@
+<!-- Global Notification System Component -->
+<div id="notificationContainer" class="notification-container"></div>
+
+<script>
+/**
+ * Global Notification System
+ * Handles all in-app notifications (success, error, warning, info)
+ */
+class NotificationSystem {
+    constructor() {
+        this.container = document.getElementById('notificationContainer');
+        this.notifications = [];
+    }
+    
+    /**
+     * Show a notification
+     * @param {string} message - Notification message
+     * @param {string} type - Type: 'success', 'error', 'warning', 'info'
+     * @param {number} duration - Duration in ms (0 = permanent)
+     */
+    show(message, type = 'info', duration = 3000) {
+        const id = Date.now();
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.id = `notification-${id}`;
+        
+        // Icon based on type
+        const icons = {
+            success: 'fas fa-check-circle',
+            error: 'fas fa-exclamation-circle',
+            warning: 'fas fa-exclamation-triangle',
+            info: 'fas fa-info-circle'
+        };
+        
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="${icons[type] || icons.info}"></i>
+                <span class="notification-message">${this.escapeHtml(message)}</span>
+            </div>
+            <button class="notification-close" onclick="notificationSystem.close('${id}')">&times;</button>
+        `;
+        
+        this.container.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Auto-dismiss
+        if (duration > 0) {
+            setTimeout(() => this.close(id), duration);
+        }
+        
+        return id;
+    }
+    
+    /**
+     * Show success notification
+     */
+    success(message, duration = 3000) {
+        return this.show(message, 'success', duration);
+    }
+    
+    /**
+     * Show error notification
+     */
+    error(message, duration = 5000) {
+        return this.show(message, 'error', duration);
+    }
+    
+    /**
+     * Show warning notification
+     */
+    warning(message, duration = 4000) {
+        return this.show(message, 'warning', duration);
+    }
+    
+    /**
+     * Show info notification
+     */
+    info(message, duration = 3000) {
+        return this.show(message, 'info', duration);
+    }
+    
+    /**
+     * Close a notification
+     */
+    close(id) {
+        const notification = document.getElementById(`notification-${id}`);
+        if (notification) {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }
+    }
+    
+    /**
+     * Close all notifications
+     */
+    closeAll() {
+        const notifications = this.container.querySelectorAll('.notification');
+        notifications.forEach(n => {
+            n.classList.remove('show');
+            setTimeout(() => n.remove(), 300);
+        });
+    }
+    
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+}
+
+// Initialize global notification system
+const notificationSystem = new NotificationSystem();
+
+// Handle API errors automatically
+document.addEventListener('fetch-error', function(e) {
+    notificationSystem.error(e.detail.message || 'An error occurred');
+});
+
+// Handle API success automatically
+document.addEventListener('fetch-success', function(e) {
+    if (e.detail.message) {
+        notificationSystem.success(e.detail.message);
+    }
+});
+</script>
+
+<style>
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9998;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: auto;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.notification-content i {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.notification-message {
+    font-size: 14px;
+    line-height: 1.4;
+    color: #2c3e50;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: #95a5a6;
+    padding: 0 0 0 12px;
+    margin-left: 12px;
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.notification-close:hover {
+    color: #2c3e50;
+}
+
+/* Type-specific styles */
+.notification-success {
+    border-left: 4px solid #27ae60;
+}
+
+.notification-success .notification-content i {
+    color: #27ae60;
+}
+
+.notification-error {
+    border-left: 4px solid #e74c3c;
+}
+
+.notification-error .notification-content i {
+    color: #e74c3c;
+}
+
+.notification-warning {
+    border-left: 4px solid #f39c12;
+}
+
+.notification-warning .notification-content i {
+    color: #f39c12;
+}
+
+.notification-info {
+    border-left: 4px solid #3498db;
+}
+
+.notification-info .notification-content i {
+    color: #3498db;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .notification-container {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+    
+    .notification {
+        margin-bottom: 10px;
+        padding: 12px 16px;
+    }
+    
+    .notification-message {
+        font-size: 13px;
+    }
+}
+</style>
