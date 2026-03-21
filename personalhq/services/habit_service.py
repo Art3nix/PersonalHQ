@@ -125,3 +125,59 @@ def get_habit_status_and_sync(habit) -> str:
             if habit.streak != 0:
                 habit.streak = 0
             return "BROKEN"
+
+
+def create_habit(user_id: int, name: str, frequency: str, identity_id: int = None, 
+                 description: str = None, trigger: str = None, icon: str = "⭐") -> Habit:
+    """Create a new habit for a user."""
+    habit = Habit(
+        user_id=user_id,
+        name=name.strip(),
+        frequency=HabitFrequency[frequency.upper()],
+        identity_id=identity_id,
+        description=description.strip() if description else None,
+        trigger=trigger.strip() if trigger else None,
+        icon=icon,
+        streak=0
+    )
+    db.session.add(habit)
+    db.session.commit()
+    return habit
+
+
+def update_habit(habit_id: int, user_id: int, **kwargs) -> dict:
+    """Update habit fields (name, description, trigger, icon, etc.)."""
+    habit = db.session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        return {"status": "error", "message": "Habit not found"}
+    
+    allowed_fields = ['name', 'description', 'trigger', 'icon', 'frequency', 'identity_id']
+    for field, value in kwargs.items():
+        if field in allowed_fields and value is not None:
+            if field == 'frequency':
+                setattr(habit, field, HabitFrequency[value.upper()])
+            else:
+                setattr(habit, field, value)
+    
+    db.session.commit()
+    return {"status": "success", "message": "Habit updated"}
+
+
+def delete_habit(habit_id: int, user_id: int) -> dict:
+    """Delete a habit and all its logs."""
+    habit = db.session.get(Habit, habit_id)
+    if not habit or habit.user_id != user_id:
+        return {"status": "error", "message": "Habit not found"}
+    
+    db.session.delete(habit)
+    db.session.commit()
+    return {"status": "success", "message": "Habit deleted"}
+
+
+def import_habit_streak(user_id: int, name: str, existing_streak: int, 
+                       frequency: str = "DAILY", identity_id: int = None) -> dict:
+    """Import a habit with an existing streak from another system."""
+    habit = create_habit(user_id, name, frequency, identity_id)
+    habit.streak = existing_streak
+    db.session.commit()
+    return {"status": "success", "habit_id": habit.id, "message": "Habit imported with streak"}
