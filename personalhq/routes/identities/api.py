@@ -11,7 +11,7 @@ from personalhq.services.logging_service import LoggingService
 from personalhq.middleware.rate_limiter import api_rate_limit
 
 # Blueprint for legacy /actions/ endpoints
-identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/identities')
+identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/api/v1/identities')
 
 # Blueprint for modern /api/v2/ endpoints
 identities_api_v2_bp = Blueprint('identities_api_v2', __name__, url_prefix='/api/v2/identities')
@@ -23,7 +23,6 @@ identities_api_v2_bp = Blueprint('identities_api_v2', __name__, url_prefix='/api
 
 @identities_api_bp.route('/create', methods=['POST'])
 @login_required
-def create_identity_legacy():
     """
     DEPRECATED: Creates a new Identity and optionally links existing unassigned habits.
     Use POST /api/v2/identities instead.
@@ -64,7 +63,6 @@ def create_identity_legacy():
 
 @identities_api_bp.route('/<int:identity_id>/edit', methods=['POST'])
 @login_required
-def edit_identity_legacy(identity_id):
     """
     DEPRECATED: Updates an existing Identity's core details.
     Use PUT /api/v2/identities/<id> instead.
@@ -89,7 +87,6 @@ def edit_identity_legacy(identity_id):
 
 @identities_api_bp.route('/<int:identity_id>/delete', methods=['POST'])
 @login_required
-def delete_identity_legacy(identity_id):
     """
     DEPRECATED: Deletes an Identity and safely unassigns its associated habits and focus sessions.
     Use DELETE /api/v2/identities/<id> instead.

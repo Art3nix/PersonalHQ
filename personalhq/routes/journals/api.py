@@ -7,7 +7,7 @@ from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalentries import JournalEntry
 from personalhq.models.journalprompts import JournalPrompt
 
-journals_api_bp = Blueprint('journals_api', __name__, url_prefix='/actions/journals')
+journals_api_bp = Blueprint('journals_api', __name__, url_prefix='/api/v1/journals')
 
 @journals_api_bp.route('/<int:journal_id>/entries', methods=['POST'])
 @login_required

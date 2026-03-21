@@ -12,7 +12,7 @@ from personalhq.models.experiences import Experience
 from personalhq.models.bucket_experience import BucketExperience
 from personalhq.models.journalentries import JournalEntry
 
-braindumps_api_bp = Blueprint('braindumps_api', __name__, url_prefix='/actions/braindumps')
+braindumps_api_bp = Blueprint('braindumps_api', __name__, url_prefix='/api/v1/braindumps')
 
 @braindumps_api_bp.route('/catch', methods=['POST'])
 @login_required

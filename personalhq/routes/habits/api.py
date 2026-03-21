@@ -17,7 +17,7 @@ from personalhq.services.logging_service import LoggingService
 from personalhq.middleware.rate_limiter import api_rate_limit
 
 # Blueprint for legacy /actions/ endpoints
-habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
+habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/api/v1/habits')
 
 # Blueprint for modern /api/v2/ endpoints
 habits_api_v2_bp = Blueprint('habits_api_v2', __name__, url_prefix='/api/v2/habits')
@@ -29,7 +29,6 @@ habits_api_v2_bp = Blueprint('habits_api_v2', __name__, url_prefix='/api/v2/habi
 
 @habits_api_bp.route('/<int:habit_id>/toggle', methods=['POST'])
 @login_required
-def toggle_habit_legacy(habit_id):
     """
     DEPRECATED: Toggles a habit's completion status for today and logs the event.
     Use POST /api/v2/habits/<id>/log instead.
@@ -90,7 +89,6 @@ def toggle_habit_legacy(habit_id):
 
 @habits_api_bp.route('/create', methods=['POST'])
 @login_required
-def create_habit_legacy():
     """
     DEPRECATED: Receives form data to create a new habit.
     Use POST /api/v2/habits instead.
@@ -122,7 +120,6 @@ def create_habit_legacy():
 
 @habits_api_bp.route('/<int:habit_id>/edit', methods=['POST'])
 @login_required
-def edit_habit_legacy(habit_id):
     """
     DEPRECATED: Updates an existing habit's details.
     Use PUT /api/v2/habits/<id> instead.
@@ -150,7 +147,6 @@ def edit_habit_legacy(habit_id):
 
 @habits_api_bp.route('/<int:habit_id>/delete', methods=['POST'])
 @login_required
-def delete_habit_legacy(habit_id):
     """
     DEPRECATED: Deletes a habit and all associated logs.
     Use DELETE /api/v2/habits/<id> instead.
