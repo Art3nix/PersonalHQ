@@ -207,7 +207,7 @@ def create_theme():
     name = request.form.get('name')
     color = request.form.get('color', 'stone')
     if name:
-        new_theme = CoreTheme(name=name.strip(), color=color)
+        new_theme = CoreTheme(user_id=current_user.id, name=name.strip(), color=color)
         db.session.add(new_theme)
         db.session.commit()
     return redirect(url_for('time_buckets_view.manage'))
@@ -218,7 +218,7 @@ def create_emotion():
     name = request.form.get('name')
     color = request.form.get('color', 'rose')
     if name:
-        new_emotion = EmotionalValue(name=name.strip(), color=color)
+        new_emotion = EmotionalValue(user_id=current_user.id, name=name.strip(), color=color)
         db.session.add(new_emotion)
         db.session.commit()
     return redirect(url_for('time_buckets_view.manage'))
@@ -227,7 +227,7 @@ def create_emotion():
 @login_required
 def edit_theme(id):
     theme = db.session.get(CoreTheme, id)
-    if theme:
+    if theme and theme.user_id == current_user.id:
         theme.name = request.form.get('name', theme.name).strip()
         theme.color = request.form.get('color', theme.color)
         db.session.commit()
@@ -237,7 +237,7 @@ def edit_theme(id):
 @login_required
 def delete_theme(id):
     theme = db.session.get(CoreTheme, id)
-    if theme:
+    if theme and theme.user_id == current_user.id:
         db.session.delete(theme)
         db.session.commit()
     return redirect(url_for('time_buckets_view.manage'))
@@ -246,7 +246,7 @@ def delete_theme(id):
 @login_required
 def edit_emotion(id):
     emotion = db.session.get(EmotionalValue, id)
-    if emotion:
+    if emotion and emotion.user_id == current_user.id:
         emotion.name = request.form.get('name', emotion.name).strip()
         emotion.color = request.form.get('color', emotion.color)
         db.session.commit()
@@ -256,7 +256,7 @@ def edit_emotion(id):
 @login_required
 def delete_emotion(id):
     emotion = db.session.get(EmotionalValue, id)
-    if emotion:
+    if emotion and emotion.user_id == current_user.id:
         db.session.delete(emotion)
         db.session.commit()
     return redirect(url_for('time_buckets_view.manage'))

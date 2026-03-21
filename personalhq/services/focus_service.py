@@ -32,6 +32,8 @@ def pause_session(session_id: int) -> bool:
 def resume_session(session_id: int) -> bool:
     """Calculates pause duration, adds to the total, and resumes IN_PROGRESS."""
     session = db.session.get(FocusSession, session_id)
+    if not session:
+        return False
 
     # Handle the very first start
     if session.status == SessionStatus.NOT_STARTED:

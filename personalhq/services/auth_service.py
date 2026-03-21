@@ -53,5 +53,5 @@ def send_reset_email(to_email: str, reset_url: str):
 
 def update_password(user: User, new_password: str):
     """Updates a user's password securely."""
-    user.password = new_password # The model's @password.setter handles hashing
+    user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
     db.session.commit()

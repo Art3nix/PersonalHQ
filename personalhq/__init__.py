@@ -75,4 +75,29 @@ def create_app(config_name=None):
     app.register_blueprint(journals_view_bp)
     app.register_blueprint(journals_api_bp)
 
+    # Health check endpoint for monitoring
+    @app.route('/health')
+    def health():
+        """Health check endpoint for load balancers and monitoring."""
+        try:
+            from sqlalchemy import text
+            db.session.execute(text('SELECT 1'))
+            return {'status': 'ok', 'database': 'connected'}, 200
+        except Exception as e:
+            return {'status': 'error', 'error': str(e)}, 500
+
+    # Global error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        """Handle 404 errors."""
+        from flask import render_template
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        """Handle 500 errors."""
+        from flask import render_template
+        db.session.rollback()
+        return render_template('errors/500.html'), 500
+
     return app
