@@ -1,0 +1,382 @@
+<!-- Timer Display Component with Progress -->
+<div id="timerContainer" class="timer-container" style="display: none;">
+    <div class="timer-overlay"></div>
+    <div class="timer-card">
+        <div class="timer-header">
+            <h3 id="timerTaskName">Focus Session</h3>
+            <button type="button" class="close-timer" id="closeTimer">&times;</button>
+        </div>
+        
+        <div class="timer-display">
+            <div class="timer-circle">
+                <svg class="timer-progress" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="45" class="timer-background"></circle>
+                    <circle cx="50" cy="50" r="45" class="timer-fill" id="timerFill"></circle>
+                </svg>
+                <div class="timer-time" id="timerTime">25:00</div>
+            </div>
+        </div>
+        
+        <div class="timer-stats">
+            <div class="stat">
+                <span class="stat-label">Duration</span>
+                <span class="stat-value" id="timerDuration">25 min</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Elapsed</span>
+                <span class="stat-value" id="timerElapsed">0 min</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Remaining</span>
+                <span class="stat-value" id="timerRemaining">25 min</span>
+            </div>
+        </div>
+        
+        <div class="timer-controls">
+            <button type="button" class="btn btn-sm btn-secondary" id="pauseResumeBtn">
+                <i class="fas fa-pause"></i> Pause
+            </button>
+            <button type="button" class="btn btn-sm btn-warning" id="extendBtn">
+                <i class="fas fa-plus"></i> +5 min
+            </button>
+            <button type="button" class="btn btn-sm btn-danger" id="endBtn">
+                <i class="fas fa-stop"></i> End
+            </button>
+        </div>
+        
+        <div class="timer-footer">
+            <small>Press ESC to minimize • Click to focus</small>
+        </div>
+    </div>
+</div>
+
+<script>
+/**
+ * Timer Display Manager
+ * Handles visual timer display with progress circle
+ */
+class TimerDisplay {
+    constructor() {
+        this.container = document.getElementById('timerContainer');
+        this.timerTime = document.getElementById('timerTime');
+        this.timerFill = document.getElementById('timerFill');
+        this.timerDuration = document.getElementById('timerDuration');
+        this.timerElapsed = document.getElementById('timerElapsed');
+        this.timerRemaining = document.getElementById('timerRemaining');
+        this.taskName = document.getElementById('timerTaskName');
+        
+        this.isPaused = false;
+        this.totalSeconds = 0;
+        this.elapsedSeconds = 0;
+        this.intervalId = null;
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        document.getElementById('closeTimer').addEventListener('click', () => this.minimize());
+        document.getElementById('pauseResumeBtn').addEventListener('click', () => this.togglePause());
+        document.getElementById('extendBtn').addEventListener('click', () => this.extend());
+        document.getElementById('endBtn').addEventListener('click', () => this.end());
+        
+        // ESC to minimize
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.container.style.display !== 'none') {
+                this.minimize();
+            }
+        });
+    }
+    
+    show(taskName, durationMinutes) {
+        this.taskName.textContent = taskName;
+        this.totalSeconds = durationMinutes * 60;
+        this.elapsedSeconds = 0;
+        this.isPaused = false;
+        
+        this.container.style.display = 'flex';
+        this.updateDisplay();
+        this.startTimer();
+    }
+    
+    minimize() {
+        this.container.style.display = 'none';
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+    }
+    
+    startTimer() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId);
+        }
+        
+        this.intervalId = setInterval(() => {
+            if (!this.isPaused) {
+                this.elapsedSeconds++;
+                this.updateDisplay();
+                
+                // Timer finished
+                if (this.elapsedSeconds >= this.totalSeconds) {
+                    this.timerFinished();
+                }
+            }
+        }, 1000);
+    }
+    
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        const btn = document.getElementById('pauseResumeBtn');
+        
+        if (this.isPaused) {
+            btn.innerHTML = '<i class="fas fa-play"></i> Resume';
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-info');
+        } else {
+            btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+            btn.classList.remove('btn-info');
+            btn.classList.add('btn-secondary');
+        }
+    }
+    
+    extend(minutes = 5) {
+        this.totalSeconds += minutes * 60;
+        this.updateDisplay();
+    }
+    
+    end() {
+        if (confirm('End this focus session?')) {
+            clearInterval(this.intervalId);
+            this.container.style.display = 'none';
+            // Trigger end session event
+            document.dispatchEvent(new CustomEvent('timerEnded', {
+                detail: { elapsedSeconds: this.elapsedSeconds }
+            }));
+        }
+    }
+    
+    timerFinished() {
+        clearInterval(this.intervalId);
+        this.playNotification();
+        // Trigger completion event
+        document.dispatchEvent(new CustomEvent('timerCompleted', {
+            detail: { totalSeconds: this.totalSeconds }
+        }));
+    }
+    
+    updateDisplay() {
+        const remainingSeconds = this.totalSeconds - this.elapsedSeconds;
+        
+        // Update time display
+        const minutes = Math.floor(remainingSeconds / 60);
+        const seconds = remainingSeconds % 60;
+        this.timerTime.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        // Update stats
+        this.timerDuration.textContent = `${Math.floor(this.totalSeconds / 60)} min`;
+        this.timerElapsed.textContent = `${Math.floor(this.elapsedSeconds / 60)} min`;
+        this.timerRemaining.textContent = `${Math.floor(remainingSeconds / 60)} min`;
+        
+        // Update progress circle
+        const progress = (this.elapsedSeconds / this.totalSeconds) * 100;
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (progress / 100) * circumference;
+        this.timerFill.style.strokeDashoffset = offset;
+    }
+    
+    playNotification() {
+        // Play sound notification
+        const audio = new Audio('data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA==');
+        audio.play().catch(e => console.log('Audio notification failed:', e));
+    }
+}
+
+// Initialize timer display
+const timerDisplay = new TimerDisplay();
+</script>
+
+<style>
+.timer-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.timer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+.timer-card {
+    position: relative;
+    background: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 90%;
+    z-index: 10000;
+}
+
+.timer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.timer-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.close-timer {
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #7f8c8d;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-timer:hover {
+    color: #2c3e50;
+}
+
+.timer-display {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.timer-circle {
+    position: relative;
+    width: 200px;
+    height: 200px;
+}
+
+.timer-progress {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.timer-background {
+    fill: none;
+    stroke: #ecf0f1;
+    stroke-width: 3;
+}
+
+.timer-fill {
+    fill: none;
+    stroke: #3498db;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 282.7;
+    stroke-dashoffset: 282.7;
+    transition: stroke-dashoffset 0.5s linear;
+}
+
+.timer-time {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 48px;
+    font-weight: 700;
+    color: #2c3e50;
+    font-family: 'Courier New', monospace;
+}
+
+.timer-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.timer-controls .btn {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.timer-controls .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.timer-footer {
+    text-align: center;
+    color: #95a5a6;
+    font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .timer-card {
+        padding: 30px 20px;
+    }
+    
+    .timer-circle {
+        width: 150px;
+        height: 150px;
+    }
+    
+    .timer-time {
+        font-size: 36px;
+    }
+}
+</style>
