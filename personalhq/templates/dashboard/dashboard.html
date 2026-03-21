@@ -740,5 +740,145 @@
             }
         });
 
+        // --- PEDAGOGY MODAL LOGIC ---
+        function openPedagogyModal() {
+            const modal = document.getElementById('pedagogy-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closePedagogyModal() {
+            const modal = document.getElementById('pedagogy-modal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function showPedagogyCategory(categoryId) {
+            document.querySelectorAll('.pedagogy-content').forEach(el => el.classList.add('hidden'));
+            const content = document.getElementById(`pedagogy-${categoryId}`);
+            if (content) content.classList.remove('hidden');
+        }
+
+    </script>
+
+    <!-- Pedagogy Knowledge Modal -->
+    <div id="pedagogy-modal" class="fixed inset-0 z-[200] bg-stone-950/50 backdrop-blur-sm opacity-0 transition-opacity duration-300 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col">
+            <!-- Header -->
+            <div class="border-b border-stone-100 p-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-stone-900">Knowledge Base</h2>
+                    <p class="text-sm text-stone-400 mt-1">Learn the principles behind PersonalHQ</p>
+                </div>
+                <button onclick="closePedagogyModal()" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Content -->
+            <div class="flex flex-1 overflow-hidden">
+                <!-- Category List -->
+                <div class="w-48 border-r border-stone-100 overflow-y-auto bg-stone-50/50">
+                    <button onclick="showPedagogyCategory('habits')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Building Habits
+                    </button>
+                    <button onclick="showPedagogyCategory('identity')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Identity-Based Change
+                    </button>
+                    <button onclick="showPedagogyCategory('deep_work')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Deep Work & Focus
+                    </button>
+                    <button onclick="showPedagogyCategory('time_buckets')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Time Buckets
+                    </button>
+                    <button onclick="showPedagogyCategory('gtd')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Getting Things Done
+                    </button>
+                    <button onclick="showPedagogyCategory('general')" class="w-full text-left px-6 py-4 hover:bg-stone-100 transition-colors border-l-2 border-transparent hover:border-indigo-500 font-medium text-sm text-stone-700">
+                        Getting Started
+                    </button>
+                </div>
+
+                <!-- Content Area -->
+                <div class="flex-1 overflow-y-auto p-8">
+                    <div id="pedagogy-habits" class="pedagogy-content prose prose-sm max-w-none">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Building Habits</h3>
+                        <p class="text-stone-600 mb-4">Habits are the compound interest of self-improvement. Small, consistent actions lead to remarkable results.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">Key Principles:</h4>
+                        <ul class="text-stone-600 space-y-2 ml-4">
+                            <li><strong>Identity-Based Habits:</strong> Focus on who you want to become</li>
+                            <li><strong>The Habit Loop:</strong> Cue → Craving → Response → Reward</li>
+                            <li><strong>Streaks Matter:</strong> Consistency is more important than intensity</li>
+                            <li><strong>Two-Day Rule:</strong> Missing once is a slip, missing twice is a new habit</li>
+                        </ul>
+                        <p class="text-stone-500 text-sm mt-6 italic">Reference: Atomic Habits by James Clear</p>
+                    </div>
+
+                    <div id="pedagogy-identity" class="pedagogy-content prose prose-sm max-w-none hidden">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Identity-Based Change</h3>
+                        <p class="text-stone-600 mb-4">The most effective way to change behavior is to focus on who you wish to become, not the outcomes you want.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">The Identity Shift:</h4>
+                        <ul class="text-stone-600 space-y-2 ml-4">
+                            <li><strong>Outcome-Based:</strong> "I want to run a marathon" → Often fails</li>
+                            <li><strong>Identity-Based:</strong> "I am a runner" → Sustainable</li>
+                        </ul>
+                        <p class="text-stone-500 text-sm mt-6 italic">Reference: Atomic Habits by James Clear</p>
+                    </div>
+
+                    <div id="pedagogy-deep_work" class="pedagogy-content prose prose-sm max-w-none hidden">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Deep Work & Focus</h3>
+                        <p class="text-stone-600 mb-4">Deep work is professional activity performed in a state of undistracted concentration that pushes your cognitive abilities to their limit.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">Why Deep Work Matters:</h4>
+                        <ul class="text-stone-600 space-y-2 ml-4">
+                            <li>Most valuable work requires deep focus</li>
+                            <li>Shallow work is easy to do but hard to improve</li>
+                            <li>Deep work is rare and therefore valuable</li>
+                        </ul>
+                        <p class="text-stone-500 text-sm mt-6 italic">Reference: Deep Work by Cal Newport</p>
+                    </div>
+
+                    <div id="pedagogy-time_buckets" class="pedagogy-content prose prose-sm max-w-none hidden">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Life Planning with Time Buckets</h3>
+                        <p class="text-stone-600 mb-4">Life is finite. By dividing your life into decades, you can make intentional choices about how to spend your time.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">Why This Matters:</h4>
+                        <ul class="text-stone-600 space-y-2 ml-4">
+                            <li>Forces you to think long-term</li>
+                            <li>Prevents the "I'll do it later" trap</li>
+                            <li>Creates urgency and motivation</li>
+                        </ul>
+                        <p class="text-stone-500 text-sm mt-6 italic">Reference: Die With Zero by Bill Perkins</p>
+                    </div>
+
+                    <div id="pedagogy-gtd" class="pedagogy-content prose prose-sm max-w-none hidden">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Getting Things Done</h3>
+                        <p class="text-stone-600 mb-4">GTD is a method for capturing, organizing, and executing on all your ideas and tasks.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">The Five Steps:</h4>
+                        <ol class="text-stone-600 space-y-2 ml-4">
+                            <li><strong>Capture:</strong> Write down everything on your mind</li>
+                            <li><strong>Clarify:</strong> Decide what each item means</li>
+                            <li><strong>Organize:</strong> Put items in the right categories</li>
+                            <li><strong>Reflect:</strong> Review regularly</li>
+                            <li><strong>Engage:</strong> Do the work</li>
+                        </ol>
+                        <p class="text-stone-500 text-sm mt-6 italic">Reference: Getting Things Done by David Allen</p>
+                    </div>
+
+                    <div id="pedagogy-general" class="pedagogy-content prose prose-sm max-w-none hidden">
+                        <h3 class="text-xl font-bold text-stone-900 mb-4">Welcome to PersonalHQ</h3>
+                        <p class="text-stone-600 mb-4">PersonalHQ is a productivity system designed to help you build the life you want through intentional habits, deep work, and life planning.</p>
+                        <h4 class="font-bold text-stone-800 mt-4 mb-2">Getting Started:</h4>
+                        <ol class="text-stone-600 space-y-2 ml-4">
+                            <li>Define 2-3 identities that matter to you</li>
+                            <li>Create 3-5 habits that reinforce those identities</li>
+                            <li>Start tracking daily</li>
+                            <li>Add deep work sessions to your calendar</li>
+                        </ol>
+                        <p class="text-stone-500 text-sm mt-6 italic">Remember: Small, consistent actions compound over time.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     </script>
 {% endblock %}
