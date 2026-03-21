@@ -15,10 +15,19 @@ def index():
     """Renders the main Journals overview and the creation modal."""
     journals = Journal.query.filter_by(user_id=current_user.id).all()
 
+    # Fetch 2 most recent entries per journal for preview
+    recent_entries = {}
+    for journal in journals:
+        entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(
+            JournalEntry.created_at.desc()
+        ).limit(2).all()
+        recent_entries[journal.id] = entries
+
     return render_template(
         'journals/index.html',
         journals=journals,
-        JournalFrequency=JournalFrequency # Pass this to the template
+        recent_entries=recent_entries,
+        JournalFrequency=JournalFrequency
     )
 
 @journals_view_bp.route('/<int:journal_id>/write')

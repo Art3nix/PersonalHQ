@@ -1,19 +1,15 @@
 """Application factory for Personal HQ."""
 
 import os
-from flask import Flask
+from flask import Flask, render_template
 
-# Import the extensions
 from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail
 from personalhq import models
 
-# Import the configuration classes
 from config.development import DevelopmentConfig
 from config.production import ProductionConfig
 from config.testing import DockerTestingConfig, LocalTestingConfig
 
-
-# Map environment strings to their respective config objects
 CONFIG_MAP = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
@@ -25,14 +21,11 @@ def create_app(config_name=None):
     """Creates and configures the Flask application."""
     app = Flask(__name__)
 
-    # Load Configuration
-    # Uses the FLASK_CONFIG environment variable defined in docker-compose.yml
     if config_name is None:
         config_name = os.environ.get("FLASK_CONFIG", "development")
 
     app.config.from_object(CONFIG_MAP.get(config_name, DevelopmentConfig))
 
-    # Initialize Extensions
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
@@ -41,15 +34,19 @@ def create_app(config_name=None):
     csrf.init_app(app)
     mail.init_app(app)
 
-
     @login_manager.user_loader
     def load_user(user_id):
         return models.User.query.get(int(user_id))
 
-    #@app.context_processor
-    #def inject_logout_form():
-    #    return dict(logout_form=LogoutForm())
+    # Global error handlers
+    @app.errorhandler(404)
+    def not_found(error):
+        return render_template('errors/404.html'), 404
 
+    @app.errorhandler(500)
+    def server_error(error):
+        db.session.rollback()
+        return render_template('errors/500.html'), 500
 
     # Register Blueprints
     from personalhq.routes.dashboard import dashboard_bp
@@ -70,9 +67,17 @@ def create_app(config_name=None):
     app.register_blueprint(focus_view_bp)
     from personalhq.routes.identities import identities_api_bp, identities_view_bp
     app.register_blueprint(identities_api_bp)
-    app.register_blueprint(identities_view_bp)# Inside your create_app() function:
+    app.register_blueprint(identities_view_bp)
     from personalhq.routes.journals import journals_view_bp, journals_api_bp
     app.register_blueprint(journals_view_bp)
     app.register_blueprint(journals_api_bp)
+    from personalhq.routes.settings import settings_bp
+    app.register_blueprint(settings_bp)
+
+
+    @app.route('/health')
+    def health():
+        from flask import jsonify
+        return jsonify({"status": "ok"}), 200
 
     return app

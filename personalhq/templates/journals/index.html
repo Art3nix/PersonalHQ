@@ -39,9 +39,19 @@
                             <p class="text-xs font-medium text-stone-500 line-clamp-2 mb-6 leading-relaxed">{{ journal.description }}</p>
                         {% endif %}
 
+                        {% if recent_entries.get(journal.id) %}
+                        <div class="mt-4 space-y-2 border-t border-{{ theme }}-100/50 pt-4">
+                            {% for entry in recent_entries[journal.id] %}
+                            <div class="bg-white/50 backdrop-blur-sm rounded-xl p-3 border border-{{ theme }}-100">
+                                <p class="text-[10px] font-bold text-{{ theme }}-500 uppercase tracking-wider mb-1">{{ entry.created_at.strftime('%b %d') }}</p>
+                                <p class="text-xs text-stone-600 line-clamp-2 leading-relaxed">{{ entry.content[:100] }}{% if entry.content|length > 100 %}…{% endif %}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                         <div class="flex items-center justify-between mt-auto pt-4">
                             <span class="text-[10px] font-bold text-{{ theme }}-700 uppercase tracking-widest bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-{{ theme }}-200 shadow-sm">
-                                {{ journal.frequency.value }}
+                                {% if journal.frequency.name == 'ON_DEMAND' %}On Demand{% else %}{{ journal.frequency.value }}{% endif %}
                             </span>
                             <span class="text-xs font-bold text-{{ theme }}-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
                                 Open 

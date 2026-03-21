@@ -14,7 +14,8 @@
                 </a>
                 <div>
                     <h1 class="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
-                        {{ journal.icon or '📓' }} {{ journal.name }}
+                        <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-5 h-5 text-{{ journal.color or 'indigo' }}-500"></i>
+                        {{ journal.name }}
                     </h1>
                     <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ entries|length }} Total Entries</p>
                 </div>

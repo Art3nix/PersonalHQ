@@ -22,7 +22,7 @@ def manage():
     # Add this right here! Pad the DB before rendering anything.
     run_daily_ledger_catchup(current_user.id)
     
-    all_habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).order_by(Habit.sort_order).all()
+    all_habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).order_by(Habit.id).all()
     archived_habits = Habit.query.filter_by(user_id=current_user.id, is_active=False).order_by(Habit.id).all()
 
     habit_statuses = {}

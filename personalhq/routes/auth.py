@@ -107,3 +107,8 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
 
     return render_template('auth/reset-password.html', form=form, token=token)
+from flask import jsonify
+
+@auth_bp.route('/health')
+def health():
+    return jsonify({"status": "ok"}), 200

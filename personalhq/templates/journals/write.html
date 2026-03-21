@@ -13,7 +13,8 @@
                 </a>
                 <div>
                     <h1 class="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
-                        {{ journal.icon or '📓' }} {{ journal.name }}
+                        <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-5 h-5 text-{{ journal.color or 'indigo' }}-500"></i>
+                        {{ journal.name }}
                     </h1>
                     <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ journal.frequency.value }} • {{ entries|length }} Entries</p>
                 </div>
@@ -266,11 +267,17 @@
             composer.addEventListener('input', () => {
                 isDirty = true;
                 localStorage.setItem(draftKey, composer.value);
+                // Visual indicator: asterisk on save button
+                const submitBtn = document.getElementById('main-submit-btn');
+                if (submitBtn && !submitBtn.textContent.includes('*')) {
+                    submitBtn.textContent = submitBtn.textContent.trim() + ' *';
+                }
             });
 
             form.addEventListener('submit', () => {
                 isDirty = false;
                 localStorage.removeItem(draftKey);
+                showToast('Entry saved!', 'success');
             });
 
             window.addEventListener('beforeunload', (event) => {

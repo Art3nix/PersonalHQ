@@ -31,14 +31,15 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     )
     streak: Mapped[int] = mapped_column(default=0, server_default="0")
     best_streak: Mapped[int] = mapped_column(default=0, server_default="0")
-    description: Mapped[str | None]
-    trigger: Mapped[str | None]
+    description: Mapped[str | None]   # Response - what exactly you do
+    trigger: Mapped[str | None]        # Cue - what triggers the habit
+    craving: Mapped[str | None]        # Why it matters / motivation
+    reward: Mapped[str | None]         # How you celebrate completion
     category: Mapped[str | None]
     last_completed: Mapped[datetime | None]
     target_count: Mapped[int] = mapped_column(db.Integer, default=1, server_default="1", nullable=False)
     is_active = db.Column(db.Boolean, default=True, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.now(), nullable=True)
-    sort_order = db.Column(db.Integer, default=0, server_default='0', nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=True)
 
     identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")

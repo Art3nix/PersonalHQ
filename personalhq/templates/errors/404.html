@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}404 - Page Not Found{% endblock %}
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-stone-50">
+    <div class="text-center">
+        <h1 class="text-6xl font-black text-stone-900 mb-4">404</h1>
+        <p class="text-lg font-medium text-stone-500 mb-8">This page doesn't exist.</p>
+        <a href="{{ url_for('dashboard.index') }}" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors">Go Home</a>
+    </div>
+</div>
+{% endblock %}

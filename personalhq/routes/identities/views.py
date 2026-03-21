@@ -1,8 +1,11 @@
+from datetime import timedelta
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit
+from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
 from personalhq.models.focussessions import FocusSession, SessionStatus
+from personalhq.services.time_service import get_local_today
 
 identities_view_bp = Blueprint('identities_view', __name__, url_prefix='/identity')
 
@@ -25,11 +28,30 @@ def matrix():
 
         total_evidence = habit_votes + focus_votes
 
+        # Weekly habit votes
+        today = get_local_today()
+        start_of_week = today - timedelta(days=today.weekday())
+        week_habit_votes = 0
+        for habit in identity.habits:
+            logs = HabitLog.query.filter(
+                HabitLog.habit_id == habit.id,
+                HabitLog.completed_date >= start_of_week,
+                HabitLog.progress > 0
+            ).count()
+            week_habit_votes += logs
+
+        week_focus_votes = FocusSession.query.filter(
+            FocusSession.identity_id == identity.id,
+            FocusSession.status == SessionStatus.FINISHED,
+            FocusSession.target_date >= start_of_week
+        ).count()
+
         identity_stats.append({
             'model': identity,
             'total_evidence': total_evidence,
             'habit_count': len(identity.habits),
-            'focus_count': FocusSession.query.filter_by(identity_id=identity.id).count()
+            'focus_count': FocusSession.query.filter_by(identity_id=identity.id).count(),
+            'week_votes': week_habit_votes + week_focus_votes,
         })
 
     # Sort by the identity with the most evidence
