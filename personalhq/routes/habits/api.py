@@ -180,3 +180,31 @@ def unarchive_habit(habit_id):
         habit.is_active = True
         db.session.commit()
     return redirect(url_for('habits_view.manage'))
+
+@habits_api_bp.route('/reorder', methods=['POST'])
+@login_required
+def reorder_habits():
+    """Catches the new drag-and-drop order and updates the database."""
+    data = request.get_json() or {}
+    ordered_ids = data.get('order', [])
+    
+    if not ordered_ids:
+        return {"status": "error", "message": "No order provided"}, 400
+        
+    # Fetch only the habits belonging to this user that are in the list
+    habits = Habit.query.filter(
+        Habit.user_id == current_user.id,
+        Habit.id.in_(ordered_ids)
+    ).all()
+    
+    # Create a fast lookup map
+    habit_map = {h.id: h for h in habits}
+    
+    # Loop through the array and assign the new index as the sort_order
+    for index, h_id_str in enumerate(ordered_ids):
+        h_id = int(h_id_str)
+        if h_id in habit_map:
+            habit_map[h_id].sort_order = index
+            
+    db.session.commit()
+    return {"status": "success"}

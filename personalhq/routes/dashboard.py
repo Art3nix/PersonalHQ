@@ -21,7 +21,7 @@ def index():
     # 1. Pad the database with 0s for any missing days!
     run_daily_ledger_catchup(current_user.id)
 
-    habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
+    habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).order_by(Habit.sort_order).all()
     today = get_local_today()
     start_of_week = today - timedelta(days=today.weekday())
     

@@ -5,6 +5,7 @@
 
 {% block extra_head %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 {% endblock %}
 
 {% block app_content %}
@@ -32,7 +33,7 @@
                         {{ today.strftime('%A, %b %d') }}
                     </span>
                 </div>
-                <div class="grid grid-cols-2 gap-6">
+                <div id="daily-habits-grid" class="grid grid-cols-2 gap-6">
                     {% for habit in habits %}
                         {% if habit.frequency.value == 'DAILY' %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
@@ -63,6 +64,9 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="drag-handle cursor-grab active:cursor-grabbing p-2 rounded-xl text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-colors" title="Drag to reorder">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                                    </div>
                                     <button type="button" 
                                             onclick="openEditHabitModal({id: {{ habit.id }}, name: '{{ habit.name }}', icon: '{{ habit.icon }}', freq: '{{ habit.frequency.name }}', identity: '{{ habit.identity_id or '' }}', description: '{{ habit.description | replace('\n', '\\n') or '' }}', trigger: '{{ habit.trigger | replace('\n', '\\n') or '' }}', target: {{ habit.target_count }}})"
                                             class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20{% else %}text-stone-300 hover:bg-stone-100 hover:text-stone-600{% endif %}">
@@ -173,7 +177,7 @@
                         {{ start_of_week.strftime('%b %d') }} - {{ end_of_week.strftime('%b %d') }}
                     </span>
                 </div>
-                <div class="grid grid-cols-2 gap-6">
+                <div id="weekly-habits-grid" class="grid grid-cols-2 gap-6">
                     {% for habit in habits %}
                         {% if habit.frequency.value == 'WEEKLY' %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
@@ -204,6 +208,9 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="drag-handle cursor-grab active:cursor-grabbing p-2 rounded-xl text-stone-300 hover:text-stone-600 hover:bg-stone-100 transition-colors" title="Drag to reorder">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                                    </div>
                                     <button type="button" 
                                             onclick="openEditHabitModal({id: {{ habit.id }}, name: '{{ habit.name }}', icon: '{{ habit.icon }}', freq: '{{ habit.frequency.name }}', identity: '{{ habit.identity_id or '' }}', description: '{{ habit.description | replace('\n', '\\n') or '' }}', trigger: '{{ habit.trigger | replace('\n', '\\n') or '' }}', target: {{ habit.target_count }}})"
                                             class="p-2 rounded-xl transition-colors {% if is_completed %}text-white hover:bg-white/20{% else %}text-stone-300 hover:bg-stone-100 hover:text-stone-600{% endif %}">
@@ -666,6 +673,37 @@
 
         // Run it immediately on page load
         initCharts();
+        document.addEventListener('DOMContentLoaded', initSortable);
+
+        function initSortable() {
+            // Reusable function to fire the backend update
+            const updateOrder = async (evt) => {
+                const container = evt.to;
+                // Grab all the data-ids in their new top-to-bottom visual order
+                const items = Array.from(container.querySelectorAll('[data-id]'));
+                const orderedIds = items.map(item => item.dataset.id);
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                await fetch('/actions/habits/reorder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ order: orderedIds })
+                });
+            };
+
+            const config = {
+                handle: '.drag-handle', // Only allow dragging from the specific grip icon
+                animation: 250,         // Smooth slide animation
+                ghostClass: 'opacity-50', // Dim the card while it's being held
+                onEnd: updateOrder      // Fire the API save when dropped
+            };
+
+            const dailyGrid = document.getElementById('daily-habits-grid');
+            if (dailyGrid) new Sortable(dailyGrid, config);
+
+            const weeklyGrid = document.getElementById('weekly-habits-grid');
+            if (weeklyGrid) new Sortable(weeklyGrid, config);
+        }
 
         // Reusable function to silently update the UI without flashing the screen
         async function refreshDashboardUI() {
@@ -695,6 +733,7 @@
             // 6. Safely initialize everything again
             if (typeof lucide !== 'undefined') lucide.createIcons();
             initCharts();
+            initSortable();
         }
 
         async function toggleHabit(habitId) {
