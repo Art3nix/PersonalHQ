@@ -10,7 +10,7 @@ from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.bucket_experience import BucketExperience
 
-time_buckets_api_bp = Blueprint('time_buckets_api', __name__, url_prefix='/actions/life')
+time_buckets_api_bp = Blueprint('time_buckets_api', __name__, url_prefix='/api/v1/life')
 
 @time_buckets_api_bp.route('/experiences/create', methods=['POST'])
 @login_required
