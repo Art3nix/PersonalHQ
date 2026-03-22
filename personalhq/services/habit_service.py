@@ -1,6 +1,6 @@
 """Module handling the business logic and streak calculations for Habits."""
 
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from collections import defaultdict
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
@@ -75,21 +75,26 @@ def recalculate_habit_streaks(habit, logs=None):
                 else:
                     break
 
-    # Best streak
-    best_streak = habit.best_streak or 0
+    # Best streak - MUST start at 0 to allow downgrades when unlogging!
+    best_streak = 0
     temp_streak = 1
-    for i in range(len(valid_dates) - 1):
-        diff = (valid_dates[i] - valid_dates[i + 1]).days
-        expected = 1 if habit.frequency == HabitFrequency.DAILY else 7
-        if diff == expected:
-            temp_streak += 1
-        else:
-            best_streak = max(best_streak, temp_streak)
-            temp_streak = 1
+
+    if valid_dates:
+        for i in range(len(valid_dates) - 1):
+            diff = (valid_dates[i] - valid_dates[i + 1]).days
+            expected = 1 if habit.frequency == HabitFrequency.DAILY else 7
+            if diff == expected:
+                temp_streak += 1
+            else:
+                best_streak = max(best_streak, temp_streak)
+                temp_streak = 1
 
     habit.streak = current_streak
     habit.best_streak = max(best_streak, temp_streak, current_streak)
-    habit.last_completed = datetime.combine(valid_dates[0], datetime.min.time())
+    if valid_dates:
+        habit.last_completed = datetime.combine(valid_dates[0], datetime.min.time())
+    else:
+        habit.last_completed = None
 
 
 # ---------------------------------------------------------------------------
