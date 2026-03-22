@@ -1,6 +1,6 @@
 """Module handling the business logic for Deep Work focus sessions."""
 
-from datetime import timedelta
+from datetime import date, timedelta
 from sqlalchemy import func
 from personalhq.extensions import db
 from personalhq.models.focussessions import FocusSession, SessionStatus

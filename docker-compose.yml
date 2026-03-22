@@ -35,6 +35,23 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-
+  tailwind:
+    image: node:20-slim
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install --silent && npx tailwindcss -i personalhq/static/css/input.css -o personalhq/static/css/tailwind.css --watch"
+    restart: no
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: no
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
 volumes:
   postgres_data:
+  pgadmin-data:
