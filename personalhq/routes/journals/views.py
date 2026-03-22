@@ -78,5 +78,6 @@ def entries(journal_id):
         'journals/entries.html',
         journal=journal,
         entries=journal_entries,
+        prompts=journal.prompts,
         JournalFrequency=JournalFrequency
     )
