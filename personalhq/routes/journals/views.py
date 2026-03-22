@@ -77,6 +77,6 @@ def entries(journal_id):
     return render_template(
         'journals/entries.html',
         journal=journal,
-        entries=journal_entries, 
+        entries=journal_entries,
         JournalFrequency=JournalFrequency
     )
