@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalentries import JournalEntry
+from personalhq.models.journalprompts import JournalPrompt
 from personalhq.services import journal_service
 
 journals_view_bp = Blueprint('journals_view', __name__, url_prefix='/journals')
@@ -18,10 +19,10 @@ def index():
     # Fetch 2 most recent entries per journal for preview
     recent_entries = {}
     for journal in journals:
-        entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(
+        journal_entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(
             JournalEntry.created_at.desc()
         ).limit(2).all()
-        recent_entries[journal.id] = entries
+        recent_entries[journal.id] = journal_entries
 
     return render_template(
         'journals/index.html',
@@ -47,7 +48,11 @@ def write(journal_id):
         if not entry_to_edit or entry_to_edit.journal_id != journal.id:
             entry_to_edit = None
 
-    active_prompt = journal_service.get_active_prompt(journal)
+    active_prompt = None
+    if entry_to_edit and entry_to_edit.prompt_id:
+        active_prompt = db.session.get(JournalPrompt, entry_to_edit.prompt_id)
+    else:
+        active_prompt = journal_service.get_active_prompt(journal)
 
     return render_template(
         'journals/write.html',

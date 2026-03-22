@@ -1,5 +1,6 @@
 """Module defining the API routes for Journals."""
 
+from flask import flash
 from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from personalhq.extensions import db
@@ -19,15 +20,16 @@ def add_entry(journal_id):
         return jsonify({"status": "error", "message": "Journal not found"}), 404
 
     content = request.form.get('content')
+    prompt_id = request.form.get('prompt_id', type=int)
 
     if content and content.strip():
         new_entry = JournalEntry(
             journal_id=journal.id,
-            content=content.strip()
+            content=content.strip(),
+            prompt_id=prompt_id
         )
         db.session.add(new_entry)
         db.session.commit()
-        from flask import flash
         flash('Entry saved.', 'success')
 
     return redirect(url_for('journals_view.entries', journal_id=journal.id))
@@ -35,7 +37,7 @@ def add_entry(journal_id):
 @journals_api_bp.route('/entries/<int:entry_id>/edit', methods=['POST'])
 @login_required
 def edit_entry(entry_id):
-    """Updates the text of a specific journal entry."""
+    """Updates the text and the prompt of a specific journal entry."""
     entry = db.session.get(JournalEntry, entry_id)
     if not entry:
         return redirect(request.referrer or url_for('journals_view.index'))
@@ -46,10 +48,12 @@ def edit_entry(entry_id):
         return redirect(url_for('journals_view.index'))
 
     content = request.form.get('content')
+    prompt_id = request.form.get('prompt_id', type=int)
+
     if content:
         entry.content = content.strip()
+        entry.prompt_id = prompt_id if prompt_id else None
         db.session.commit()
-        from flask import flash
         flash('Entry updated.', 'success')
 
     return redirect(url_for('journals_view.entries', journal_id=journal.id))

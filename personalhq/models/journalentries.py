@@ -18,3 +18,4 @@ class JournalEntry(db.Model):
     created_at: Mapped[datetime] = mapped_column(default=get_local_now)
 
     journal = relationship("Journal", back_populates="entries")
+    prompt_id: Mapped[int] = mapped_column(ForeignKey('journal_prompts.id', ondelete='SET NULL'), nullable=True)

@@ -34,17 +34,27 @@
                     <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-10">Today's Entry</h2>
                     
                     {% if active_prompt %}
-                    <div class="mb-10 p-8 bg-{{ theme }}-100/50 border border-{{ theme }}-200 rounded-3xl shadow-sm">
-                        <h3 class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                            Current Prompt
-                        </h3>
-                        <p class="text-xl font-bold text-{{ theme }}-900 leading-snug">{{ active_prompt.text }}</p>
+                    <div class="mb-10 p-8 bg-{{ theme }}-100/50 border border-{{ theme }}-200 rounded-3xl shadow-sm transition-all relative group">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                Current Prompt
+                            </h3>
+                            
+                            <button type="button" onclick="cyclePrompt()" class="text-{{ theme }}-400 hover:text-{{ theme }}-700 hover:bg-{{ theme }}-200/50 p-1.5 rounded-lg transition-colors flex items-center gap-1.5 opacity-0 group-hover:opacity-100" title="Get a different prompt">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.05l5.67-5.67"/></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Shuffle</span>
+                            </button>
+                        </div>
+                        
+                        <p id="active-prompt-display" class="text-xl font-bold text-{{ theme }}-900 leading-snug transition-opacity duration-200">{{ active_prompt.text }}</p>
                     </div>
                     {% endif %}
 
                     <form id="main-entry-form" action="{% if entry_to_edit %}{{ url_for('journals_api.edit_entry', entry_id=entry_to_edit.id) }}{% else %}{{ url_for('journals_api.add_entry', journal_id=journal.id) }}{% endif %}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-xl shadow-stone-200/30">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                        <input type="hidden" name="prompt_id" id="selected-prompt-id" value="{% if active_prompt %}{{ active_prompt.id }}{% endif %}">
                         
                         <textarea id="main-entry-content" name="content" placeholder="What's on your mind today?" required 
                                   class="w-full min-h-[40vh] bg-transparent text-stone-800 text-lg placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed overflow-hidden">{% if entry_to_edit %}{{ entry_to_edit.content }}{% endif %}</textarea>
@@ -247,6 +257,42 @@
             modal.classList.add('opacity-0');
             box.classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        // --- PROMPT SHUFFLE LOGIC ---
+        // Pull both the ID and the Text from the database
+        const availablePrompts = [
+            {% for p in prompts %}
+                { id: {{ p.id }}, text: {{ p.text | tojson }} },
+            {% endfor %}
+        ];
+        
+        let currentPromptIndex = -1;
+
+        function cyclePrompt() {
+            if (availablePrompts.length <= 1) return;
+            
+            const display = document.getElementById('active-prompt-display');
+            const hiddenInput = document.getElementById('selected-prompt-id'); // NEW
+            if (!display) return;
+
+            // Find where we currently are in the array
+            if (currentPromptIndex === -1) {
+                currentPromptIndex = availablePrompts.findIndex(p => p.text === display.innerText.trim());
+                if (currentPromptIndex === -1) currentPromptIndex = 0;
+            }
+            
+            // Move to the next prompt
+            currentPromptIndex = (currentPromptIndex + 1) % availablePrompts.length;
+            const newPrompt = availablePrompts[currentPromptIndex]; // NEW
+            
+            // Fade out, swap text AND hidden ID, fade in
+            display.style.opacity = 0; 
+            setTimeout(() => {
+                display.innerText = newPrompt.text;
+                if (hiddenInput) hiddenInput.value = newPrompt.id; // NEW
+                display.style.opacity = 1; 
+            }, 200);
         }
 
         // --- AUTO-SAVE & RECOVERY LOGIC ---
