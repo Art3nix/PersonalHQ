@@ -27,8 +27,9 @@ def add_entry(journal_id):
         )
         db.session.add(new_entry)
         db.session.commit()
+        from flask import flash
+        flash('Entry saved.', 'success')
 
-    # Redirect back to the journal view after saving
     return redirect(url_for('journals_view.entries', journal_id=journal.id))
 
 @journals_api_bp.route('/entries/<int:entry_id>/edit', methods=['POST'])
@@ -48,6 +49,8 @@ def edit_entry(entry_id):
     if content:
         entry.content = content.strip()
         db.session.commit()
+        from flask import flash
+        flash('Entry updated.', 'success')
 
     return redirect(url_for('journals_view.entries', journal_id=journal.id))
 

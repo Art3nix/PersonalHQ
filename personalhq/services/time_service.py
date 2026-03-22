@@ -7,10 +7,13 @@ def get_local_now() -> datetime:
     """Returns the user's current wall-clock time as a naive datetime."""
     utc_now = datetime.now(timezone.utc)
 
-    # Default to UTC if not logged in
+    # Default to UTC if not logged in or no request context
     tz_str = "UTC"
-    if current_user and current_user.is_authenticated and hasattr(current_user, 'timezone'):
-        tz_str = current_user.timezone or "UTC"
+    try:
+        if current_user and current_user.is_authenticated and hasattr(current_user, 'timezone'):
+            tz_str = current_user.timezone or "UTC"
+    except Exception:
+        pass
 
     try:
         user_zone = ZoneInfo(tz_str)

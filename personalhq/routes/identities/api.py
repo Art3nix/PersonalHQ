@@ -67,6 +67,7 @@ def edit_identity(identity_id):
         identity.description = description.strip() if description else None
         identity.color = color
         db.session.commit()
+        flash(f'Identity "{identity.name}" updated.', 'success')
 
     return redirect(url_for('identities_view.matrix'))
 
@@ -77,15 +78,13 @@ def delete_identity(identity_id):
     identity = db.session.get(Identity, identity_id)
 
     if identity and identity.user_id == current_user.id:
-        # Unassign habits so they don't get deleted or cause foreign key errors
+        name = identity.name
         for habit in identity.habits:
             habit.identity_id = None
-
-        # Unassign focus sessions
         for session in identity.focus_sessions:
             session.identity_id = None
-
         db.session.delete(identity)
         db.session.commit()
+        flash(f'Identity "{name}" deleted.', 'success')
 
     return redirect(url_for('identities_view.matrix'))

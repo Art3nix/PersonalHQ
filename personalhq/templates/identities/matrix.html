@@ -28,8 +28,9 @@
                             <p class="text-[10px] font-bold text-{{ stat.model.color }}-600 uppercase tracking-widest mb-1">Core Identity</p>
                             <h2 class="text-2xl font-extrabold text-stone-900">{{ stat.model.name }}</h2>
                             {% if stat.model.description %}
-                                <p class="text-xs font-medium text-stone-400 mt-1 max-w-xs">{{ stat.model.description }}</p>
+                                <p class="text-xs font-medium text-stone-500 mt-1 max-w-xs leading-relaxed">{{ stat.model.description }}</p>
                             {% endif %}
+                            <p class="text-[10px] font-bold text-{{ stat.model.color }}-500/70 mt-2">{{ stat.total_evidence }} total votes cast</p>
                         </div>
                         
                         <div class="flex items-center gap-1 mt-1 -mr-2">
@@ -57,7 +58,12 @@
                     </div>
 
                     <div class="mt-auto border-t border-{{ stat.model.color }}-200/50 pt-6">
-                        <p class="text-[10px] font-bold text-{{ stat.model.color }}-600/70 uppercase tracking-widest mb-3">Proof of Identity</p>
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[10px] font-bold text-{{ stat.model.color }}-600/70 uppercase tracking-widest">Proof of Identity</p>
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md {% if stat.week_votes > 0 %}bg-{{ stat.model.color }}-200 text-{{ stat.model.color }}-800{% else %}bg-stone-100 text-stone-400{% endif %}">
+                                {{ stat.week_votes }} this week
+                            </span>
+                        </div>
                         
                         <div class="flex gap-2 flex-wrap">
                             {% for habit in stat.model.habits %}
@@ -78,9 +84,32 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="col-span-2 text-center py-20 border-2 border-dashed border-stone-100 rounded-[2rem]">
-                    <h3 class="text-lg font-bold text-stone-900">Who do you want to become?</h3>
-                    <p class="text-sm font-medium text-stone-400 mt-1">Define your first identity to start gathering evidence.</p>
+                <div class="col-span-full text-center py-16 border-2 border-dashed border-stone-100 rounded-[2rem] bg-stone-50/30 max-w-2xl mx-auto">
+                    <div class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mx-auto mb-5 border border-indigo-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-stone-900 tracking-tight">Who do you want to become?</h3>
+                    <p class="text-sm font-medium text-stone-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                        Identities are the roles you want to grow into — <em>The Athlete, The Writer, The Builder</em>. 
+                        Every habit you complete is a vote for that identity.
+                    </p>
+                    <div class="mt-6 grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                        <div class="bg-white border border-indigo-100 rounded-xl p-3 text-center shadow-sm">
+                            <span class="text-lg">🏃</span>
+                            <p class="text-[10px] font-bold text-stone-500 mt-1">The Athlete</p>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-xl p-3 text-center shadow-sm">
+                            <span class="text-lg">✍️</span>
+                            <p class="text-[10px] font-bold text-stone-500 mt-1">The Writer</p>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-xl p-3 text-center shadow-sm">
+                            <span class="text-lg">🧠</span>
+                            <p class="text-[10px] font-bold text-stone-500 mt-1">The Builder</p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                        Define your first identity →
+                    </button>
                 </div>
             {% endif %}
         </section>

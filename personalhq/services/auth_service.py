@@ -5,7 +5,7 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
 from datetime import datetime
 
-from personalhq.extensions import mail, db
+from personalhq.extensions import mail, db, bcrypt
 from personalhq.models.users import User
 
 def register_new_user(email: str, first_name: str, last_name: str, password: str) -> User | None:
@@ -52,6 +52,6 @@ def send_reset_email(to_email: str, reset_url: str):
     mail.send(msg)
 
 def update_password(user: User, new_password: str):
-    """Updates a user's password securely."""
-    user.password = new_password # The model's @password.setter handles hashing
+    """Updates a user's password securely with bcrypt hashing."""
+    user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
     db.session.commit()
