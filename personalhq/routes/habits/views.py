@@ -273,10 +273,15 @@ def habit_calendar():
     # Prevent division by zero and cap at 100%
     consistency_score = min(int((total_completions_month / total_possible) * 100), 100) if total_possible > 0 else 0
 
+    # Calculate Top Identity (Only counting actual successful days!)
     identity_counts = defaultdict(int)
     for log in logs:
         if log.habit.identity:
-            identity_counts[log.habit.identity] += 1
+            is_daily_win = log.habit.frequency == HabitFrequency.DAILY and log.progress >= log.target_at_time
+            is_weekly_action = log.habit.frequency == HabitFrequency.WEEKLY and log.progress > 0
+            
+            if is_daily_win or is_weekly_action:
+                identity_counts[log.habit.identity] += 1
 
     top_identity_name = "Mixed Focus"
     top_identity_color = "stone"
