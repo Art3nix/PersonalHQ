@@ -247,7 +247,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Details <span class="text-stone-400 font-normal normal-case">- Optional</span></label>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Details<span class="text-stone-400 font-normal normal-case">- Optional</span></label>
                         <textarea name="details" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none" placeholder="Who are you going with? What is the ideal season?"></textarea>
                     </div>
 
@@ -257,6 +257,49 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('experience-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to maximize fulfillment</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Die With Zero</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="experience-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Match the Season of Life</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't save a grueling 2-week backpacking trip for your 70s. Assign highly physical experiences to your earlier Time Buckets while your health is at its peak.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">The Memory Dividend</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences pay compound interest in the form of memories. A trip taken at 25 yields 50+ years of joy, stories, and connections. Plotting experiences early maximizes the yield.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Be Specific</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Travel more" is a wish. "Hike the Camino de Santiago with John" is a plotted experience. Use the details box to write down <span class="font-bold text-stone-700">who</span> you are going with to make it real.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -305,6 +348,49 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('bucket-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to map your timeline</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Die With Zero</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="bucket-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">The Wealth/Health Curve</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't save hiking the Alps for when you are 70 and have bad knees. Experiences require different levels of health and wealth. Plot high-physicality experiences in your earlier decades.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">The Memory Dividend</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences pay compound interest. An amazing trip taken at 25 will yield 50 years of joyful memories, conversations, and photos. The earlier you invest in experiences, the higher the yield.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Time-boxing Creates Urgency</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Someday" is not a day of the week. By forcing an experience into a specific 5-year bucket (e.g., "Ages 30-35"), you create the psychological urgency needed to actually fund and plan it.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -85,7 +85,7 @@
         </main>
 
         <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
-            <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-6">Inbox Zero Protocol</h3>
+            <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-6">The Inbox Guide</h3>
             
             <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-sm text-sm text-stone-600 mb-6">
                 <p class="mb-4 leading-relaxed">The mind is for having ideas, not holding them. Every item in your inbox represents an open loop.</p>
@@ -243,6 +243,49 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('inbox-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-700 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to process thoughts</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The GTD Framework</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="inbox-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">The 2-Minute Rule</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If this thought is an action that takes less than two minutes to complete (e.g., "Reply to Sarah's email"), don't convert it into a Focus Session. Just do it right now, close this modal, and delete the thought.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Is it Actionable?</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If there is no physical next action tied to this thought, it shouldn't be Deep Work. Either log it as a <span class="font-bold text-stone-700">Journal</span> entry for future reference, or discard it.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Define the "Next Action"</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If you are converting this to Deep Work, rewrite the title so it starts with a verb. Change "Taxes" to "Draft 2025 tax spreadsheet." Your brain needs a clear starting line.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -170,6 +170,37 @@
                         {% endfor %}
                     </div>
                 </div>
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('calendar-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-100 text-stone-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to review your progress</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Reality of Consistency</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="calendar-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Never Miss Twice</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Missing one day is an accident. Missing two days is the start of a new habit. If you see a blank square, your only goal for today is to prevent a second one. Don't aim for perfection; aim for rapid recovery.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">The Plateau of Latent Potential</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Progress is not linear. You will put in weeks of work with no visible results. This is the "Valley of Disappointment." Your work isn't being wasted; it is being stored. Keep logging the days until you break through.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
         </div>

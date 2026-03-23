@@ -249,6 +249,49 @@
                         </button>
                     </div>
                 </form>
+                
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('focus-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 90-Minute Rule</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="focus-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-emerald-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Zero Context Switching</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick <span class="font-bold text-stone-700">one</span> cognitively demanding task. Do not check email. Do not open Slack. Every time you switch tabs, you leave "attention residue" behind, destroying your focus.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-emerald-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Define the Finish Line</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Work on my business" is a terrible goal. "Write the first draft of the Q3 marketing page" is a great goal. You must know exactly what "done" looks like before you start the timer.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-emerald-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Embrace the Boredom</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">About 15 minutes in, your brain will crave a dopamine hit and urge you to check your phone. Recognize the urge, ignore it, and push through. That friction is the feeling of your brain actually rewiring.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </div>

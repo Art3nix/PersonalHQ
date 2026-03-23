@@ -149,6 +149,38 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('journal-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to structure journals</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Compartmentalization Rule</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="journal-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">One Journal, One Purpose</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't mix your daily gratitudes with your deep emotional processing or your project notes. Give each journal a strict, narrow focus so your brain knows exactly what mode to enter when you open it.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-xs font-extrabold text-stone-900">Match the Cadence</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A "Morning Pages" journal needs a daily prompt rotation. A "Weekly Review" journal needs a weekly rotation. Set the frequency to match how often you actually intend to write in this specific space.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
