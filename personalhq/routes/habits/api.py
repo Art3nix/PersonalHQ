@@ -1,6 +1,6 @@
 """Module defining the API and view routes for Habits."""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, request, redirect, url_for, jsonify, flash
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
@@ -65,7 +65,11 @@ def create_habit():
     description = request.form.get('description')
     trigger = request.form.get('trigger')
     target_count = request.form.get('target_count', 1, type=int)
-    initial_streak = request.form.get('initial_streak', 0, type=int)
+    target_count = request.form.get('target_count', 1, type=int)
+    
+    # SECURITY PATCH: Cap the streak at 10,000 (roughly 27 years)
+    raw_streak = request.form.get('initial_streak', 0, type=int)
+    initial_streak = min(raw_streak, 10000) 
 
     if not name or not frequency_str or not icon:
         return redirect(url_for('habits_view.manage'))
@@ -92,6 +96,26 @@ def create_habit():
     )
 
     db.session.add(new_habit)
+    db.session.flush() # Get the new_habit.id without closing the transaction!
+
+    # Generate historical logs so the streak engine finds them naturally
+    if initial_streak > 0:
+        today = get_local_today()
+        
+        for i in range(1, initial_streak + 1):
+            # Step backward by Days or Weeks depending on the frequency
+            delta = timedelta(days=i) if frequency == HabitFrequency.DAILY else timedelta(weeks=i)
+            past_date = today - delta
+            
+            backfill_log = HabitLog(
+                habit_id=new_habit.id,
+                completed_date=past_date,
+                progress=target_count,      # Instantly mark as 100% complete
+                target_at_time=target_count
+            )
+            db.session.add(backfill_log)
+
+    # Save the habit AND the backfilled logs to the database all at once
     db.session.commit()
     flash(f'Habit "{new_habit.name}" created successfully.', 'success')
     return redirect(url_for('habits_view.manage'))

@@ -260,18 +260,21 @@
                             <div class="flex items-center gap-4">
                                 {% if habit.target_count > 1 %}
                                     {% set current_count = current_counts[habit.id] if current_counts else 0 %}
-                                    <div class="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl p-1 shadow-sm" onclick="event.stopPropagation()">
-                                        <button id="minus-btn-{{ habit.id }}" onclick="interactWithHabit({{ habit.id }}, 'unlog')" {% if current_count == 0 %}disabled{% endif %} class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                        </button>
-                                        
-                                        <span id="count-display-{{ habit.id }}" class="text-[11px] font-black text-stone-700 w-8 text-center">{{ current_count }} / {{ habit.target_count }}</span>
-                                        
-                                        <button onclick="interactWithHabit({{ habit.id }}, 'log')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-50 text-{{ theme }}-600 shadow-sm border border-{{ theme }}-100 hover:border-{{ theme }}-200 hover:bg-{{ theme }}-100 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                        </button>
-                                        <button onclick="interactWithHabit({{ habit.id }}, 'toggle')" title="Complete all at once" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-100 text-{{ theme }}-700 shadow-sm border border-{{ theme }}-200 hover:bg-{{ theme }}-200 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <div class="flex items-center gap-3" onclick="event.stopPropagation()">
+                                        <div class="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl p-1 shadow-sm">
+                                            <button id="minus-btn-{{ habit.id }}" onclick="interactWithHabit({{ habit.id }}, 'unlog')" {% if current_count == 0 %}disabled{% endif %} class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            </button>
+                                            
+                                            <span id="count-display-{{ habit.id }}" class="text-[11px] font-black text-stone-700 w-8 text-center">{{ current_count }} / {{ habit.target_count }}</span>
+                                            
+                                            <button onclick="interactWithHabit({{ habit.id }}, 'log')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-50 text-{{ theme }}-600 shadow-sm border border-{{ theme }}-100 hover:border-{{ theme }}-200 hover:bg-{{ theme }}-100 transition-colors">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            </button>
+                                        </div>
+
+                                        <button onclick="interactWithHabit({{ habit.id }}, 'toggle')" title="Complete all at once" class="w-8 h-8 flex items-center justify-center rounded-xl bg-{{ theme }}-100 text-{{ theme }}-700 shadow-sm border border-{{ theme }}-200 hover:bg-{{ theme }}-200 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         </button>
                                     </div>
                                 {% endif %}
@@ -509,11 +512,17 @@
             // 1. OPTIMISTIC UI: Update the math instantly before the server responds
             if (targetCount > 1 && countDisplay) {
                 let currentCount = parseInt(countDisplay.innerText.split('/')[0].trim());
+                
                 if (action === 'log') currentCount++;
                 if (action === 'unlog') currentCount--;
+                if (action === 'toggle') {
+                    // If it's already full, toggle resets to 0. Otherwise, fill it up to the target!
+                    currentCount = (currentCount >= targetCount) ? 0 : targetCount;
+                }
                 
-                // Prevent negatives
+                // Prevent negatives or visual over-filling
                 if (currentCount < 0) currentCount = 0;
+                if (currentCount > targetCount) currentCount = targetCount;
                 
                 countDisplay.innerText = `${currentCount} / ${targetCount}`;
                 if (minusBtn) minusBtn.disabled = (currentCount === 0);
