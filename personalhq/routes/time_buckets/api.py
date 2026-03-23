@@ -77,7 +77,7 @@ def create_bucket():
     new_bucket = TimeBucket(
         user_id=current_user.id,
         name=name.strip(),
-        theme=theme.strip() if theme else None,
+        theme=theme.strip() if theme else "",
         start_date=start_date,
         end_date=end_date
     )
@@ -100,8 +100,7 @@ def edit_bucket(bucket_id):
 
     if name and start_age and end_age:
         bucket.name = name.strip()
-        bucket.theme = theme.strip() if theme else None
-        
+        theme=theme.strip() if theme else ""
         start_date, end_date = get_bucket_dates_from_age(start_age, end_age, current_user)
         bucket.start_date = start_date
         bucket.end_date = end_date
@@ -120,11 +119,11 @@ def edit_experience(exp_id):
     # Security: Ensure the user owns the bucket this experience is currently in
     bucket_link = BucketExperience.query.filter_by(experience_id=exp.id).first()
     if not bucket_link:
-         return redirect(url_for('time_buckets_view.manage'))
+        return redirect(url_for('time_buckets_view.manage'))
     
     current_bucket = db.session.get(TimeBucket, bucket_link.bucket_id)
     if not current_bucket or current_bucket.user_id != current_user.id:
-         return redirect(url_for('time_buckets_view.manage'))
+        return redirect(url_for('time_buckets_view.manage'))
 
     name = request.form.get('name')
     details = request.form.get('details')

@@ -356,19 +356,21 @@
                         <div>
                             <p class="text-[9px] font-bold text-stone-400 uppercase tracking-widest border-b border-stone-100 pb-2 mb-3">Experiences to Fulfill</p>
                             
-                            <ul class="space-y-2">
+                            <ul class="space-y-3 mt-4">
                                 {% for exp in upcoming_experiences %}
-                                <li class="flex items-start gap-2.5 group/item p-2 rounded-xl hover:bg-indigo-50 transition-colors">
-                                    <div class="w-1.5 h-1.5 rounded-full border border-stone-300 mt-1.5 group-hover/item:border-indigo-500 group-hover/item:bg-indigo-500 transition-colors shrink-0"></div>
+                                <li class="flex items-start gap-3">
+                                    {% set dot_color = exp.core_theme.color if exp.core_theme else 'stone' %}
+                                    <div class="w-2 h-2 rounded-full bg-{{ dot_color }}-400 mt-1.5 shadow-sm shrink-0"></div>
+                                    
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-bold text-stone-700 group-hover/item:text-indigo-800 transition-colors truncate">{{ exp.name }}</p>
+                                        <p class="text-xs font-bold text-stone-700 truncate">{{ exp.name }}</p>
                                         {% if exp.core_theme %}
-                                            <p class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest mt-0.5">{{ exp.core_theme.name }}</p>
+                                            <p class="text-[9px] font-bold text-{{ dot_color }}-500 uppercase tracking-widest mt-0.5">{{ exp.core_theme.name }}</p>
                                         {% endif %}
                                     </div>
                                 </li>
                                 {% else %}
-                                <li class="text-xs font-medium text-stone-400 italic bg-stone-50/50 p-3 rounded-xl border border-stone-100 border-dashed text-center">
+                                <li class="text-xs font-medium text-stone-400 italic bg-stone-50 p-4 rounded-xl border border-stone-100 border-dashed text-center">
                                     All plotted experiences for this chapter are complete!
                                 </li>
                                 {% endfor %}

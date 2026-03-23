@@ -15,7 +15,7 @@ class TimeBucket(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
     name: Mapped[str] = mapped_column(nullable=False)
-    theme: Mapped[str] = mapped_column(nullable=False)
+    theme: Mapped[str] = mapped_column(nullable=True)
     start_date: Mapped[date] = mapped_column(nullable=False)
     end_date: Mapped[date] = mapped_column(nullable=False)
 
