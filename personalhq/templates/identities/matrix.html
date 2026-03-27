@@ -172,8 +172,8 @@
                     </div>
                 </form>
 
-                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
-                    <button type="button" onclick="document.getElementById('identity-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                    <button type="button" onclick="document.getElementById('identity-pedagogy-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
                         <div class="flex items-center gap-3">
                             <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
@@ -186,32 +186,28 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     
-                    <div id="identity-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
-                        
+                    <div id="identity-pedagogy-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Outcomes vs. Identity</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Outcomes are what you get. Identity is who you are. The most effective way to change your habits is to focus not on what you want to achieve, but on <span class="font-bold text-stone-700">who you wish to become</span>.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Outcomes vs Identity</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Outcomes are what you get, but identity is who you are. The most effective way to change your habits is to focus on who you wish to become. Do not just aim to read a book, aim to become a reader.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Cast Your Votes</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Every action you take is a vote for the type of person you wish to become. You don't need a unanimous election to win; you just need a majority of votes to shape your new identity.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Cast Your Votes</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Every action you take is a vote for the type of person you wish to become. You do not need a unanimous election to win. You just need a majority of votes to prove to yourself that you are changing.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">The Two-Step Process</h5>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Two-Step Process</h5>
                                 <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">First, decide the type of person you want to be. Second, prove it to yourself with small wins. Name your identity here, then attach the small daily habits that will act as proof.</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -255,6 +251,44 @@
                         </button>
                     </div>
                 </form>
+                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                    <button type="button" onclick="document.getElementById('identity-pedagogy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to reshape yourself</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Identity Framework</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="identity-pedagogy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Outcomes vs Identity</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Outcomes are what you get, but identity is who you are. The most effective way to change your habits is to focus on who you wish to become. Do not just aim to read a book, aim to become a reader.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Cast Your Votes</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Every action you take is a vote for the type of person you wish to become. You do not need a unanimous election to win. You just need a majority of votes to prove to yourself that you are changing.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Two-Step Process</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">First, decide the type of person you want to be. Second, prove it to yourself with small wins. Name your identity here, then attach the small daily habits that will act as proof.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
