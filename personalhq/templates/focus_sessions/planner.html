@@ -161,6 +161,52 @@
                 </div>
             </details>
             {% endif %}
+
+            <div class="mt-16 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm max-w-4xl mx-auto">
+                <button type="button" onclick="document.getElementById('planner-guide-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to master your attention</h4>
+                            <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Focus Engine</p>
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="planner-guide-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-5">
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Deep vs Shallow Work</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Deep work pushes your cognitive capabilities to their absolute limit. Shallow work is just logistical busywork like checking emails or Slack. Do not confuse the two. Only queue up true deep work here.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Focus Equation</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">High quality work equals time spent multiplied by intensity of focus. By maximizing your intensity, you can drastically reduce the time needed to produce elite results.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Drain the Shallows</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Shallow work consists of minor, logistical tasks that do not create real value. You must give every single hour of your day a job. When you map out your schedule, you instantly expose exactly how much time you are wasting on busywork. Constrain the shallows so you can protect your focus.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">4</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Shutdown Ritual</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">At the end of the workday, you must shut down completely. No checking email after dinner. Disconnect. This ensures your mental energy is fully recharged for tomorrow.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
         
         <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
@@ -250,46 +296,92 @@
                     </div>
                 </form>
                 
-                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white">
-                    <button type="button" onclick="document.getElementById('focus-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
-                        <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                <div class="mt-8 space-y-3">
+                    <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">The Deep Work Playbook</h4>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-philosophy-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to schedule your time</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 4 Philosophies</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
-                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 90-Minute Rule</p>
-                            </div>
-                        </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </button>
-                    
-                    <div id="focus-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
                         
-                        <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-emerald-300 mt-0.5">1</span>
-                            <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Zero Context Switching</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick <span class="font-bold text-stone-700">one</span> cognitively demanding task. Do not check email. Do not open Slack. Every time you switch tabs, you leave "attention residue" behind, destroying your focus.</p>
+                        <div id="focus-philosophy-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Monastic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Isolate yourself completely for long periods. This is best for extreme focus, like writing a book or doing heavy research.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Bimodal Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Divide your time clearly. Dedicate specific full days to deep work and leave the rest of the week open for shallow obligations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Rhythmic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Generate a simple daily habit. Do 90 minutes every single morning before checking your phone. This is the most practical method for a standard career.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">4</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Journalistic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Fit deep work into whatever free time you have. Shift into intense focus instantly like a journalist on a tight deadline. This requires practice.</p>
+                                </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-emerald-300 mt-0.5">2</span>
-                            <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Define the Finish Line</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Work on my business" is a terrible goal. "Write the first draft of the Q3 marketing page" is a great goal. You must know exactly what "done" looks like before you start the timer.</p>
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-execution-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Execution Rules</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-execution-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Build The Ritual</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Decide exactly where you will work and how long you will work before you start the timer. Define exactly what done looks like. Leave your phone in another room.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Zero Context Switching</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick one cognitively demanding task. Do not check email or Slack. Multitasking is a myth. Every time you switch tabs you leave attention residue behind. This ruins your cognitive performance.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Embrace The Boredom</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Focus is a muscle. When your brain craves a quick dopamine hit, recognize the urge, ignore it, and push through. That friction is your brain actually rewiring.</p>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-emerald-300 mt-0.5">3</span>
-                            <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Embrace the Boredom</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">About 15 minutes in, your brain will crave a dopamine hit and urge you to check your phone. Recognize the urge, ignore it, and push through. That friction is the feeling of your brain actually rewiring.</p>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -345,6 +437,95 @@
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-8 space-y-3">
+                    <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">The Deep Work Playbook</h4>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-philosophy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to schedule your time</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 4 Philosophies</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-philosophy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Monastic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Isolate yourself completely for long periods. This is best for extreme focus, like writing a book or doing heavy research.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Bimodal Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Divide your time clearly. Dedicate specific full days to deep work and leave the rest of the week open for shallow obligations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Rhythmic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Generate a simple daily habit. Do 90 minutes every single morning before checking your phone. This is the most practical method for a standard career.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">4</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Journalistic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Fit deep work into whatever free time you have. Shift into intense focus instantly like a journalist on a tight deadline. This requires practice.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-execution-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Execution Rules</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-execution-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Build The Ritual</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Decide exactly where you will work and how long you will work before you start the timer. Define exactly what done looks like. Leave your phone in another room.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Zero Context Switching</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick one cognitively demanding task. Do not check email or Slack. Multitasking is a myth. Every time you switch tabs you leave attention residue behind. This ruins your cognitive performance.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Embrace The Boredom</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Focus is a muscle. When your brain craves a quick dopamine hit, recognize the urge, ignore it, and push through. That friction is your brain actually rewiring.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
