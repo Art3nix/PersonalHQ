@@ -4,14 +4,14 @@
 {% block title %}Time Buckets - Life HQ{% endblock %}
 
 {% block app_content %}
-    <main class="flex-1 max-w-5xl mx-auto px-12 py-12">
+    <main class="flex-1 w-full max-w-6xl mx-auto px-12 py-12">
         
-        <header class="flex justify-between items-end mb-16 border-b border-stone-100 pb-6">
-            <div>
+        <header class="flex justify-between items-end gap-8 mb-16 border-b border-stone-100 pb-6">
+            <div class="max-w-2xl">
                 <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Life Map</h1>
-                <p class="text-sm font-medium text-stone-400 mt-2">Die With Zero: Maximize fulfillment by planning experiences for the right decades.</p>
+                <p class="text-sm font-medium text-stone-400 mt-2 leading-relaxed">Die With Zero: Maximize fulfillment by planning experiences for the right decades.</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 shrink-0">
                 <button onclick="document.getElementById('slide-over-labels').classList.remove('translate-x-full')" class="bg-white border border-stone-200 text-stone-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-50 transition-all shadow-sm">
                     Manage Labels
                 </button>
@@ -84,7 +84,7 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                                 {% if bucket.experiences %}
                                     {% for link in bucket.experiences | sort(attribute='experience.is_completed') %}
                                     {% set exp_color = link.experience.core_theme.color if link.experience.core_theme else 'stone' %}
@@ -163,7 +163,7 @@
                                     </div>
                                     {% endfor %}
                                 {% else %}
-                                    <div class="col-span-2 bg-stone-50 border border-stone-100 border-dashed rounded-2xl p-6 text-center">
+                                    <div class="col-span-full bg-stone-50 border border-stone-100 border-dashed rounded-2xl p-6 text-center">
                                         <p class="text-xs font-medium text-stone-400 italic">No experiences plotted for this Time Bucket yet.</p>
                                     </div>
                                 {% endif %}
@@ -191,6 +191,51 @@
             </section>
         {% endif %}
 
+        <div class="mt-16 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm max-w-4xl mx-auto">
+                <button type="button" onclick="document.getElementById('lifemap-guide-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to optimize your lifetime</h4>
+                            <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Core Philosophy</p>
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="lifemap-guide-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-5">
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-rose-300 mt-0.5">1</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Ultimate Deadline</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">When faced with a terminal diagnosis, wealth becomes instantly worthless. The only thing that matters is how you spent your time. You must adopt this perspective now, not when you have months left to live. The ultimate goal is to reach your final moments with absolutely zero regrets about the things you did not do.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-rose-300 mt-0.5">2</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Die With Zero</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Money is simply fuel for experiences. If you die with two million dollars in the bank, you traded thousands of hours of your healthy life working for paper you never used. That is a massive failure in life optimization.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-rose-300 mt-0.5">3</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Memory Dividend</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences compound in your mind just like money compounds in the market. When you take a great trip at age 25, you get to remember it for the next 50 years. Investing heavily in experiences when you are young yields the highest lifetime return.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-rose-300 mt-0.5">4</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Health Curve</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Money has the highest utility when you are healthy. Do not save hiking the Alps for when you are 70 and have bad knees. You must actively use your wealth to buy back your time and fund your experiences while your body can actually handle them.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </main>
     <div id="slide-over" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
         <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over').classList.add('translate-x-full')"></div>
@@ -273,31 +318,27 @@
                     </button>
                     
                     <div id="experience-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
-                        
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-amber-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Match the Season of Life</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't save a grueling 2-week backpacking trip for your 70s. Assign highly physical experiences to your earlier Time Buckets while your health is at its peak.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Brainstorm Without Limits</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Write down everything you want to do before you die. Do not filter yourself based on money or logistics right now. Get the raw ideas into the system first. You will organize the funding later.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-amber-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">The Memory Dividend</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences pay compound interest in the form of memories. A trip taken at 25 yields 50+ years of joy, stories, and connections. Plotting experiences early maximizes the yield.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Be Specific</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Saying you want to travel more is just a wish. Saying you want to hike the Camino de Santiago with your best friend is a plotted experience. Use the details box to write down exactly who you are going with to make it real.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-amber-300 mt-0.5">3</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Be Specific</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Travel more" is a wish. "Hike the Camino de Santiago with John" is a plotted experience. Use the details box to write down <span class="font-bold text-stone-700">who</span> you are going with to make it real.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Real Risk</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If an experience feels too risky or expensive, write down the absolute worst case scenario. You will quickly realize the risk is exaggerated. The only true risk is reaching the end of your life and regretting the things you did not do. Do not let fear stop you.</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -364,31 +405,27 @@
                     </button>
                     
                     <div id="bucket-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
-                        
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-rose-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">The Wealth/Health Curve</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't save hiking the Alps for when you are 70 and have bad knees. Experiences require different levels of health and wealth. Plot high-physicality experiences in your earlier decades.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Box Your Time</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A traditional bucket list fails because it lacks deadlines. Estimate your life expectancy to find your true end date, then divide your remaining years into strict five or ten year buckets. This forces you to schedule your life and creates the urgency needed to act.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-rose-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">The Memory Dividend</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences pay compound interest. An amazing trip taken at 25 will yield 50 years of joyful memories, conversations, and photos. The earlier you invest in experiences, the higher the yield.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Define The Theme</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Every decade of your life has a different physical and mental reality. Give this bucket a specific theme like Career Building or Peak Adventure. This helps you figure out exactly what experiences belong here.</p>
                             </div>
                         </div>
-
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-rose-300 mt-0.5">3</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Time-boxing Creates Urgency</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">"Someday" is not a day of the week. By forcing an experience into a specific 5-year bucket (e.g., "Ages 30-35"), you create the psychological urgency needed to actually fund and plan it.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Survival Threshold</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">This is the absolute minimum wealth required to survive. The formula is your annual cost of living multiplied by your years left to live, multiplied by 0.7. Once you cross this number, stop grinding and start funding these buckets.</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -456,6 +493,45 @@
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">Save Changes</button>
                     </div>
                 </form>
+
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('experience-pedagogy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to maximize fulfillment</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Die With Zero</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="experience-pedagogy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Brainstorm Without Limits</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Write down everything you want to do before you die. Do not filter yourself based on money or logistics right now. Get the raw ideas into the system first. You will organize the funding later.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Be Specific</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Saying you want to travel more is just a wish. Saying you want to hike the Camino de Santiago with your best friend is a plotted experience. Use the details box to write down exactly who you are going with to make it real.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-amber-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Real Risk</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If an experience feels too risky or expensive, write down the absolute worst case scenario. You will quickly realize the risk is exaggerated. The only true risk is reaching the end of your life and regretting the things you did not do. Do not let fear stop you.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -503,6 +579,45 @@
                         <button type="submit" class="w-full bg-stone-900 text-white font-bold py-3.5 rounded-xl hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">Save Changes</button>
                     </div>
                 </form>
+
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('bucket-pedagogy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to map your timeline</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Die With Zero</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="bucket-pedagogy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Box Your Time</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A traditional bucket list fails because it lacks deadlines. Estimate your life expectancy to find your true end date, then divide your remaining years into strict five or ten year buckets. This forces you to schedule your life and creates the urgency needed to act.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Define The Theme</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Every decade of your life has a different physical and mental reality. Give this bucket a specific theme like Career Building or Peak Adventure. This helps you figure out exactly what experiences belong here.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-rose-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Survival Threshold</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">This is the absolute minimum wealth required to survive. The formula is your annual cost of living multiplied by your years left to live, multiplied by 0.7. Once you cross this number, stop grinding and start funding these buckets.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -643,6 +758,38 @@
                         {% endfor %}
                     </div>
                 </section>
+
+                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('labels-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to tag experiences</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Labeling System</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="labels-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Core Themes</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Themes define the primary nature of an individual experience. Whether it is a high physical adventure, a career milestone, or a family gathering, tagging your experiences allows you to see exactly what kind of life you are building. It ensures your timeline has a healthy balance of different pursuits.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Emotional Values</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Experiences pay compound interest in the form of memories. You must know what kind of dividend you are getting. Tagging the emotion prevents you from building a timeline full of stressful grinds with absolutely zero connection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
