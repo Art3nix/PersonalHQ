@@ -133,6 +133,38 @@
                         <button type="submit" class="w-full bg-stone-900 text-white font-bold py-3.5 rounded-xl hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">Save Changes</button>
                     </div>
                 </form>
+
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('journal-pedagogy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to build a journal</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Compartmentalization Rule</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="journal-pedagogy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">One Journal, One Purpose</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Do not mix your daily gratitudes with your business strategy. Give this journal a highly specific name and description so you know exactly what kind of thoughts belong inside it.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Match the Cadence</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A "Morning Pages" journal needs a daily prompt rotation. A "Weekly Review" journal needs a weekly rotation. Set the frequency to match how often you actually intend to write in this specific space.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -164,29 +196,39 @@
                 </form>
 
                 <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
-                    <button type="button" onclick="document.getElementById('prompt-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
-                        <div class="flex items-center gap-2">
-                            <div class="w-5 h-5 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    <button type="button" onclick="document.getElementById('prompt-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                             </div>
-                            <h4 class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Sparking deeper reflection</p>
+                            </div>
                         </div>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     
-                    <div id="prompt-pedagogy-content" class="hidden p-4 border-t border-stone-100 bg-white space-y-3">
-                        <div class="flex items-start gap-2">
-                            <span class="text-xs font-black text-stone-300 mt-0.5">1</span>
+                    <div id="prompt-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-[11px] font-extrabold text-stone-900">Avoid Yes/No Questions</h5>
-                                <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Instead of "Was today a good day?", ask "What was the most energizing part of today?" Force your brain to dig for specifics.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Ask Open Questions</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Instead of asking "Was today a good day?", try asking "What brought me energy today?" Open-ended questions give your mind the space it needs to actually wander and reflect, rather than just giving a quick yes or no.</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-2">
-                            <span class="text-xs font-black text-stone-300 mt-0.5">2</span>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-[11px] font-extrabold text-stone-900">Drive Actionable Insight</h5>
-                                <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Great prompts reflect on the past to change the future. Try "What is one thing I will do differently tomorrow?"</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Focus on Growth</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Great prompts do not just look backwards, they help you move forward. Asking yourself "What is one small thing I can do better tomorrow?" turns your reflection into gentle, inspiring action.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Keep It Kind</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Your journal is a safe space, not a courtroom. Write prompts that invite self-compassion rather than harsh judgment. You are here to understand yourself and grow, not to interrogate yourself.</p>
                             </div>
                         </div>
                     </div>

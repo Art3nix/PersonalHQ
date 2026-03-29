@@ -95,6 +95,44 @@
             {% endfor %}
         </section>
 
+        <div class="mt-16 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm max-w-4xl mx-auto">
+            <button type="button" onclick="document.getElementById('journals-guide-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
+                <div class="flex items-center gap-3">
+                    <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to map your mind</h4>
+                        <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Reference Engine</p>
+                    </div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+
+            <div id="journals-guide-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-5">
+                <div class="flex items-start gap-3">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Clear Your Head</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Think of your journal as a pressure valve for your brain. Writing things down helps move swirling anxieties out of your head and onto the page where you can actually deal with them. It is the fastest way to stop overthinking and start finding clarity.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Inbox vs Journal</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don’t mistake your journal for a to-do list—there is a separate Inbox for that. Your Inbox handles the logistics of what you need to do, but your Journal handles the reality of who you are becoming. Keeping them separate means your journal stays a stress-free space for reflection.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">One Space, One Vibe</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Try to give each journal a strict, narrow focus. If you mix your work notes with your personal gratitudes, your brain gets confused about what "mode" it should be in. Keeping them separate makes it way easier to focus—and it helps your future AI assistant understand you better.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
     <div id="slide-over-journal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
@@ -150,32 +188,32 @@
                     </div>
                 </form>
 
-                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
-                    <button type="button" onclick="document.getElementById('journal-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('journal-pedagogy-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
                         <div class="flex items-center gap-3">
                             <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to structure journals</h4>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to build a journal</h4>
                                 <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Compartmentalization Rule</p>
                             </div>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
                     </button>
                     
-                    <div id="journal-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                    <div id="journal-pedagogy-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">One Journal, One Purpose</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Don't mix your daily gratitudes with your deep emotional processing or your project notes. Give each journal a strict, narrow focus so your brain knows exactly what mode to enter when you open it.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">One Journal, One Purpose</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Do not mix your daily gratitudes with your business strategy. Give this journal a highly specific name and description so you know exactly what kind of data belongs inside it.</p>
                             </div>
                         </div>
                         <div class="flex items-start gap-3">
                             <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Match the Cadence</h5>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Match the Cadence</h5>
                                 <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A "Morning Pages" journal needs a daily prompt rotation. A "Weekly Review" journal needs a weekly rotation. Set the frequency to match how often you actually intend to write in this specific space.</p>
                             </div>
                         </div>
@@ -233,6 +271,38 @@
                         <button type="submit" class="w-full bg-stone-900 text-white font-bold py-3.5 rounded-xl hover:bg-stone-800 transition-colors shadow-lg shadow-stone-200">Save Changes</button>
                     </div>
                 </form>
+
+                <div class="mt-6 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('journal-pedagogy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to build a journal</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Compartmentalization Rule</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="journal-pedagogy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">One Journal, One Purpose</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Do not mix your daily gratitudes with your business strategy. Give this journal a highly specific name and description so you know exactly what kind of data belongs inside it.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Match the Cadence</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">A "Morning Pages" journal needs a daily prompt rotation. A "Weekly Review" journal needs a weekly rotation. Set the frequency to match how often you actually intend to write in this specific space.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
