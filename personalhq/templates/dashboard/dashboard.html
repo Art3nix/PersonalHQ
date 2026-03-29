@@ -270,7 +270,20 @@
                             </div>
                         </div>
                         {% else %}
-                        <p class="text-sm text-stone-400 font-medium">No habits loaded.</p>
+                        <div class="bg-stone-50/50 border-2 border-dashed border-stone-100 rounded-[2.5rem] p-10 flex items-center justify-between text-center transition-all duration-300 group hover:border-indigo-100 hover:bg-indigo-50/20 mt-4">
+                            <div class="flex items-center gap-5">
+                                <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-stone-300 shadow-sm border border-stone-100 group-hover:text-indigo-400 group-hover:border-indigo-100 transition-colors shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                                </div>
+                                <div class="text-left">
+                                    <h4 class="text-sm font-extrabold text-stone-900">Start building momentum</h4>
+                                    <p class="text-xs font-medium text-stone-400 mt-0.5 max-w-md leading-relaxed">You don't need to change your whole life overnight. Pick just one small, daily action to start proving to yourself who you are.</p>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('habits_view.manage') }}" class="shrink-0 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
+                                Add a Habit →
+                            </a>
+                        </div>
                         {% endfor %}
                     </div>
                 </section>
@@ -349,14 +362,14 @@
                         </a>
                     </div>
                     {% else %}
-                    <div class="bg-stone-50 border-2 border-dashed border-stone-200 rounded-[2rem] p-8 text-center">
-                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm border border-stone-100 text-stone-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <div class="bg-stone-50 border-2 border-dashed border-stone-200 rounded-[2.5rem] p-8 text-center group hover:border-indigo-200 hover:bg-indigo-50/30 transition-all duration-300">
+                        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm border border-stone-100 text-stone-300 group-hover:text-indigo-500 group-hover:border-indigo-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
-                        <h4 class="text-xs font-bold text-stone-900">No Active Chapter</h4>
-                        <p class="text-[11px] font-medium text-stone-500 mt-1 mb-4">You don't have a time bucket spanning today's date.</p>
-                        <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-block px-4 py-2 bg-white border border-stone-200 text-stone-600 rounded-lg font-bold text-[10px] hover:bg-stone-50 transition-all shadow-sm uppercase tracking-widest">
-                            Update Map
+                        <h4 class="text-sm font-extrabold text-stone-900">Define This Chapter</h4>
+                        <p class="text-[11px] font-medium text-stone-500 mt-1.5 mb-6 leading-relaxed px-2">Time passes whether we plan it or not. Give this current phase of your life a theme so you know exactly what experiences to prioritize right now.</p>
+                        <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
+                            Design Your Chapter →
                         </a>
                     </div>
                     {% endif %}
