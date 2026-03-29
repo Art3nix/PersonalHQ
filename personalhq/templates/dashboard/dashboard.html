@@ -33,37 +33,6 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #E7E5E4; border-radius: 10px; }
 
-        /* Fixed Lore Tooltip (i) */
-        .lore-box {
-            visibility: hidden;
-            opacity: 0;
-            transform: scale(0.95);
-            transition: all 0.2s ease-in-out;
-            pointer-events: none;
-            position: absolute;
-            bottom: calc(100% + 12px);
-            left: 0;
-            background-color: #0f172a;
-            color: white;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            width: 14rem;
-            z-index: 50;
-            font-size: 0.65rem;
-            line-height: 1.5;
-            font-weight: 400;
-            text-transform: none;
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-        }
-        .has-info:hover .lore-box {
-            visibility: visible;
-            opacity: 1;
-            transform: scale(1);
-        }
-        .info-btn { 
-            @apply inline-flex items-center justify-center w-4 h-4 rounded-full border border-stone-200 text-[10px] text-stone-300 cursor-help transition-all hover:bg-stone-900 hover:text-white hover:border-stone-900 ml-1.5;
-        }
-
         /* Analog Clock Scaling */
         #analog-clock { width: 130px; height: 130px; }
         .hand { stroke-linecap: round; transform-origin: 50% 50%; }
@@ -127,9 +96,8 @@
 
                 <section class="mb-20">
                     <div class="flex justify-between items-end mb-6 px-1 relative">
-                        <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
-                            Deep work <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
-                            <span class="lore-box">CAL NEWPORT: 90 mins of undistracted concentration on your most cognitively demanding task.</span>
+                        <h3 class="text-sm font-bold text-stone-900 flex items-center">
+                            Deep Work
                         </h3>
                         
                         {% if queued_sessions %}
@@ -202,10 +170,7 @@
                     <div class="flex justify-between items-center mb-10 px-1">
                         <div class="flex justify-between items-end mb-6 px-1">
                             <h3 class="text-sm font-bold text-stone-900 flex items-center gap-3">
-                                <span class="flex items-center has-info relative">
-                                    Daily Habits <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
-                                    <span class="lore-box">ATOMIC HABITS: Small, consistent actions that compound over time to provide undeniable proof of your core identity.</span>
-                                </span>
+                                <span>Daily Habits</span>
                                 <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-md border border-indigo-100 uppercase tracking-widest">
                                     {{ today.strftime('%A, %b %d') }}
                                 </span>
@@ -329,9 +294,8 @@
                 </section>
                 <section class="mb-20">
                     <div class="flex justify-between items-end mb-6 px-1">
-                        <h3 class="text-sm font-bold text-stone-900 flex items-center has-info relative">
-                            Active Life Chapter <span class="text-stone-400 hover:text-stone-500 cursor-pointer text-xs ml-1.5 font-bold info-btn">(i)</span>
-                            <span class="lore-box">DIE WITH ZERO: Your current time bucket. Maximize these specific experiences before this chapter closes.</span>
+                        <h3 class="text-sm font-bold text-stone-900 flex items-center">
+                            Active Life Chapter
                         </h3>
                     </div>
 
