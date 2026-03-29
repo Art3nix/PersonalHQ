@@ -87,24 +87,26 @@
         <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
             <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-6">The Inbox Guide</h3>
             
-            <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-sm text-sm text-stone-600 mb-6">
-                <p class="mb-4 leading-relaxed">The mind is for having ideas, not holding them. Every item in your inbox represents an open loop.</p>
+            <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-sm text-sm text-stone-600 mb-6 space-y-5">
+                <div>
+                    <h4 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide mb-1">A Safe Place For Your Mind</h4>
+                    <p class="text-[11px] font-medium leading-relaxed">Your mind is beautifully designed to create ideas, not to hold onto them. Every lingering thought or forgotten task quietly drains your energy. Think of this inbox as a pressure valve. The exact moment you write a worry or an idea down here, you are whispering to your brain: "I've got this. It is safe to let it go."</p>
+                </div>
+                
+                <hr class="border-stone-100">
+
                 <ul class="space-y-4">
                     <li class="flex items-start gap-3">
                         <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</div>
-                        <div><strong class="text-stone-900 block">Convert to Action</strong> If it requires focus, turn it into a planned Deep Work session.</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Just Get It Out</strong> <span class="text-[11px]">When a thought strikes, dump it here immediately. Don't worry about organizing it or making it sound smart. Just get it out of your head so you can stay present in your life.</span></div>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</div>
-                        <div><strong class="text-stone-900 block">Convert to Experience</strong> If it's a bucket-list idea, plot it on your Life Map.</div>
-                    </li>
-                    <li class="flex items-start gap-3">
-                        <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">3</div>
-                        <div><strong class="text-stone-900 block">Convert to Memory</strong> If it's a reflection, append it to an active Journal.</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Clear The Room</strong> <span class="text-[11px]">To keep your mind at peace, make a habit of clearing this list regularly. Think of it as a temporary waiting room, not a permanent storage closet.</span></div>
                     </li>
                     <li class="flex items-start gap-3">
                         <div class="w-6 h-6 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">X</div>
-                        <div><strong class="text-stone-900 block">Discard</strong> If it serves none of these, delete it without guilt.</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Let Things Go</strong> <span class="text-[11px]">Not every passing thought is a mandate. If an idea no longer excites you or serves you, just delete it. Freeing up mental space is a beautiful thing.</span></div>
                     </li>
                 </ul>
             </div>
@@ -131,20 +133,45 @@
             </div>
 
             <div class="p-8 flex-1 overflow-y-auto">
-                <form id="edit-dump-form" action="" method="POST" class="space-y-6 h-full flex flex-col">
+                <form id="edit-dump-form" action="" method="POST" class="space-y-6">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 
-                    <div class="flex-1">
+                    <div>
                         <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Thought Content</label>
-                        <textarea name="content" id="edit-dump-content" required class="w-full h-48 bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none custom-scrollbar"></textarea>
+                        <textarea name="content" id="edit-dump-content" required class="w-full h-64 bg-stone-50 border border-stone-200 rounded-xl py-4 px-5 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none custom-scrollbar leading-relaxed"></textarea>
                     </div>
 
-                    <div class="pt-4 mt-auto">
+                    <div class="pt-2">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
                             Save Changes
                         </button>
                     </div>
                 </form>
+
+                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('edit-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.05l5.67-5.67"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">Honoring your ideas</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">A judgment-free zone</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="edit-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Don't Overthink It</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Sometimes your best ideas will sound a little crazy at first, and that is perfectly okay! If you filter yourself before you write them down, you might lose something brilliant. Don't worry about editing right now—just let your thoughts exist exactly as they are.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -247,12 +274,12 @@
                 <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
                     <button type="button" onclick="document.getElementById('inbox-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
                         <div class="flex items-center gap-3">
-                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-700 flex items-center justify-center shrink-0">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                             </div>
                             <div>
-                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to process thoughts</h4>
-                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The GTD Framework</p>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">From Chaos to Clarity</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Finding your next step</p>
                             </div>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
@@ -261,26 +288,26 @@
                     <div id="inbox-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
                         
                         <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">The 2-Minute Rule</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If this thought is an action that takes less than two minutes to complete (e.g., "Reply to Sarah's email"), don't convert it into a Focus Session. Just do it right now, close this modal, and delete the thought.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The 2-Minute Relief</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If this thought takes less than two minutes to resolve (like sending a quick text or paying a bill), don't even bother scheduling it. Just do it right now, enjoy that little burst of momentum, and delete the thought!</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-stone-300 mt-0.5">2</span>
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Is it Actionable?</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If there is no physical next action tied to this thought, it shouldn't be Deep Work. Either log it as a <span class="font-bold text-stone-700">Journal</span> entry for future reference, or discard it.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Define the Outcome</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Vague tasks cause stress because your brain doesn't know what "done" looks like. Change a vague word like "Taxes" to a clear outcome like "File 2025 tax return." Then, just ask yourself what the very first physical step is (like opening the spreadsheet) so you have an easy starting line.</p>
                             </div>
                         </div>
 
                         <div class="flex items-start gap-3">
-                            <span class="text-sm font-black text-stone-300 mt-0.5">3</span>
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
                             <div>
-                                <h5 class="text-xs font-extrabold text-stone-900">Define the "Next Action"</h5>
-                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If you are converting this to Deep Work, rewrite the title so it starts with a verb. Change "Taxes" to "Draft 2025 tax spreadsheet." Your brain needs a clear starting line.</p>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Give It a Home</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Where does this idea belong? If it's a project, send it to Deep Work. If it's a dream for the future, make it an Experience. If it's just a feeling, save it in your Journal. Every piece of your mind deserves a proper home.</p>
                             </div>
                         </div>
 
