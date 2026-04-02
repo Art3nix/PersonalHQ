@@ -61,8 +61,38 @@ def matrix():
     # Fetch habits that don't belong to an identity yet
     unassigned_habits = Habit.query.filter_by(user_id=current_user.id, identity_id=None, is_active=True).all()
 
+    # ==========================================
+    # START IDENTITY AI MOCK DATA
+    # ==========================================
+    TEST_AI_NUDGES = True
+    ai_empty_state = None
+
+    if TEST_AI_NUDGES:
+        if not identity_stats:
+            ai_empty_state = "Who do you want to be? Don't worry about outcomes yet. Focus on creating one identity (e.g., 'The Writer') and we will build the systems to support it."
+        else:
+            for stat in identity_stats:
+                # 1. Disconnected (No habits linked)
+                if not stat['habit_count'] and not stat['focus_count']:
+                    stat['model'].ai_insight = "An identity without actions is just a wish. Attach one small daily habit to start building evidence."
+                
+                # 2. Slipping Alignment (Calculated from your existing logic)
+                elif stat['total_evidence'] == 0:
+                    stat['model'].ai_insight = f"Your '{stat['model'].name}' identity has been quiet lately. Do we need to schedule a small win today to get it back?"
+                
+                # 3. Strong Alignment
+                elif stat['total_evidence'] > 0:
+                    stat['model'].ai_insight = f"The evidence is stacking up. You are consistently proving to yourself that you are {stat['model'].name}."
+                
+                else:
+                    stat['model'].ai_insight = None
+    # ==========================================
+    # END IDENTITY AI MOCK DATA
+    # ==========================================
+
     return render_template(
         'identities/matrix.html', 
         identity_stats=identity_stats,
-        unassigned_habits=unassigned_habits 
+        unassigned_habits=unassigned_habits,
+        ai_empty_state=ai_empty_state
     )
