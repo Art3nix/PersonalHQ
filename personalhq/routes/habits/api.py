@@ -11,6 +11,48 @@ from personalhq.services.habit_service import get_habit_status_and_sync, recalcu
 
 habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
 
+def get_ai_insight(habit, log, status_str):
+    # 1. Localized imports to completely prevent Circular Import crashes
+    from datetime import timedelta
+    from personalhq.services.time_service import get_local_today
+    from personalhq.models.habit_logs import HabitLog
+
+    # If the habit is currently unlogged, we skip the positive reinforcements
+    if not log or log.progress == 0:
+        if status_str == 'EXPIRING':
+            return "Your streak is at risk today. Don't lose the momentum you've built."
+        elif habit.streak == 0:
+            return "Friction seems high here lately. Consider doing just 2 minutes of this today to get back on the board."
+        return None
+
+    # 2. Time & Database checks
+    today = get_local_today()
+    yesterday = today - timedelta(days=1)
+    day_before = today - timedelta(days=2)
+    
+    log_yest = HabitLog.query.filter_by(habit_id=habit.id, logged_at=yesterday).first()
+    log_day_before = HabitLog.query.filter_by(habit_id=habit.id, logged_at=day_before).first()
+    
+    is_yest_missed = not log_yest or log_yest.progress < habit.target_count
+    had_streak_before = log_day_before and log_day_before.progress >= habit.target_count
+    is_today_logged = log.progress >= habit.target_count
+    
+    # 3. Text Generation Logic
+    if is_yest_missed and had_streak_before and not is_today_logged:
+        return "You missed this yesterday. Recover your streak before logging today."
+        
+    if is_today_logged:
+        if habit.streak == habit.best_streak and habit.best_streak > 1:
+            return f"New all-time best! {habit.streak} days. You are operating at a completely new level."
+        elif habit.streak == 1:
+            return "Slump broken. Great job showing up. Let's build on this tomorrow."
+        elif habit.streak > 0 and habit.streak % 3 == 0:
+            return f"Momentum is building! You've hit a {habit.streak}-day streak. You are becoming the person who does this consistently."
+        else:
+            return "Target reached. Excellent execution today."
+            
+    return None
+
 def _get_date_from_request(data: dict):
     """Safely parse a date from request data, defaulting to today."""
     target_date_str = data.get('date')
@@ -53,7 +95,8 @@ def toggle_habit(habit_id):
         "best": habit.best_streak,
         "habit_status": status_str,
         "progress": log.progress,
-        "target": habit.target_count
+        "target": habit.target_count,
+        "ai_insight": get_ai_insight(habit, log, status_str)
     })
 
 @habits_api_bp.route('/create', methods=['POST'])
@@ -192,7 +235,8 @@ def log_habit_progress(habit_id):
         "best": habit.best_streak,
         "habit_status": status_str,
         "progress": log.progress,
-        "target": habit.target_count
+        "target": habit.target_count,
+        "ai_insight": get_ai_insight(habit, log, status_str)
     })
 
 @habits_api_bp.route('/<int:habit_id>/unlog', methods=['POST'])
@@ -224,7 +268,8 @@ def unlog_habit_progress(habit_id):
         "best": habit.best_streak,
         "habit_status": status_str,
         "progress": log.progress,
-        "target": habit.target_count
+        "target": habit.target_count,
+        "ai_insight": get_ai_insight(habit, log, status_str)
     })
 
 @habits_api_bp.route('/<int:habit_id>/archive', methods=['POST'])

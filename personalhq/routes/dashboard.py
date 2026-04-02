@@ -42,7 +42,15 @@ def index():
             log = hdates.get(today)
             current_counts[habit.id] = log.progress if log else 0
             log_yest = hdates.get(yesterday)
-            if habit.streak > 0 and (not log_yest or log_yest.progress < habit.target_count):
+            is_yest_missed = not log_yest or log_yest.progress < habit.target_count
+
+            day_before_yest = today - timedelta(days=2)
+            log_day_before = hdates.get(day_before_yest)
+            had_streak_before = log_day_before and log_day_before.progress >= habit.target_count
+            is_today_logged = log and log.progress >= habit.target_count
+
+            # ONLY show the recovery nudge if they haven't logged today yet!
+            if is_yest_missed and had_streak_before and not is_today_logged:
                 missed_yesterday.append(habit)
         else:
             current_counts[habit.id] = sum(l.progress for d, l in hdates.items() if d >= start_of_week)
@@ -105,6 +113,66 @@ def index():
     elif hour < 21: greeting = "Good evening"
     else: greeting = "Working late"
 
+    # ==========================================
+    # START NATIVE AI MOCK DATA
+    # ==========================================
+    TEST_AI_NUDGES = True
+    
+    ai_daily_briefing = None
+    ai_focus_intention = None
+    ai_focus_empty_state = None
+    ai_habit_empty_state = None
+    ai_chapter_empty_state = None
+
+    if TEST_AI_NUDGES:
+        ai_daily_briefing = "You have a solid 90-minute Deep Work session queued today. Get that done early, but don't forget to move your body later."
+
+        # TASK-SPECIFIC AI MOCK DATA
+        for session in queued_sessions:
+            # You would replace this with actual AI logic later
+            if "Sidehustle" in session.name or "Code" in session.name:
+                session.ai_intention = "System design requires unbroken logic chains. Close your email."
+            else:
+                session.ai_intention = "Deep work requires deep focus. Put your phone in another room."
+        
+        # Empty States (Replacing the static paragraphs)
+        ai_focus_empty_state = "Your focus queue is clear. Even a 30-minute session reading a book builds the focus muscle. Schedule one now?"
+        ai_habit_empty_state = "Based on your focus on deep work, adding a 'Morning Walk' habit might help you clear your mind before sessions."
+        ai_chapter_empty_state = "You are currently in a heavy execution phase of life. Let's give this chapter a name to solidify that identity."
+
+        # Merged Habit Notes (Inside the card)
+        missed_ids = [h.id for h in missed_yesterday]
+        if habits:
+            for habit in habits:
+                status_str = habit_statuses[habit.id]
+                is_completed_today = status_str == 'COMPLETED'
+                is_expiring = status_str == 'EXPIRING'
+                
+                if habit.id in missed_ids:
+                    habit.ai_insight = "You missed this yesterday. Recover your streak before logging today."
+                elif is_completed_today:
+                    # 1. New Best Celebration
+                    if habit.streak == habit.best_streak and habit.best_streak > 1:
+                        habit.ai_insight = f"New all-time best! {habit.streak} days. You are operating at a completely new level."
+                    # 2. Slump Broken
+                    elif habit.streak == 1:
+                        habit.ai_insight = "Slump broken. Great job showing up. Let's build on this tomorrow."
+                    # 3. Milestone Celebration
+                    elif habit.streak > 0 and habit.streak % 3 == 0:
+                        habit.ai_insight = f"Momentum is building! You've hit a {habit.streak}-day streak. You are becoming the person who does this consistently."
+                    else:
+                        habit.ai_insight = "Target reached. Excellent execution today."
+                # 4. At-Risk Warning
+                elif is_expiring:
+                    habit.ai_insight = "Your streak is at risk today. Don't lose the momentum you've built."
+                elif habit.streak == 0:
+                    habit.ai_insight = "Friction seems high here lately. Consider doing just 2 minutes of this today to get back on the board."
+                else:
+                    habit.ai_insight = None
+    # ==========================================
+    # END NATIVE AI MOCK DATA
+    # ==========================================
+
     return render_template(
         'dashboard/dashboard.html',
         habits=habits,
@@ -121,5 +189,10 @@ def index():
         bucket_progress=bucket_progress,
         time_left_str=time_left_str,
         is_urgent=is_urgent,
-        upcoming_experiences=upcoming_experiences
+        upcoming_experiences=upcoming_experiences,
+        ai_daily_briefing=ai_daily_briefing,
+        ai_focus_intention=ai_focus_intention,
+        ai_focus_empty_state=ai_focus_empty_state,
+        ai_habit_empty_state=ai_habit_empty_state,
+        ai_chapter_empty_state=ai_chapter_empty_state
     )

@@ -70,26 +70,20 @@
             <main class="w-[70%] overflow-y-auto custom-scrollbar p-12 pt-4">
                 <div class="mb-14">
                     <h2 class="text-3xl font-bold text-stone-400">{{ greeting }}, <span class="text-stone-900">{{ current_user.first_name }}.</span></h2>
+
+                    {% if ai_daily_briefing %}
+                    <div class="mt-3 flex items-start gap-2.5 max-w-2xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-0.5 shrink-0"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+                        <p class="text-sm font-medium text-stone-500 leading-relaxed">{{ ai_daily_briefing }}</p>
+                    </div>
+                    {% endif %}
+
                     {% if daily_total > 0 %}
                     <div class="mt-4 flex items-center gap-4">
                         <div class="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
                             <div class="h-full bg-indigo-500 rounded-full transition-all duration-700" style="width: {{ ((daily_completed / daily_total) * 100)|round|int }}%"></div>
                         </div>
                         <span class="text-xs font-bold text-stone-500 shrink-0">{{ daily_completed }}/{{ daily_total }} habits today</span>
-                    </div>
-                    {% endif %}
-                    {% if missed_yesterday %}
-                    <div class="mt-4 space-y-2">
-                        {% for habit in missed_yesterday %}
-                        <div class="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500 shrink-0"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            <span class="text-xs font-medium text-amber-700">Did you do <strong>{{ habit.name }}</strong> yesterday?</span>
-                            <button onclick="logYesterday({{ habit.id }})" class="ml-auto px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg text-xs font-bold transition-colors shrink-0">Yes ✓</button>
-                            <button onclick="this.closest('div').remove()" class="text-amber-400 hover:text-amber-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                            </button>
-                        </div>
-                        {% endfor %}
                     </div>
                     {% endif %}
                 </div>
@@ -125,6 +119,10 @@
                                 <div class="mb-8">
                                     <p id="session-identity" class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest mb-2"></p>
                                     <h4 id="session-title" class="text-4xl font-extrabold text-stone-900 tracking-tight leading-none">Loading...</h4>
+                                    <p id="ai-focus-intention-text" style="display: none;" class="text-xs font-bold text-indigo-500/80 uppercase tracking-widest mt-4 items-center gap-2">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                                        <span></span>
+                                    </p>
                                 </div>
                                 
                                 <div class="flex items-center gap-4 w-full" id="timer-controls">
@@ -156,7 +154,7 @@
                             </div>
                             <div class="text-left">
                                 <h4 class="text-sm font-extrabold text-stone-900">No deep work today</h4>
-                                <p class="text-xs font-medium text-stone-400 mt-0.5">Plan a 90-min session to do your most important work.</p>
+                                <p class="text-xs font-medium text-stone-400 mt-0.5">{{ ai_focus_empty_state | default('Plan a 90-min session to do your most important work.') }}</p>
                             </div>
                         </div>
                         <a href="{{ url_for('focus_view.planner') }}" class="shrink-0 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
@@ -188,85 +186,100 @@
                         {% set status = habit_statuses[habit.id] %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
 
-                        <div id="habit-row-{{ habit.id }}" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" data-target="{{ habit.target_count }}" class="habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all group 
-                            {% if status == 'COMPLETED' %}bg-{{ theme }}-50/50 border-{{ theme }}-100
-                            {% elif status == 'EXPIRING' %}bg-white border-{{ theme }}-200 hover:border-{{ theme }}-300
-                            {% elif status == 'PENDING' %}bg-white border-slate-100 hover:border-{{ theme }}-200
-                            {% else %}bg-stone-50/50 border-stone-100 hover:border-stone-200{% endif %}
-                            {% if habit.target_count == 1 %}cursor-pointer{% endif %}" 
-                            style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}" 
-                            {% if habit.target_count == 1 %}onclick="interactWithHabit({{ habit.id }}, 'toggle')"{% endif %}>
+                        <div class="habit-row-item flex flex-col gap-2" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" data-target="{{ habit.target_count }}" style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}">
                             
-                            <div class="flex items-center gap-4">
-                                <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors 
-                                    {% if status == 'COMPLETED' %}bg-{{ theme }}-600 text-white
-                                    {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600
-                                    {% else %}bg-slate-50 text-slate-400 group-hover:bg-{{ theme }}-50 group-hover:text-{{ theme }}-600{% endif %}">
-                                    <i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>
-                                </div>
-                                <div class="flex flex-col items-start gap-1.5">
-                                    <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 
-                                        {% if status == 'COMPLETED' %}text-{{ theme }}-900
-                                        {% elif status == 'EXPIRING' %}text-{{ theme }}-900
-                                        {% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
-                                    {% if habit.identity %}
-                                        <span id="habit-identity-{{ habit.id }}" 
-                                              title="{{ habit.identity.description or habit.identity.name }}"
-                                              class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm cursor-help
-                                            {% if status == 'COMPLETED' %}bg-{{ theme }}-100/50 text-{{ theme }}-600 border-{{ theme }}-200
-                                            {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200
-                                            {% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200 group-hover:bg-{{ theme }}-100{% endif %}">
-                                            {{ habit.identity.name }}
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
-                            <div class="flex items-center gap-4">
-                                {% if habit.target_count > 1 %}
-                                    {% set current_count = current_counts[habit.id] if current_counts else 0 %}
-                                    <div class="flex items-center gap-3" onclick="event.stopPropagation()">
-                                        <div class="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl p-1 shadow-sm">
-                                            <button id="minus-btn-{{ habit.id }}" onclick="interactWithHabit({{ habit.id }}, 'unlog')" {% if current_count == 0 %}disabled{% endif %} class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            </button>
-                                            
-                                            <span id="count-display-{{ habit.id }}" class="text-[11px] font-black text-stone-700 w-8 text-center">{{ current_count }} / {{ habit.target_count }}</span>
-                                            
-                                            <button onclick="interactWithHabit({{ habit.id }}, 'log')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-50 text-{{ theme }}-600 shadow-sm border border-{{ theme }}-100 hover:border-{{ theme }}-200 hover:bg-{{ theme }}-100 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                                            </button>
+                            <div id="habit-card-{{ habit.id }}" class="flex flex-col p-4 border rounded-2xl transition-all group 
+                                {% if status == 'COMPLETED' %}bg-{{ theme }}-50/50 border-{{ theme }}-100
+                                {% elif status == 'EXPIRING' %}bg-white border-{{ theme }}-200 hover:border-{{ theme }}-300
+                                {% elif status == 'PENDING' %}bg-white border-slate-100 hover:border-{{ theme }}-200
+                                {% else %}bg-stone-50/50 border-stone-100 hover:border-stone-200{% endif %}
+                                {% if habit.target_count == 1 %}cursor-pointer{% endif %}" 
+                                {% if habit.target_count == 1 %}onclick="interactWithHabit({{ habit.id }}, 'toggle')"{% endif %}>
+                                
+                                <div class="flex items-center justify-between w-full">
+                                    <div class="flex items-center gap-4">
+                                        <div id="habit-icon-{{ habit.id }}" class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors 
+                                            {% if status == 'COMPLETED' %}bg-{{ theme }}-600 text-white
+                                            {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600
+                                            {% else %}bg-slate-50 text-slate-400 group-hover:bg-{{ theme }}-50 group-hover:text-{{ theme }}-600{% endif %}">
+                                            <i data-lucide="{{ habit.icon }}" class="w-5 h-5"></i>
                                         </div>
-
-                                        <button onclick="interactWithHabit({{ habit.id }}, 'toggle')" title="Complete all at once" class="w-8 h-8 flex items-center justify-center rounded-xl bg-{{ theme }}-100 text-{{ theme }}-700 shadow-sm border border-{{ theme }}-200 hover:bg-{{ theme }}-200 transition-colors">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        </button>
+                                        <div class="flex flex-col items-start gap-1.5">
+                                            <p id="habit-name-{{ habit.id }}" class="text-sm font-bold 
+                                                {% if status == 'COMPLETED' %}text-{{ theme }}-900
+                                                {% elif status == 'EXPIRING' %}text-{{ theme }}-900
+                                                {% else %}text-slate-800{% endif %}">{{ habit.name }}</p>
+                                            {% if habit.identity %}
+                                                <span id="habit-identity-{{ habit.id }}" 
+                                                    title="{{ habit.identity.description or habit.identity.name }}"
+                                                    class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm cursor-help
+                                                    {% if status == 'COMPLETED' %}bg-{{ theme }}-100/50 text-{{ theme }}-600 border-{{ theme }}-200
+                                                    {% elif status == 'EXPIRING' %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200
+                                                    {% else %}bg-{{ theme }}-50 text-{{ theme }}-600 border-{{ theme }}-200 group-hover:bg-{{ theme }}-100{% endif %}">
+                                                    {{ habit.identity.name }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
                                     </div>
-                                {% endif %}
-
-                                <div class="flex flex-col items-end justify-center" id="streak-container-{{ habit.id }}">
-                                    {% set streak_unit = 'week' if habit.frequency.value == 'WEEKLY' else 'day' %}
                                     
-                                    {% if status == 'COMPLETED' and habit.streak and habit.streak > 0 %}
-                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-700 bg-{{ theme }}-100 px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-sm border border-{{ theme }}-200">
-                                            🔥 {{ habit.streak }} {{ streak_unit }} streak
-                                        </span>
-                                    {% elif status == 'EXPIRING' and habit.streak and habit.streak > 0 %}
-                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-600 bg-white px-2 py-1 rounded-lg flex items-center gap-1.5 border-2 border-dashed border-{{ theme }}-300 shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                            {{ habit.streak }} {{ streak_unit }}s at risk
-                                        </span>
-                                    {% elif status == 'PENDING' and habit.streak and habit.streak > 0 %}
-                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-500 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200 shadow-sm">
-                                            🔥 {{ habit.streak }} {{ streak_unit }} streak
-                                        </span>
-                                    {% else %}
-                                        <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200">
-                                            <span class="opacity-50 grayscale text-sm leading-none">🌱</span>
-                                            {% if habit.streak == 0 and habit.best_streak == 0 %}Start today{% else %}Restart streak{% endif %}
-                                        </span>
+                                    <div class="flex items-center gap-4">
+                                        {% if habit.target_count > 1 %}
+                                            {% set current_count = current_counts[habit.id] if current_counts else 0 %}
+                                            <div class="flex items-center gap-3" onclick="event.stopPropagation()">
+                                                <div class="flex items-center gap-1.5 bg-white border border-stone-200 rounded-xl p-1 shadow-sm">
+                                                    <button id="minus-btn-{{ habit.id }}" onclick="interactWithHabit({{ habit.id }}, 'unlog')" {% if current_count == 0 %}disabled{% endif %} class="w-7 h-7 flex items-center justify-center rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                    </button>
+                                                    <span id="count-display-{{ habit.id }}" class="text-[11px] font-black text-stone-700 w-8 text-center">{{ current_count }} / {{ habit.target_count }}</span>
+                                                    <button onclick="interactWithHabit({{ habit.id }}, 'log')" class="w-7 h-7 flex items-center justify-center rounded-lg bg-{{ theme }}-50 text-{{ theme }}-600 shadow-sm border border-{{ theme }}-100 hover:border-{{ theme }}-200 hover:bg-{{ theme }}-100 transition-colors">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                    </button>
+                                                </div>
+                                                <button onclick="interactWithHabit({{ habit.id }}, 'toggle')" title="Complete all at once" class="w-8 h-8 flex items-center justify-center rounded-xl bg-{{ theme }}-100 text-{{ theme }}-700 shadow-sm border border-{{ theme }}-200 hover:bg-{{ theme }}-200 transition-colors">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                                </button>
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="flex flex-col items-end justify-center" id="streak-container-{{ habit.id }}">
+                                            {% set streak_unit = 'week' if habit.frequency.value == 'WEEKLY' else 'day' %}
+                                            
+                                            {% if status == 'COMPLETED' and habit.streak and habit.streak > 0 %}
+                                                <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-700 bg-{{ theme }}-100 px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-sm border border-{{ theme }}-200">
+                                                    🔥 {{ habit.streak }} {{ streak_unit }} streak
+                                                </span>
+                                            {% elif status == 'EXPIRING' and habit.streak and habit.streak > 0 %}
+                                                <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-{{ theme }}-600 bg-white px-2 py-1 rounded-lg flex items-center gap-1.5 border-2 border-dashed border-{{ theme }}-300 shadow-sm">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                                    {{ habit.streak }} {{ streak_unit }}s at risk
+                                                </span>
+                                            {% elif status == 'PENDING' and habit.streak and habit.streak > 0 %}
+                                                <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-500 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200 shadow-sm">
+                                                    🔥 {{ habit.streak }} {{ streak_unit }} streak
+                                                </span>
+                                            {% else %}
+                                                <span id="streak-{{ habit.id }}" class="text-[11px] font-bold text-stone-400 bg-stone-50 px-2 py-1 rounded-lg flex items-center gap-1.5 border border-stone-200">
+                                                    <span class="opacity-50 grayscale text-sm leading-none">🌱</span>
+                                                    {% if habit.streak == 0 and habit.best_streak == 0 %}Start today{% else %}Restart streak{% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div id="ai-note-container-{{ habit.id }}" class="{% if not habit.ai_insight %}hidden{% endif %} mt-4 pt-3 border-t border-stone-100/60 flex items-start justify-between gap-4" onclick="event.stopPropagation()">
+                                    <div class="flex items-start gap-2">
+                                        <svg id="ai-icon-{{ habit.id }}" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="mt-0.5 shrink-0 transition-colors {% if status == 'COMPLETED' %}text-emerald-500{% else %}text-indigo-400{% endif %}"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                                        <p id="ai-text-{{ habit.id }}" class="text-[11px] leading-relaxed transition-colors {% if status == 'COMPLETED' %}text-emerald-700 font-bold{% else %}text-stone-500 font-medium{% endif %}">{{ habit.ai_insight }}</p>
+                                    </div>
+                                    
+                                    {% if habit in missed_yesterday %}
+                                    <button onclick="logYesterday({{ habit.id }})" class="shrink-0 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 rounded-lg text-[10px] font-bold transition-colors border border-indigo-200 shadow-sm ml-auto">
+                                        Recover Yesterday
+                                    </button>
                                     {% endif %}
                                 </div>
+
                             </div>
                         </div>
                         {% else %}
@@ -277,7 +290,9 @@
                                 </div>
                                 <div class="text-left">
                                     <h4 class="text-sm font-extrabold text-stone-900">Start building momentum</h4>
-                                    <p class="text-xs font-medium text-stone-400 mt-0.5 max-w-md leading-relaxed">You don't need to change your whole life overnight. Pick just one small, daily action to start proving to yourself who you are.</p>
+                                    <p class="text-xs font-medium text-stone-400 mt-0.5 max-w-md leading-relaxed">
+                                        {{ ai_habit_empty_state | default("You don't need to change your whole life overnight. Pick just one small, daily action to start proving to yourself who you are.") }}
+                                    </p>
                                 </div>
                             </div>
                             <a href="{{ url_for('habits_view.manage') }}" class="shrink-0 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
@@ -367,7 +382,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
                         <h4 class="text-sm font-extrabold text-stone-900">Define This Chapter</h4>
-                        <p class="text-[11px] font-medium text-stone-500 mt-1.5 mb-6 leading-relaxed px-2">Time passes whether we plan it or not. Give this current phase of your life a theme so you know exactly what experiences to prioritize right now.</p>
+                        <p class="text-[11px] font-medium text-stone-500 mt-1.5 mb-6 leading-relaxed px-2">
+                            {{ ai_chapter_empty_state | default('Time passes whether we plan it or not. Give this current phase of your life a theme so you know exactly what experiences to prioritize right now.') }}
+                        </p>
                         <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
                             Design Your Chapter →
                         </a>
@@ -481,23 +498,19 @@
 
         // --- HABITS API SYNC ---
         async function interactWithHabit(habitId, action) {
-            const row = document.getElementById(`habit-row-${habitId}`);
+            const wrapper = document.querySelector(`#habit-card-${habitId}`).closest('.habit-row-item');
+            const card = document.getElementById(`habit-card-${habitId}`);
             const countDisplay = document.getElementById(`count-display-${habitId}`);
             const minusBtn = document.getElementById(`minus-btn-${habitId}`);
-            const targetCount = parseInt(row.dataset.target || 1);
+            const targetCount = parseInt(wrapper.dataset.target || 1);
 
-            // 1. OPTIMISTIC UI: Update the math instantly before the server responds
+            // OPTIMISTIC UI 
             if (targetCount > 1 && countDisplay) {
                 let currentCount = parseInt(countDisplay.innerText.split('/')[0].trim());
-                
                 if (action === 'log') currentCount++;
                 if (action === 'unlog') currentCount--;
-                if (action === 'toggle') {
-                    // If it's already full, toggle resets to 0. Otherwise, fill it up to the target!
-                    currentCount = (currentCount >= targetCount) ? 0 : targetCount;
-                }
+                if (action === 'toggle') currentCount = (currentCount >= targetCount) ? 0 : targetCount;
                 
-                // Prevent negatives or visual over-filling
                 if (currentCount < 0) currentCount = 0;
                 if (currentCount > targetCount) currentCount = targetCount;
                 
@@ -505,7 +518,7 @@
                 if (minusBtn) minusBtn.disabled = (currentCount === 0);
             }
 
-            // 2. Fetch the true state from the Python backend
+            // FETCH API
             const data = await apiCall(`/actions/habits/${habitId}/${action}`, 'POST', {});
 
             if (data.status === 'success') {
@@ -514,11 +527,11 @@
                 const identityEl = document.getElementById(`habit-identity-${habitId}`);
                 const container = document.getElementById(`streak-container-${habitId}`);
 
-                const freq = row.dataset.freq;
+                const freq = wrapper.dataset.freq;
                 const streakUnit = freq === 'WEEKLY' ? 'week' : 'day';
-                const theme = row.dataset.theme || 'indigo';
+                const theme = wrapper.dataset.theme || 'indigo';
 
-                // 3. Rebuild the Status Pill
+                // Rebuild Streak Pill
                 container.innerHTML = '';
                 const streakSpan = document.createElement('span');
                 streakSpan.id = `streak-${habitId}`;
@@ -538,36 +551,72 @@
                 }
                 container.appendChild(streakSpan);
 
-                // 4. Reset Row Layout Classes
-                row.className = "habit-row-item flex items-center justify-between p-4 border rounded-2xl transition-all group";
-                if (targetCount === 1) row.classList.add('cursor-pointer');
-                
+                // Update Card Layout Classes without breaking Flex-col
+                card.className = `flex flex-col p-4 border rounded-2xl transition-all group ${targetCount === 1 ? 'cursor-pointer' : ''}`;
                 iconBox.className = "w-10 h-10 rounded-xl flex items-center justify-center transition-colors";
                 nameEl.className = "text-sm font-bold";
-                if (identityEl) identityEl.className = "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm";
+                if (identityEl) identityEl.className = "text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md border transition-colors shadow-sm cursor-help";
 
-                // 5. Apply Colors (FIXED: Zero-streak states now retain hover colors!)
+                // Apply Colors
                 if (data.habit_status === 'COMPLETED') {
-                    row.classList.add(`bg-${theme}-50/50`, `border-${theme}-100`);
+                    card.classList.add(`bg-${theme}-50/50`, `border-${theme}-100`);
                     iconBox.classList.add(`bg-${theme}-600`, `text-white`);
                     nameEl.classList.add(`text-${theme}-900`);
                     if (identityEl) identityEl.classList.add(`bg-${theme}-100/50`, `text-${theme}-600`, `border-${theme}-200`);
                 } else if (data.habit_status === 'EXPIRING') {
-                    row.classList.add('bg-white', `border-${theme}-200`, `hover:border-${theme}-300`);
+                    card.classList.add('bg-white', `border-${theme}-200`, `hover:border-${theme}-300`);
                     iconBox.classList.add(`bg-${theme}-50`, `text-${theme}-600`);
                     nameEl.classList.add(`text-${theme}-900`);
                     if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`);
                 } else if (data.habit_status === 'PENDING') {
-                    row.classList.add('bg-white', 'border-slate-100', `hover:border-${theme}-200`);
+                    card.classList.add('bg-white', 'border-slate-100', `hover:border-${theme}-200`);
                     iconBox.classList.add('bg-slate-50', 'text-slate-400', `group-hover:bg-${theme}-50`, `group-hover:text-${theme}-600`);
                     nameEl.classList.add('text-slate-800');
                     if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`, `group-hover:bg-${theme}-100`);
                 } else {
-                    // NEW BROKEN STATE: Identical to initial page load!
-                    row.classList.add('bg-stone-50/50', 'border-stone-100', 'hover:border-stone-200');
+                    card.classList.add('bg-stone-50/50', 'border-stone-100', 'hover:border-stone-200');
                     iconBox.classList.add('bg-slate-50', 'text-slate-400', `group-hover:bg-${theme}-50`, `group-hover:text-${theme}-600`);
                     nameEl.classList.add('text-slate-800');
                     if (identityEl) identityEl.classList.add(`bg-${theme}-50`, `text-${theme}-600`, `border-${theme}-200`, `group-hover:bg-${theme}-100`);
+                }
+
+                // AI Insight Update (Driven purely by the API response)
+                const aiContainer = document.getElementById(`ai-note-container-${habitId}`);
+                const aiText = document.getElementById(`ai-text-${habitId}`);
+                const aiIcon = document.getElementById(`ai-icon-${habitId}`);
+                
+                if (data.ai_insight) {
+                    if (aiContainer) aiContainer.classList.remove('hidden');
+                    if (aiText) aiText.innerText = data.ai_insight;
+                    
+                    const recoverBtn = aiContainer.querySelector('button');
+
+                    // If completed, style green and HIDE the recover button
+                    if (data.progress >= targetCount && action !== 'unlog') {
+                        if (aiIcon) {
+                            aiIcon.classList.remove('text-indigo-400', 'text-amber-500');
+                            aiIcon.classList.add('text-emerald-500');
+                        }
+                        if (aiText) {
+                            aiText.classList.remove('text-stone-500', 'font-medium');
+                            aiText.classList.add('text-emerald-700', 'font-bold');
+                        }
+                        if (recoverBtn) recoverBtn.classList.add('hidden');
+                        
+                    // If unlogged/incomplete, style neutral and REVEAL the recover button
+                    } else {
+                        if (aiIcon) {
+                            aiIcon.classList.add('text-indigo-400');
+                            aiIcon.classList.remove('text-emerald-500');
+                        }
+                        if (aiText) {
+                            aiText.classList.add('text-stone-500', 'font-medium');
+                            aiText.classList.remove('text-emerald-700', 'font-bold');
+                        }
+                        if (recoverBtn) recoverBtn.classList.remove('hidden');
+                    }
+                } else {
+                    if (aiContainer) aiContainer.classList.add('hidden');
                 }
             }
         }
@@ -610,7 +659,8 @@
                 durationSeconds: {{ session.target_duration_minutes * 60 }},
                 status: "{{ session.status.value }}",
                 identity: "{% if session.identity %}{{ session.identity.name }}{% endif %}",
-                identity_id: "{% if session.identity_id %}{{ session.identity_id }}{% endif %}"
+                identity_id: "{% if session.identity_id %}{{ session.identity_id }}{% endif %}",
+                ai_intention: "{% if session.ai_intention %}{{ session.ai_intention }}{% endif %}"
             },
             {% endfor %}
         ];
@@ -891,6 +941,18 @@
             document.getElementById('session-title').textContent = current.name;
             document.getElementById('current-session-id').value = current.id;
             document.getElementById('session-identity').textContent = current.identity ? current.identity : "Unassigned Focus";
+
+            // Dynamically update the AI Intention text
+            const intentionContainer = document.getElementById('ai-focus-intention-text');
+            if (intentionContainer) {
+                const textSpan = intentionContainer.querySelector('span');
+                if (current.ai_intention) {
+                    intentionContainer.style.display = 'flex';
+                    textSpan.textContent = current.ai_intention;
+                } else {
+                    intentionContainer.style.display = 'none';
+                }
+            }
             
             // Reset text colors on load
             document.getElementById('timer-display').classList.remove('text-emerald-500');
@@ -1059,15 +1121,25 @@
 
         // Log yesterday's missed habit
         async function logYesterday(habitId) {
+            // Grab the button that was clicked
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerText = "Recovering...";
+            btn.disabled = true;
+
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             const dateStr = yesterday.toISOString().split('T')[0];
+            
             const data = await apiCall(`/actions/habits/${habitId}/toggle`, 'POST', { date: dateStr });
+            
             if (data.status === 'success') {
-                showToast('Logged for yesterday!', 'success');
-                // Remove the nudge card
-                const nudge = document.querySelector(`[onclick="logYesterday(${habitId})"]`);
-                if (nudge) nudge.closest('div.flex').remove();
+                // Instantly reload to sync the daily progress bar, streaks, and new AI notes!
+                window.location.reload(); 
+            } else {
+                showToast('Error recovering yesterday', 'error');
+                btn.innerText = originalText;
+                btn.disabled = false;
             }
         }
 
