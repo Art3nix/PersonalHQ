@@ -14,7 +14,9 @@
             <header class="flex justify-between items-end mb-12">
                 <div>
                     <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Habit Analytics</h1>
-                    <p class="text-sm font-medium text-stone-400 mt-2">Track your consistency and manage your routines.</p>
+                    <p class="text-sm font-medium mt-2 {% if 'Warning' in (ai_habits_subtitle|string) %}text-amber-600 font-bold{% else %}text-stone-400{% endif %}">
+                        {{ ai_habits_subtitle | default('Track your consistency and manage your routines.') }}
+                    </p>
                 </div>
                 <button onclick="document.getElementById('new-habit-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('new-habit-modal').classList.remove('translate-x-full'), 10);" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -40,7 +42,7 @@
                         </div>
                         <h4 class="text-base font-extrabold text-stone-900">No habits yet</h4>
                         <p class="text-sm font-medium text-stone-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                            Start small. Pick one habit you want to build — daily or weekly. Consistency compounds.
+                            {{ ai_habits_empty_state | default('Start small. Pick one habit you want to build — daily or weekly. Consistency compounds.') }}
                         </p>
                         <div class="mt-4 flex flex-wrap gap-2 justify-center">
                             {% for suggestion in [('Book reading', 'book-open'), ('Exercise', 'zap'), ('Meditation', 'wind'), ('Journaling', 'edit-3'), ('Cold shower', 'droplets')] %}
@@ -202,6 +204,12 @@
                                 {% endfor %}
                             </div>
                             {% endif %}
+                            {% if habit.ai_insight %}
+                            <div class="mt-5 pt-4 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %} flex items-start gap-2.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="{% if is_completed %}text-white/80{% else %}text-{{ theme }}-400{% endif %} mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">{{ habit.ai_insight }}</p>
+                            </div>
+                            {% endif %}
                             <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
                                 Full Calendar <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                             </a>
@@ -359,7 +367,12 @@
                                     </div>
                                 {% endif %}
                             </div>
-
+                            {% if habit.ai_insight %}
+                            <div class="mt-5 pt-4 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %} flex items-start gap-2.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="{% if is_completed %}text-white/80{% else %}text-{{ theme }}-400{% endif %} mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">{{ habit.ai_insight }}</p>
+                            </div>
+                            {% endif %}
                             <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-5 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
                                 Full Calendar <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                             </a>
@@ -526,6 +539,12 @@
                         <div class="w-2 h-2 rounded-[2px] bg-indigo-700"></div>
                         <span>More</span>
                     </div>
+                    {% if ai_heatmap_analysis %}
+                    <div class="mt-6 pt-4 border-t border-stone-100/60 flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">{{ ai_heatmap_analysis }}</p>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-xl shadow-stone-200/30">
@@ -536,6 +555,12 @@
                     <div class="relative h-40 w-full">
                         <canvas id="dowChart" data-chart="{{ dow_counts | safe }}"></canvas>
                     </div>
+                    {% if ai_dow_analysis %}
+                    <div class="mt-5 pt-4 border-t border-stone-100/60 flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">{{ ai_dow_analysis }}</p>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-xl shadow-stone-200/30">
@@ -546,6 +571,12 @@
                     <div class="relative h-40 w-full">
                         <canvas id="momentumChart" data-chart="{{ weekly_trend | safe }}"></canvas>
                     </div>
+                    {% if ai_momentum_analysis %}
+                    <div class="mt-5 pt-4 border-t border-stone-100/60 flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">{{ ai_momentum_analysis }}</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </aside>

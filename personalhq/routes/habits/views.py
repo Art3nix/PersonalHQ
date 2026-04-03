@@ -158,6 +158,56 @@ def manage():
             ).all()
             current_counts[habit.id] = sum(l.progress for l in logs)
 
+    # ==========================================
+    # START HABITS AI MOCK DATA
+    # ==========================================
+    TEST_AI_NUDGES = True
+    
+    ai_habits_subtitle = None
+    ai_habits_empty_state = None
+    ai_heatmap_analysis = None
+    ai_dow_analysis = None
+    ai_momentum_analysis = None
+
+    if TEST_AI_NUDGES:
+        if not all_habits:
+            ai_habits_empty_state = "A system of atomic habits is the foundation of a high-performance life. Pick one small thing you want to do every day and build from there."
+        else:
+            ai_habits_subtitle = "Your daily systems are running smoothly. Keep casting votes for your identity."
+
+        # 1. Sidebar Analytics Coaching
+        ai_heatmap_analysis = "Your intensity is highest mid-week, but drops off significantly on weekends. Consider designing a separate, lighter weekend routine to maintain baseline momentum."
+        
+        # Look for patterns in the Day of Week data (mock logic)
+        ai_dow_analysis = "Thursdays are consistently your lowest execution day. What is happening in your schedule on Thursdays that is draining your energy?"
+        
+        # Look for trends in the momentum data (mock logic)
+        ai_momentum_analysis = "You've increased total completions by 15% over the last 3 weeks. The compounding effect is taking hold. Protect this momentum."
+
+        # 2. Individual Habit Coaching (Using the same logic your API will use)
+        for habit in all_habits:
+            status_str = habit_statuses.get(habit.id)
+            current_count = current_counts.get(habit.id, 0)
+            is_completed = current_count >= habit.target_count
+
+            if is_completed:
+                if habit.streak == habit.best_streak and habit.best_streak > 1:
+                    habit.ai_insight = "New all-time best! You are operating at a completely new level of consistency."
+                elif habit.streak > 0 and habit.streak % 5 == 0:
+                    habit.ai_insight = f"Milestone reached: {habit.streak} days. The neural pathways are solidifying."
+                else:
+                    habit.ai_insight = "Execution complete. Another vote cast for the person you are becoming."
+            elif status_str == 'EXPIRING':
+                habit.ai_insight = "Your streak is at immediate risk. Don't let a slip become a slide."
+            elif not habit.trigger or not habit.craving:
+                habit.ai_insight = "This habit is missing a defined loop. Add a specific Cue and Craving to make it stick faster."
+            else:
+                habit.ai_insight = None
+    # ==========================================
+    # END HABITS AI MOCK DATA
+    # ==========================================
+            
+
     return render_template(
         'habits/manage.html',
         habits=all_habits,
@@ -178,7 +228,12 @@ def manage():
         identities=identities,
         today=today,
         start_of_week=start_of_week,
-        end_of_week=end_of_week
+        end_of_week=end_of_week,
+        ai_habits_subtitle=ai_habits_subtitle,
+        ai_habits_empty_state=ai_habits_empty_state,
+        ai_heatmap_analysis=ai_heatmap_analysis,
+        ai_dow_analysis=ai_dow_analysis,
+        ai_momentum_analysis=ai_momentum_analysis
     )
 
 @habits_view_bp.route('/calendar')
