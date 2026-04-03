@@ -79,6 +79,49 @@ def planner():
             'minutes': total_mins
         })
 
+    # ==========================================
+    # START PLANNER AI MOCK DATA
+    # ==========================================
+    TEST_AI_NUDGES = True
+    ai_planner_subtitle = None
+    ai_empty_state = None
+    ai_analysis = None
+
+    if TEST_AI_NUDGES:
+        # 1. SIDEBAR ANALYSIS (Over-scheduling vs Elite Execution)
+        if stats['week_scheduled'] > 0:
+            completion_rate = (stats['week_completed'] / stats['week_scheduled']) * 100
+            if completion_rate >= 80:
+                ai_analysis = f"Elite execution. You have completed {completion_rate:.0f}% of your scheduled sessions this week. Don't forget to schedule recovery time."
+            elif completion_rate < 50 and stats['week_scheduled'] > 4:
+                ai_analysis = "You are over-scheduling. Ambition is good, but scheduling sessions you don't finish trains your brain to ignore your own calendar."
+            else:
+                ai_analysis = "Consistent output. Try extending one session by 15 minutes this week to stretch your focus limits."
+
+        # 2. OVERLOAD WARNING & EMPTY STATES
+        if not today_sessions:
+            ai_empty_state = "Zero sessions queued. If you want to move the needle today, schedule at least one 45-minute block of deep work."
+            ai_planner_subtitle = "Your day is entirely open. What is the most important thing you can do?"
+        else:
+            total_mins = sum(s.target_duration_minutes for s in today_sessions)
+            if total_mins > 240:
+                ai_planner_subtitle = f"Warning: You have {total_mins/60:.1f} hours of deep work scheduled. This exceeds the sustainable cognitive limit for most humans. Prioritize ruthlessly."
+            else:
+                ai_planner_subtitle = "Your focus pipeline is set. Execute the plan."
+
+        # 3. INDIVIDUAL SESSION COACHING
+        for session in today_sessions:
+            name_lower = session.name.lower()
+            if session.target_duration_minutes > 90:
+                session.ai_insight = "This is a marathon session. Take a 5-minute visual break halfway through to prevent cognitive fatigue."
+            elif any(word in name_lower for word in ["email", "slack", "admin", "messages"]):
+                session.ai_insight = "This looks like shallow work. Real Deep Work pushes your cognitive capabilities. Are you sure you want to queue this here?"
+            else:
+                session.ai_insight = None
+    # ==========================================
+    # END PLANNER AI MOCK DATA
+    # ==========================================
+
     return render_template(
         'focus_sessions/planner.html',
         today=today,
@@ -89,5 +132,8 @@ def planner():
         identities=identities,
         SessionStatus=SessionStatus,
         missed_yesterday=missed_yesterday,
-        session_history_json=json.dumps(session_history)
+        session_history_json=json.dumps(session_history),
+        ai_planner_subtitle=ai_planner_subtitle,
+        ai_empty_state=ai_empty_state,
+        ai_analysis=ai_analysis
     )
