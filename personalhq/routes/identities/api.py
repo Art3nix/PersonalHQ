@@ -1,10 +1,6 @@
 """API routes for Identity Matrix actions."""
 
-import os
-import json
 from datetime import timedelta
-from google import genai
-from google.genai import types
 from flask import Blueprint, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from personalhq.extensions import db
@@ -14,6 +10,7 @@ from personalhq.models.journalprompts import JournalPrompt
 from personalhq.models.habits import Habit
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.services.time_service import get_local_today
+from personalhq.services.ai_service import generate_json
 
 identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/identities')
 
@@ -108,12 +105,6 @@ def generate_batch():
     if not identities_input or len(identities_input) == 0:
         return jsonify({"status": "error", "message": "At least one identity is required."}), 400
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        return jsonify({"status": "error", "message": "AI configuration missing."}), 500
-        
-    client = genai.Client(api_key=api_key)
-    
     # Format the user's inputs into a readable string for the LLM
     identities_text = "\n".join([f"Identity {i}: '{req['name']}' - Vision: '{req['description']}'" for i, req in enumerate(identities_input)])
 
@@ -157,17 +148,8 @@ Use valid Lucide icon names.
 """
 
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=system_prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-            )
-        )
-        
-        # This will now be a list of dictionaries
-        ai_data_list = json.loads(response.text)
-        print(f"AI Generation Response: {response.text}")
+        # One clean call to the global service. We get a list back directly.
+        ai_data_list = generate_json(system_prompt)
         
         # Loop through the user's inputs and the AI's outputs simultaneously
         for i, req in enumerate(identities_input):
@@ -233,6 +215,8 @@ Use valid Lucide icon names.
         
         return jsonify({"status": "success"}), 200
 
+    except ValueError as ve:
+        return jsonify({"status": "error", "message": str(ve)}), 500
     except Exception as e:
         db.session.rollback()
         print(f"AI Batch Generation Error: {e}")
