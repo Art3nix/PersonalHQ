@@ -1,6 +1,6 @@
 """HTML View routes for the Inbox/BrainDumps."""
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
 from personalhq.models.braindumps import BrainDump
 from personalhq.models.timebuckets import TimeBucket
@@ -21,13 +21,12 @@ def index():
     # ==========================================
     # START INBOX AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     
     ai_inbox_overload = None
     ai_inbox_subtitle = None
     ai_empty_state = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         # 1. Overload Warning (Triggers if > 30 dumps, or force it for testing)
         if len(braindumps) > 30:
             ai_inbox_overload = f"Your inbox is getting heavy ({len(braindumps)} items). Spend 5 minutes deleting ideas you no longer care about."

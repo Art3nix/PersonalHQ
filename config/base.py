@@ -24,3 +24,6 @@ class Config: # pylint: disable=R0903; # flask config class used to only store d
     SESSION_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
+
+    # Logging
+    TEST_AI_NUDGES = os.environ.get("TEST_AI_NUDGES")

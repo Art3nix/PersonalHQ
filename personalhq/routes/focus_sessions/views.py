@@ -1,7 +1,8 @@
+
 import json
 from datetime import timedelta
 from collections import defaultdict
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.identities import Identity
@@ -82,12 +83,11 @@ def planner():
     # ==========================================
     # START PLANNER AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_planner_subtitle = None
     ai_empty_state = None
     ai_analysis = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         # 1. SIDEBAR ANALYSIS (Over-scheduling vs Elite Execution)
         if stats['week_scheduled'] > 0:
             completion_rate = (stats['week_completed'] / stats['week_scheduled']) * 100

@@ -1,5 +1,5 @@
 from datetime import timedelta
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.identities import Identity
@@ -64,10 +64,9 @@ def matrix():
     # ==========================================
     # START IDENTITY AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_empty_state = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         if not identity_stats:
             ai_empty_state = "Who do you want to be? Don't worry about outcomes yet. Focus on creating one identity (e.g., 'The Writer') and we will build the systems to support it."
         else:

@@ -4,7 +4,7 @@ import json
 import calendar as py_calendar
 from collections import defaultdict
 from datetime import date, timedelta, datetime
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, current_app
 from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
@@ -161,7 +161,6 @@ def manage():
     # ==========================================
     # START HABITS AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     
     ai_habits_subtitle = None
     ai_habits_empty_state = None
@@ -169,7 +168,7 @@ def manage():
     ai_dow_analysis = None
     ai_momentum_analysis = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         if not all_habits:
             ai_habits_empty_state = "A system of atomic habits is the foundation of a high-performance life. Pick one small thing you want to do every day and build from there."
         else:

@@ -1,6 +1,6 @@
 """HTML View routes for the Time Buckets roadmap."""
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from datetime import datetime
 from personalhq.models.timebuckets import TimeBucket
@@ -23,11 +23,10 @@ def manage():
     # ==========================================
     # START TIME BUCKET AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_map_subtitle = None
     ai_lifemap_empty_state = None
 
-    if TEST_AI_NUDGES and current_user.date_of_birth:
+    if current_app.config['TEST_AI_NUDGES'] and current_user.date_of_birth:
         today = get_local_today()
         # Roughly calculate current age
         current_age = today.year - current_user.date_of_birth.year - ((today.month, today.day) < (current_user.date_of_birth.month, current_user.date_of_birth.day))

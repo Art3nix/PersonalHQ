@@ -19,3 +19,7 @@ class ProductionConfig(Config): # pylint: disable=R0903; # flask config class us
     SESSION_COOKIE_SECURE = True
     REMEMBER_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "Strict"
+
+
+    # Force test nudges to be disabled
+    TEST_AI_NUDGES = False

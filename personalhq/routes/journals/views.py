@@ -1,6 +1,6 @@
 """Module defining the HTML View routes for Journals."""
 
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, current_app
 from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.journals import Journal, JournalFrequency
@@ -28,11 +28,10 @@ def index():
     # ==========================================
     # START JOURNALS AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_journals_subtitle = None
     ai_journals_empty_state = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         if not journals:
             ai_journals_empty_state = "A clear mind executes better. Create a 'Daily Brain Dump' or a 'Gratitude' journal to start processing your thoughts."
         else:
@@ -118,11 +117,10 @@ def write(journal_id):
     # ==========================================
     # START WRITING AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_writing_coach = None
     ai_prompt_suggestion = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         # 1. Warm-Up Coach
         if entry_to_edit:
             ai_writing_coach = "You are editing a past entry. Be careful not to rewrite history; just clarify the thoughts you had in that specific moment."
@@ -162,11 +160,10 @@ def entries(journal_id):
     # ==========================================
     # START ARCHIVE AI MOCK DATA
     # ==========================================
-    TEST_AI_NUDGES = True
     ai_archive_insight = None
     ai_archive_empty_state = None
 
-    if TEST_AI_NUDGES:
+    if current_app.config['TEST_AI_NUDGES']:
         if not journal_entries:
             ai_archive_empty_state = f"This '{journal.name}' journal is a blank slate. Use the Prompts menu to find a starting point and write your first entry."
         else:
