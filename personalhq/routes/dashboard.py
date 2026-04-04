@@ -1,7 +1,7 @@
 """Module defining the main dashboard view."""
 
 from datetime import timedelta
-from flask import Blueprint, render_template, current_app
+from flask import Blueprint, render_template, redirect, url_for, current_app
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.focussessions import FocusSession, SessionStatus
@@ -19,6 +19,11 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 @login_required
 def index():
     """Renders the main command center dashboard."""
+
+    # Check if the user is a completely blank slate
+    if not current_user.identities and not current_user.journals and not current_user.habits:
+        return redirect(url_for('dashboard.onboarding'))
+
     run_daily_ledger_catchup(current_user.id) 
 
     habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
@@ -195,3 +200,12 @@ def index():
         ai_habit_empty_state=ai_habit_empty_state,
         ai_chapter_empty_state=ai_chapter_empty_state
     )
+
+@dashboard_bp.route('/onboarding')
+@login_required
+def onboarding():
+    # If they somehow navigate here but already have data, send them to the dashboard
+    if current_user.identities or current_user.journals or current_user.habits:
+        return redirect(url_for('dashboard.index'))
+        
+    return render_template('onboarding/index.html')

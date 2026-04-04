@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Life HQ{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-stone-50 flex items-center justify-center p-6 relative overflow-hidden">
+    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-indigo-300/30 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-blue-300/30 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-4xl w-full relative z-10">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-stone-900 tracking-tight mb-4">How would you like to begin?</h1>
+            <p class="text-lg font-medium text-stone-500 max-w-xl mx-auto">Life HQ is driven by your identities. You can let our AI build a custom system for you, or construct it manually.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <button onclick="document.getElementById('ai-wizard-modal').classList.remove('hidden')" class="bg-white border border-indigo-100 rounded-[2.5rem] p-10 text-left hover:border-indigo-300 hover:shadow-2xl hover:shadow-indigo-200/50 transition-all duration-300 group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-stone-900 mb-2">Generate via Identity</h2>
+                    <p class="text-sm font-medium text-stone-500 leading-relaxed mb-8">Tell us who you are becoming. We will automatically generate the habits, time constraints, and journals to support that identity.</p>
+                    <span class="inline-flex items-center gap-2 text-sm font-bold text-indigo-600">
+                        Start AI Wizard <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </span>
+                </div>
+            </button>
+
+            <form action="{{ url_for('dashboard.index') }}" method="GET" class="m-0">
+                <button type="submit" class="w-full h-full bg-stone-50 border border-stone-200 border-dashed rounded-[2.5rem] p-10 text-left hover:bg-white hover:border-stone-300 hover:shadow-xl transition-all duration-300 group">
+                    <div class="w-14 h-14 bg-stone-200 text-stone-600 rounded-2xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-stone-900 mb-2">Start Blank Workspace</h2>
+                    <p class="text-sm font-medium text-stone-500 leading-relaxed mb-8">No assumptions, no pre-filled data. Enter the headquarters with a completely blank slate and build your system manually.</p>
+                    <span class="inline-flex items-center gap-2 text-sm font-bold text-stone-600">
+                        Enter Dashboard <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="group-hover:translate-x-1 transition-transform"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% include 'components/ai_wizard_modal.html' %}
+
+{% endblock %}
