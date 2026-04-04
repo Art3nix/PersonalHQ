@@ -11,9 +11,16 @@
                 <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Identity Matrix</h1>
                 <p class="text-sm font-medium text-stone-400 mt-2">Every action is a vote for the person you are becoming.</p>
             </div>
-            <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
-                + Define Identity
-            </button>
+            <div class="flex items-center gap-3">
+                <button onclick="document.getElementById('ai-wizard-modal').classList.remove('hidden')" class="bg-indigo-50 text-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-100 transition-all border border-indigo-100 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    Generate with AI
+                </button>
+                
+                <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+                    + Define Manually
+                </button>
+            </div>
         </header>
 
         <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -107,9 +114,16 @@
                             <p class="text-[10px] font-bold text-stone-500 mt-1">The Builder</p>
                         </div>
                     </div>
-                    <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="mt-8 px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
-                        Define your first identity →
-                    </button>
+                    <div class="mt-8 flex flex-col items-center gap-4">
+                        <button onclick="document.getElementById('ai-wizard-modal').classList.remove('hidden')" class="px-8 py-3.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            Architect your system with AI
+                        </button>
+                        
+                        <button onclick="document.getElementById('new-identity-modal').classList.remove('translate-x-full')" class="text-xs font-bold text-stone-400 hover:text-stone-600 transition-colors uppercase tracking-widest">
+                            Or define one manually
+                        </button>
+                    </div>
                 </div>
             {% endif %}
         </section>
@@ -292,6 +306,7 @@
             </div>
         </div>
     </div>
+    {% include 'components/ai_wizard_modal.html' %}
 {% endblock %}
 {% block extra_scripts %}
     <script>
