@@ -14,10 +14,16 @@
                 </a>
                 <div>
                     <h1 class="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
-                        <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-5 h-5 text-{{ journal.color or 'indigo' }}-500"></i>
+                        <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-5 h-5 text-{{ theme }}-500"></i>
                         {{ journal.name }}
                     </h1>
-                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ entries|length }} Total Entries</p>
+                    <div class="flex items-start gap-2 mt-1.5">
+                        <span class="text-[10px] font-bold text-stone-400 uppercase tracking-widest shrink-0 mt-0.5">{{ entries|length }} Entries</span>
+                        {% if ai_archive_insight %}
+                            <span class="text-stone-300 shrink-0 mt-[-1px]">•</span>
+                            <span class="text-[11px] font-semibold text-{{ theme }}-600 leading-relaxed">{{ ai_archive_insight }}</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             
@@ -74,6 +80,13 @@
                                 {% endif %}
                                 
                                 <p class="archive-text text-sm font-medium text-stone-700 leading-relaxed whitespace-pre-wrap">{{ entry.content }}</p>
+
+                                {% if entry.ai_insight %}
+                                <div class="mt-5 pt-3 border-t border-{{ theme }}-100/80 flex items-start gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-{{ theme }}-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                                    <p class="text-[11px] font-semibold text-{{ theme }}-700 leading-relaxed">{{ entry.ai_insight }}</p>
+                                </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
@@ -83,7 +96,9 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                         </div>
                         <h3 class="text-lg font-extrabold text-stone-900 tracking-tight">Your archive is empty</h3>
-                        <p class="text-sm font-medium text-stone-400 mt-2">Start writing in the main view to build your library.</p>
+                        <p class="text-sm font-medium text-stone-400 mt-2 max-w-sm mx-auto leading-relaxed">
+                            {{ ai_archive_empty_state | default('Start writing in the main view to build your library.') }}
+                        </p>
                     </div>
                 {% endif %}
             </div>

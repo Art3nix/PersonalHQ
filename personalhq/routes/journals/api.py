@@ -171,6 +171,9 @@ def add_prompt(journal_id):
         db.session.add(new_prompt)
         db.session.commit()
 
+    if request.args.get('set_active') == 'true':
+        return redirect(url_for('journals_view.write', journal_id=journal_id, new_id=new_prompt.id))
+    
     return redirect(request.referrer or url_for('journals_view.write', journal_id=journal.id))
 
 @journals_api_bp.route('/prompts/<int:prompt_id>/edit', methods=['POST'])
@@ -204,6 +207,12 @@ def delete_prompt(prompt_id):
         journal_id = prompt.journal_id
         db.session.delete(prompt)
         db.session.commit()
-        return redirect(request.referrer or url_for('journals_view.write', journal_id=journal_id))
+        
+        if request.referrer:
+            # Strip query parameters (like ?new_id=X) by splitting at '?'
+            clean_referrer = request.referrer.split('?')[0]
+            return redirect(clean_referrer)
+            
+        return redirect(url_for('journals_view.write', journal_id=journal_id))
 
     return jsonify({"status": "error", "message": "Unauthorized"}), 403

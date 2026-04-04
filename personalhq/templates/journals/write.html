@@ -4,9 +4,9 @@
 
 {% block app_content %}
     {% set theme = journal.color or 'indigo' %}
-    <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50">
+    <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50 h-full min-h-0">
         
-        <header class="h-24 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
+        <header class="h-24 shrink-0 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
             <div class="flex items-center gap-4">
                 <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
@@ -26,12 +26,19 @@
             </button>
         </header>
 
-        <div class="flex-1 flex overflow-hidden bg-{{ theme }}-50">
+        <div class="flex-1 flex overflow-hidden min-h-0 bg-{{ theme }}-50">
             
-            <main class="flex-1 overflow-y-auto custom-scrollbar flex justify-center p-8">
-                <div class="max-w-3xl w-full pt-8 pb-32">
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-8 min-h-0">
+                <div class="max-w-3xl w-full mx-auto pt-8 pb-64">
                     
-                    <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-10">Today's Entry</h2>
+                    <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Today's Entry</h2>
+
+                    {% if ai_writing_coach %}
+                    <div class="mb-4 pb-3 border-b border-stone-100 flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-{{ theme }}-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-xs font-semibold text-stone-500 leading-relaxed max-w-2xl">{{ ai_writing_coach }}</p>
+                    </div>
+                    {% endif %}
                     
                     {% if active_prompt %}
                     <div class="mb-10 p-8 bg-{{ theme }}-100/50 border border-{{ theme }}-200 rounded-3xl shadow-sm transition-all relative group">
@@ -73,29 +80,27 @@
                             </div>
                         </div>
                     </form>
-                    <div class="max-w-3xl w-full mx-auto pb-20">
-                        <div class="pt-4">
-                            <div class="group relative">
-                                <button type="button" 
-                                        onclick="document.getElementById('write-guide').classList.toggle('hidden'); this.classList.toggle('opacity-100');" 
-                                        class="flex items-center gap-2 text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] hover:text-{{ theme }}-600 transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                                    Open Writing Guide
-                                </button>
+                    <div class="mt-8 w-full">
+                        <div class="group relative">
+                            <button type="button" 
+                                    onclick="document.getElementById('write-guide').classList.toggle('hidden'); this.classList.toggle('opacity-100');" 
+                                    class="flex items-center gap-2 text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] hover:text-{{ theme }}-600 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                Open Writing Guide
+                            </button>
 
-                                <div id="write-guide" class="hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                    <div class="space-y-2">
-                                        <h5 class="text-xs font-extrabold text-stone-900 uppercase">Clear Your Mind</h5>
-                                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
-                                            The goal right now is not to write a masterpiece. It is simply to move swirling thoughts out of your mind and onto the page. Do not worry about editing or sounding perfect. Just let the words flow so you can find some peace.
-                                        </p>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <h5 class="text-xs font-extrabold text-stone-900 uppercase">Be Kind To Yourself</h5>
-                                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
-                                            Your journal is a safe space, not a courtroom. If you had a tough day, write it down, but do it with self-compassion. You are just reflecting on exactly where you are right now so you can make tomorrow a little bit brighter.
-                                        </p>
-                                    </div>
+                            <div id="write-guide" class="hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-extrabold text-stone-900 uppercase">Clear Your Mind</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
+                                        The goal right now is not to write a masterpiece. It is simply to move swirling thoughts out of your mind and onto the page. Do not worry about editing or sounding perfect. Just let the words flow so you can find some peace.
+                                    </p>
+                                </div>
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-extrabold text-stone-900 uppercase">Be Kind To Yourself</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
+                                        Your journal is a safe space, not a courtroom. If you had a tough day, write it down, but do it with self-compassion. You are just reflecting on exactly where you are right now so you can make tomorrow a little bit brighter.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -103,13 +108,13 @@
                 </div>
             </main>
 
-            <aside class="hidden xl:flex w-96 bg-white/60 border-l border-{{ theme }}-100 backdrop-blur-md flex-col">
-                <div class="p-8 border-b border-{{ theme }}-100/50">
+            <aside class="hidden xl:flex w-96 bg-white/60 border-l border-{{ theme }}-100 backdrop-blur-md flex-col overflow-hidden min-h-0">
+                <div class="p-8 border-b border-{{ theme }}-100/50 shrink-0">
                     <h2 class="text-lg font-extrabold text-stone-900 tracking-tight">Journal Prompts</h2>
                     <p class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest mt-1">Rotation: {{ journal.frequency.value }}</p>
                 </div>
 
-                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
                     <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}" method="POST" class="mb-10">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Add New Question</label>
@@ -120,6 +125,26 @@
                             </button>
                         </div>
                     </form>
+
+                    {% if ai_prompt_suggestion %}
+                    <div class="mb-6 p-4 bg-{{ theme }}-50/50 border border-{{ theme }}-100 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-{{ theme }}-200 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-[10px] font-extrabold text-{{ theme }}-700 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="7" x2="12" y2="13"></line></svg>
+                                AI Suggestion
+                            </h4>
+                            <p class="text-xs font-medium text-stone-700 leading-snug mb-3">"{{ ai_prompt_suggestion }}"</p>
+                            <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}?set_active=true" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="text" value="{{ ai_prompt_suggestion }}">
+                                <button type="submit" class="text-[10px] font-bold text-{{ theme }}-600 hover:text-{{ theme }}-800 transition-colors flex items-center gap-1">
+                                    + Add to rotation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
                         <button type="button" onclick="document.getElementById('prompt-pedagogy-desk').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
@@ -187,8 +212,8 @@
         <div id="slide-over-prompts" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
             <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')"></div>
             
-            <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
-                <div class="p-8 border-b border-stone-100 flex justify-between items-center bg-stone-50/50">
+            <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200 overflow-hidden min-h-0">
+                <div class="p-8 border-b border-stone-100 flex justify-between items-center bg-stone-50/50 shrink-0">
                     <div>
                         <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Journal Prompts</h2>
                         <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Rotation: {{ journal.frequency.value }}</p>
@@ -198,7 +223,7 @@
                     </button>
                 </div>
 
-                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
                     
                     <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}" method="POST" class="mb-10">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -211,45 +236,66 @@
                         </div>
                     </form>
 
+                    {% if ai_prompt_suggestion %}
+                    <div class="mb-6 p-4 bg-{{ theme }}-50/50 border border-{{ theme }}-100 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-{{ theme }}-200 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-[10px] font-extrabold text-{{ theme }}-700 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="7" x2="12" y2="13"></line></svg>
+                                AI Suggestion
+                            </h4>
+                            <p class="text-xs font-medium text-stone-700 leading-snug mb-3">"{{ ai_prompt_suggestion }}"</p>
+                            <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}?set_active=true" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="text" value="{{ ai_prompt_suggestion }}">
+                                <button type="submit" class="text-[10px] font-bold text-{{ theme }}-600 hover:text-{{ theme }}-800 transition-colors flex items-center gap-1">
+                                    + Add to rotation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div>
                         <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
-                        <button type="button" onclick="document.getElementById('prompt-pedagogy-mobile').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
-                            <div class="flex items-center gap-2">
-                                <div class="w-5 h-5 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            <button type="button" onclick="document.getElementById('prompt-pedagogy-mobile').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
+                                        <p class="text-[9px] font-medium text-stone-500 mt-0.5">Sparking deeper reflection</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h4 class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
-                                    <p class="text-[9px] font-medium text-stone-500 mt-0.5">Sparking deeper reflection</p>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            
+                            <div id="prompt-pedagogy-mobile" class="hidden p-4 border-t border-stone-100 bg-white space-y-3">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">1</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Ask Open Questions</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Instead of asking if today was good, try asking what brought you energy today. Open questions give your mind the space it needs to actually reflect.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </button>
-                        
-                        <div id="prompt-pedagogy-mobile" class="hidden p-4 border-t border-stone-100 bg-white space-y-3">
-                            <div class="flex items-start gap-2">
-                                <span class="text-xs font-black text-stone-300 mt-0.5">1</span>
-                                <div>
-                                    <h5 class="text-[11px] font-extrabold text-stone-900">Ask Open Questions</h5>
-                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Instead of asking if today was good, try asking what brought you energy today. Open questions give your mind the space it needs to actually reflect.</p>
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">2</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Focus on Growth</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Great prompts do not just look backwards. Asking yourself what small thing you can do better tomorrow turns your reflection into gentle action.</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex items-start gap-2">
-                                <span class="text-xs font-black text-stone-300 mt-0.5">2</span>
-                                <div>
-                                    <h5 class="text-[11px] font-extrabold text-stone-900">Focus on Growth</h5>
-                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Great prompts do not just look backwards. Asking yourself what small thing you can do better tomorrow turns your reflection into gentle action.</p>
-                                </div>
-                            </div>
-                            <div class="flex items-start gap-2">
-                                <span class="text-xs font-black text-stone-300 mt-0.5">3</span>
-                                <div>
-                                    <h5 class="text-[11px] font-extrabold text-stone-900">Keep It Kind</h5>
-                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Your journal is a safe space. Write prompts that invite self-compassion rather than harsh judgment. You are here to understand yourself, not interrogate yourself.</p>
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">3</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Keep It Kind</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Your journal is a safe space. Write prompts that invite self-compassion rather than harsh judgment. You are here to understand yourself, not interrogate yourself.</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+
                         <h3 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4 border-b border-stone-100 pb-2">Active Prompts ({{ prompts|length }})</h3>
                         
                         <div class="space-y-3">
