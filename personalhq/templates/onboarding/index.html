@@ -41,6 +41,44 @@
                 </button>
             </form>
         </div>
+        <div class="mt-8 border border-stone-200 rounded-[1.5rem] overflow-hidden bg-white/60 backdrop-blur-sm max-w-2xl mx-auto shadow-sm">
+            <button type="button" onclick="document.getElementById('onboarding-guide-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-5 hover:bg-white/80 transition-colors text-left group">
+                <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">The Core Philosophy</h4>
+                        <p class="text-[11px] font-medium text-stone-500 mt-0.5">Why we focus on Identity vs Goals</p>
+                    </div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+
+            <div id="onboarding-guide-content" class="hidden p-6 border-t border-stone-100 bg-white/80 space-y-5">
+                <div class="flex items-start gap-4">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Identity-Based Change</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">True behavior change is identity change. The goal is not to read a book; the goal is to become a reader. When you start with who you want to be, the actions naturally follow.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Systems Over Goals</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">You do not rise to the level of your goals; you fall to the level of your systems. Life HQ is designed to translate your abstract identities into concrete daily systems (Habits, Time Buckets, Journals).</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                    <div>
+                        <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Blank Slate Warning</h5>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If you choose to start with a Blank Workspace, you are responsible for building this system from scratch. We highly recommend letting the AI build your first iteration to see how the ecosystem functions together.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

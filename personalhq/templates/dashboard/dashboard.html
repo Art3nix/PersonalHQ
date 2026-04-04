@@ -43,6 +43,28 @@
 {% endblock %}
 
 {% block app_content %}
+    {% if not current_user.identities and not current_user.habits and not current_user.journals %}
+    <div class="m-6 md:m-8 lg:mx-12 bg-indigo-50/80 border border-indigo-100 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+        
+        <div class="flex items-center gap-4 flex-1">
+            <div class="w-12 h-12 shrink-0 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            </div>
+            <div>
+                <h3 class="text-base font-extrabold text-indigo-950 tracking-tight">Welcome to your blank slate.</h3>
+                <p class="text-sm font-medium text-indigo-800/80 mt-0.5">Build your routines manually using the sidebar, or let the AI architect a custom system for you.</p>
+            </div>
+        </div>
+        
+        <div class="shrink-0">
+            <a href="{{ url_for('dashboard.onboarding') }}" class="whitespace-nowrap inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                Build with AI
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+        </div>
+        
+    </div>
+    {% endif %}
     <div id="focus-overlay" class="fixed inset-0 bg-stone-950/85 backdrop-blur-md z-[100] opacity-0 pointer-events-none transition-all duration-700 ease-in-out"></div>
 
     <div class="flex-1 flex flex-col min-w-0">

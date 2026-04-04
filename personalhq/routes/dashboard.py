@@ -20,11 +20,7 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 def index():
     """Renders the main command center dashboard."""
 
-    # Check if the user is a completely blank slate
-    if not current_user.identities and not current_user.journals and not current_user.habits:
-        return redirect(url_for('dashboard.onboarding'))
-
-    run_daily_ledger_catchup(current_user.id) 
+    run_daily_ledger_catchup(current_user.id)
 
     habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
     today = get_local_today()

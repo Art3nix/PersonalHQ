@@ -10,7 +10,37 @@
             <p class="text-sm font-medium text-stone-500 mb-8 leading-relaxed">Define the identities you are stepping into. We will generate the habits, time buckets, and journals for each.</p>
             
             <form id="ai-batch-form" onsubmit="handleBatchGeneration(event)" class="space-y-6">
-                
+                <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white shadow-sm">
+                    <button type="button" onclick="document.getElementById('wizard-pedagogy').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to define identities</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Two-Step Process</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="wizard-pedagogy" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-sm font-black text-amber-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Name the Person</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Do not write "I want to run." Write "The Athlete." Do not write "I need to work more." Write "The Focused Creator." Anchor yourself to a noun, not an action.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-sm font-black text-amber-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Set the Standard</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Use the vision box to define the standard this identity holds (e.g., "I train consistently and treat my body with respect"). The AI will read this standard and generate the precise habits required to fulfill it.</p>
+                                </div>
+                            </div>
+                    </div>
+                </div>
                 <div id="identities-container" class="space-y-6" style="max-height: 40vh; overflow-y: auto; padding-right: 4px;">
                     <div class="identity-slot relative p-5 bg-stone-50 border border-stone-200 rounded-2xl">
                         <div class="flex justify-between items-center mb-3">
