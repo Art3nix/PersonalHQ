@@ -168,7 +168,7 @@ def manage():
     ai_dow_analysis = None
     ai_momentum_analysis = None
 
-    if current_app.config['TEST_AI_NUDGES']:
+    if current_app.config['TEST_AI_NUDGES'] is True:
         if not all_habits:
             ai_habits_empty_state = "A system of atomic habits is the foundation of a high-performance life. Pick one small thing you want to do every day and build from there."
         else:

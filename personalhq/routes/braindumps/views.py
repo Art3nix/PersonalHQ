@@ -26,7 +26,7 @@ def index():
     ai_inbox_subtitle = None
     ai_empty_state = None
 
-    if current_app.config['TEST_AI_NUDGES']:
+    if current_app.config['TEST_AI_NUDGES'] is True:
         # 1. Overload Warning (Triggers if > 30 dumps, or force it for testing)
         if len(braindumps) > 30:
             ai_inbox_overload = f"Your inbox is getting heavy ({len(braindumps)} items). Spend 5 minutes deleting ideas you no longer care about."

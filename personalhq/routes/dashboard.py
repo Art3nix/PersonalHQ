@@ -124,7 +124,7 @@ def index():
     ai_habit_empty_state = None
     ai_chapter_empty_state = None
 
-    if current_app.config['TEST_AI_NUDGES']:
+    if current_app.config['TEST_AI_NUDGES'] is True:
         ai_daily_briefing = "You have a solid 90-minute Deep Work session queued today. Get that done early, but don't forget to move your body later."
 
         # TASK-SPECIFIC AI MOCK DATA

@@ -66,7 +66,7 @@ def matrix():
     # ==========================================
     ai_empty_state = None
 
-    if current_app.config['TEST_AI_NUDGES']:
+    if current_app.config['TEST_AI_NUDGES'] is True:
         if not identity_stats:
             ai_empty_state = "Who do you want to be? Don't worry about outcomes yet. Focus on creating one identity (e.g., 'The Writer') and we will build the systems to support it."
         else:

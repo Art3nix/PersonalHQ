@@ -87,7 +87,7 @@ def planner():
     ai_empty_state = None
     ai_analysis = None
 
-    if current_app.config['TEST_AI_NUDGES']:
+    if current_app.config['TEST_AI_NUDGES'] is True:
         # 1. SIDEBAR ANALYSIS (Over-scheduling vs Elite Execution)
         if stats['week_scheduled'] > 0:
             completion_rate = (stats['week_completed'] / stats['week_scheduled']) * 100
