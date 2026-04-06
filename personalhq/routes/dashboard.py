@@ -29,7 +29,6 @@ def index():
     start_of_week = today - timedelta(days=today.weekday())
     now = get_local_now()
     logical_today = get_logical_today(current_user)
-    is_overtime = now.date() > logical_today
 
     # ── HABIT & FOCUS LOGIC ──
     habit_ids = [h.id for h in habits]
@@ -188,7 +187,6 @@ def index():
         queued_sessions=queued_sessions,
         SessionStatus=SessionStatus,
         today=today,
-        is_overtime=is_overtime,
         greeting=greeting,
         daily_completed=daily_completed,
         daily_total=len(daily_habits),
@@ -210,5 +208,5 @@ def onboarding():
     # If they somehow navigate here but already have data, send them to the dashboard
     if current_user.identities or current_user.journals or current_user.habits:
         return redirect(url_for('dashboard.index'))
-        
+
     return render_template('onboarding/index.html')

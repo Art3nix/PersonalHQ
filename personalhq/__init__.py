@@ -2,7 +2,8 @@
 
 import os
 from flask import Flask, render_template
-
+from flask_login import current_user
+from personalhq.services.time_service import get_local_now, get_logical_today
 from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail
 from personalhq import models
 
@@ -79,5 +80,24 @@ def create_app(config_name=None):
     def health():
         from flask import jsonify
         return jsonify({"status": "ok"}), 200
+
+    @app.context_processor
+    def inject_global_template_variables():
+        """Injects variables into ALL templates automatically."""
+        if current_user.is_authenticated:
+            now = get_local_now()
+            logical_today = get_logical_today(current_user)
+            is_overtime = now.date() > logical_today
+            
+            return {
+                'is_overtime': is_overtime,
+                'today': logical_today # The banner also needs 'today' to show the day name!
+            }
+            
+        # If the user is not logged in (e.g., login page), return safe defaults
+        return {
+            'is_overtime': False,
+            'today': None
+        }
 
     return app
