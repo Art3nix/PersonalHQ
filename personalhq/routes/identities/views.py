@@ -4,7 +4,8 @@ from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.identities import Identity
 from personalhq.models.focussessions import FocusSession, SessionStatus
-from personalhq.services.time_service import get_local_today
+from personalhq.models.dailynotes import DailyNote
+from personalhq.services.time_service import get_local_today, get_logical_today
 
 identities_view_bp = Blueprint('identities_view', __name__, url_prefix='/identity')
 
@@ -62,9 +63,12 @@ def matrix():
     unassigned_habits = Habit.query.filter_by(user_id=current_user.id, identity_id=None, is_active=True).all()
 
     # ==========================================
-    # START IDENTITY AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_empty_state = None
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB (We named this one ai_identity_empty_state in the model)
+    ai_empty_state = daily_note.ai_identity_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         if not identity_stats:
@@ -85,8 +89,6 @@ def matrix():
                 
                 else:
                     stat['model'].ai_insight = None
-    # ==========================================
-    # END IDENTITY AI MOCK DATA
     # ==========================================
 
     return render_template(

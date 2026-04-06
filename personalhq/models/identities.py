@@ -18,6 +18,8 @@ class Identity(db.Model):
     description: Mapped[str | None]
     color = db.Column(db.String(20), default='stone')
 
+    ai_insight: Mapped[str | None]
+
     user = relationship("User", back_populates="identities")
 
     # The actions that serve as "votes" for this identity

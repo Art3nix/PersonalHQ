@@ -6,6 +6,8 @@ from personalhq.models.braindumps import BrainDump
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.identities import Identity
 from personalhq.models.journals import Journal
+from personalhq.models.dailynotes import DailyNote
+from personalhq.services.time_service import get_logical_today
 
 braindumps_view_bp = Blueprint('braindumps_view', __name__, url_prefix='/inbox')
 
@@ -19,12 +21,15 @@ def index():
     journals = Journal.query.filter_by(user_id=current_user.id).all()
 
     # ==========================================
-    # START INBOX AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    
-    ai_inbox_overload = None
-    ai_inbox_subtitle = None
-    ai_empty_state = None
+
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB (Note: we mapped this to ai_braindump_empty_state in the model)
+    ai_inbox_overload = daily_note.ai_inbox_overload if daily_note else None
+    ai_inbox_subtitle = daily_note.ai_inbox_subtitle if daily_note else None
+    ai_empty_state = daily_note.ai_braindump_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         # 1. Overload Warning (Triggers if > 30 dumps, or force it for testing)
@@ -45,8 +50,6 @@ def index():
                 dump.ai_insight = "Sounds like an open loop. Convert this to a Deep Work session to research it, or discard it if it doesn't matter."
             else:
                 dump.ai_insight = None
-    # ==========================================
-    # END INBOX AI MOCK DATA
     # ==========================================
 
     return render_template(

@@ -8,10 +8,11 @@ from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.experiences import Experience
 from personalhq.models.bucket_experience import BucketExperience
-from personalhq.services.time_service import get_local_today, get_local_now
+from personalhq.services.time_service import get_local_today, get_local_now, get_logical_today
 from personalhq.services.habit_service import (
     get_habit_status, bulk_load_recent_logs, run_daily_ledger_catchup
 )
+from personalhq.models.dailynotes import DailyNote
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -115,14 +116,20 @@ def index():
     else: greeting = "Working late"
 
     # ==========================================
-    # START NATIVE AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
     
-    ai_daily_briefing = None
-    ai_focus_intention = None
-    ai_focus_empty_state = None
-    ai_habit_empty_state = None
-    ai_chapter_empty_state = None
+    # 1. Fetch the DailyNote for the current logical day
+    daily_note = DailyNote.query.filter_by(
+        user_id=current_user.id,
+        logical_date=get_logical_today(current_user)
+    ).first()
+
+    # 2. Safely extract the page-level contexts
+    ai_daily_briefing = daily_note.ai_daily_briefing if daily_note else None
+    ai_focus_empty_state = daily_note.ai_focus_empty_state if daily_note else None
+    ai_habit_empty_state = daily_note.ai_habit_empty_state if daily_note else None
+    ai_chapter_empty_state = daily_note.ai_chapter_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         ai_daily_briefing = "You have a solid 90-minute Deep Work session queued today. Get that done early, but don't forget to move your body later."
@@ -170,8 +177,6 @@ def index():
                 else:
                     habit.ai_insight = None
     # ==========================================
-    # END NATIVE AI MOCK DATA
-    # ==========================================
 
     return render_template(
         'dashboard/dashboard.html',
@@ -191,7 +196,6 @@ def index():
         is_urgent=is_urgent,
         upcoming_experiences=upcoming_experiences,
         ai_daily_briefing=ai_daily_briefing,
-        ai_focus_intention=ai_focus_intention,
         ai_focus_empty_state=ai_focus_empty_state,
         ai_habit_empty_state=ai_habit_empty_state,
         ai_chapter_empty_state=ai_chapter_empty_state

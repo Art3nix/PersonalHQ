@@ -6,8 +6,9 @@ from personalhq.extensions import db
 from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalentries import JournalEntry
 from personalhq.models.journalprompts import JournalPrompt
+from personalhq.models.dailynotes import DailyNote
 from personalhq.services import journal_service
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_local_today, get_logical_today
 
 journals_view_bp = Blueprint('journals_view', __name__, url_prefix='/journals')
 
@@ -26,10 +27,14 @@ def index():
         recent_entries[journal.id] = journal_entries
 
     # ==========================================
-    # START JOURNALS AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_journals_subtitle = None
-    ai_journals_empty_state = None
+    today = get_local_today()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB
+    ai_journals_subtitle = daily_note.ai_journals_subtitle if daily_note else None
+    ai_journals_empty_state = daily_note.ai_journals_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         if not journals:
@@ -115,10 +120,14 @@ def write(journal_id):
             active_prompt = journal.prompts[0]
 
     # ==========================================
-    # START WRITING AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_writing_coach = None
-    ai_prompt_suggestion = None
+    today = get_local_today()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB
+    ai_writing_coach = daily_note.ai_writing_coach if daily_note else None
+    ai_prompt_suggestion = daily_note.ai_prompt_suggestion if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         # 1. Warm-Up Coach
@@ -158,10 +167,14 @@ def entries(journal_id):
     journal_entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(JournalEntry.created_at.desc()).all()
 
     # ==========================================
-    # START ARCHIVE AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_archive_insight = None
-    ai_archive_empty_state = None
+    today = get_local_today()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB
+    ai_archive_insight = daily_note.ai_archive_insight if daily_note else None
+    ai_archive_empty_state = daily_note.ai_archive_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         if not journal_entries:

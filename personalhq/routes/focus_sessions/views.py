@@ -6,7 +6,8 @@ from flask import Blueprint, render_template, current_app
 from flask_login import login_required, current_user
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.identities import Identity
-from personalhq.services.time_service import get_local_today
+from personalhq.models.dailynotes import DailyNote
+from personalhq.services.time_service import get_local_today, get_logical_today
 
 focus_view_bp = Blueprint('focus_view', __name__, url_prefix='/focus-planner')
 
@@ -81,11 +82,14 @@ def planner():
         })
 
     # ==========================================
-    # START PLANNER AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_planner_subtitle = None
-    ai_empty_state = None
-    ai_analysis = None
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB (Mapping to the names we set in the model)
+    ai_planner_subtitle = daily_note.ai_planner_subtitle if daily_note else None
+    ai_empty_state = daily_note.ai_planner_empty_state if daily_note else None
+    ai_analysis = daily_note.ai_focus_analysis if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         # 1. SIDEBAR ANALYSIS (Over-scheduling vs Elite Execution)
@@ -118,8 +122,6 @@ def planner():
                 session.ai_insight = "This looks like shallow work. Real Deep Work pushes your cognitive capabilities. Are you sure you want to queue this here?"
             else:
                 session.ai_insight = None
-    # ==========================================
-    # END PLANNER AI MOCK DATA
     # ==========================================
 
     return render_template(

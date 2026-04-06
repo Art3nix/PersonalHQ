@@ -22,6 +22,7 @@ class User(UserMixin, db.Model):
     date_of_birth: Mapped[date | None]
     life_expectancy: Mapped[int | None]
     timezone: Mapped[str] = mapped_column(default="UTC", server_default="UTC")
+    day_reset_hour: Mapped[int] = mapped_column(default=3, server_default="3")
 
     subscriptions = relationship("Subscription",
         back_populates="user",
@@ -53,6 +54,10 @@ class User(UserMixin, db.Model):
         cascade="all, delete-orphan"
     )
     journals = relationship("Journal",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    daily_notes = relationship("DailyNote",
         back_populates="user",
         cascade="all, delete-orphan"
     )

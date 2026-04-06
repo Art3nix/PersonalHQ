@@ -32,6 +32,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+  ai_worker:
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: python run_scheduler.py
+    depends_on:
+      - web
   tailwind:
     image: node:20-slim
     working_dir: /app

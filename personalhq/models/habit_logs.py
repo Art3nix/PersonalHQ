@@ -25,6 +25,9 @@ class HabitLog(db.Model):
 
     # The exact timestamp the database last updated this log
     logged_at: Mapped[datetime] = mapped_column(default=get_local_now, onupdate=get_local_now)
+
+    ai_celebration: Mapped[str | None]  # e.g., "Boom! 5 days straight."
+    ai_intervention: Mapped[str | None] # e.g., "You missed this yesterday. Do 2 minutes today."
     
     # Relationship back to the parent habit
     habit = relationship("Habit", back_populates="logs")

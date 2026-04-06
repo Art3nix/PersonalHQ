@@ -10,7 +10,8 @@ from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
-from personalhq.services.time_service import get_local_today
+from personalhq.models.dailynotes import DailyNote
+from personalhq.services.time_service import get_local_today, get_logical_today
 from personalhq.services.habit_service import get_habit_status_and_sync, run_daily_ledger_catchup
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
@@ -159,14 +160,20 @@ def manage():
             current_counts[habit.id] = sum(l.progress for l in logs)
 
     # ==========================================
-    # START HABITS AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
     
-    ai_habits_subtitle = None
-    ai_habits_empty_state = None
-    ai_heatmap_analysis = None
-    ai_dow_analysis = None
-    ai_momentum_analysis = None
+    today = get_local_today() # Make sure this is defined in your route!
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB (Mapping exactly to the DailyNote model)
+    ai_habits_subtitle = daily_note.ai_habits_subtitle if daily_note else None
+    ai_habits_empty_state = daily_note.ai_habits_empty_state if daily_note else None
+    
+    # Analytics strings (Usually passed to the calendar/analytics view)
+    ai_heatmap_analysis = daily_note.ai_heatmap_analysis if daily_note else None
+    ai_dow_analysis = daily_note.ai_dow_analysis if daily_note else None
+    ai_momentum_analysis = daily_note.ai_momentum_analysis if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True:
         if not all_habits:
@@ -203,9 +210,7 @@ def manage():
             else:
                 habit.ai_insight = None
     # ==========================================
-    # END HABITS AI MOCK DATA
-    # ==========================================
-            
+
 
     return render_template(
         'habits/manage.html',

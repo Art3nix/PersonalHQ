@@ -37,5 +37,8 @@ class FocusSession(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
     total_paused_seconds: Mapped[int | None]
     last_paused_tick: Mapped[datetime | None]
 
+    ai_intention: Mapped[str | None] # Generated before they start
+    ai_insight: Mapped[str | None]   # Generated after they finish
+
     identity = relationship("Identity", back_populates="focus_sessions")
     user = relationship("User", back_populates="focus_sessions")

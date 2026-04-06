@@ -42,3 +42,6 @@ def generate_json(system_prompt, model_name='gemini-2.5-flash'):
     except Exception as e:
         print(f"AI Service Execution Error: {e}")
         raise e
+    
+def generate_daily_context(user, logical_date_to_prep):
+    ...

@@ -1,13 +1,14 @@
 """HTML View routes for the Time Buckets roadmap."""
 
+from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, current_app
 from flask_login import login_required, current_user
-from datetime import datetime
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.coretheme import CoreTheme
 from personalhq.models.emotionalvalue import EmotionalValue
+from personalhq.models.dailynotes import DailyNote
 from personalhq.extensions import db
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_local_today, get_logical_today
 
 time_buckets_view_bp = Blueprint('time_buckets_view', __name__, url_prefix='/life')
 
@@ -21,10 +22,14 @@ def manage():
     emotional_values = EmotionalValue.query.all()
 
     # ==========================================
-    # START TIME BUCKET AI MOCK DATA
+    # AI COACH CONTEXT
     # ==========================================
-    ai_map_subtitle = None
-    ai_lifemap_empty_state = None
+    today = get_local_today()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+
+    # Fetch from DB
+    ai_map_subtitle = daily_note.ai_map_subtitle if daily_note else None
+    ai_lifemap_empty_state = daily_note.ai_lifemap_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True and current_user.date_of_birth:
         today = get_local_today()
@@ -73,8 +78,6 @@ def manage():
                         exp.ai_insight = "Relationships compound. Prioritizing this will deepen your bonds for decades to come."
                     else:
                         exp.ai_insight = None
-    # ==========================================
-    # END TIME BUCKET AI MOCK DATA
     # ==========================================
 
     return render_template('time_buckets/manage.html',

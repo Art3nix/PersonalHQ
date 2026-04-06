@@ -17,6 +17,8 @@ class Experience(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to
     details: Mapped[str | None]
     is_completed: Mapped[bool] = mapped_column(default=False, server_default="false")
 
+    ai_insight: Mapped[str | None]
+
     core_theme = relationship("CoreTheme", back_populates="experiences")
     emotional_value = relationship("EmotionalValue", back_populates="experiences")
     tags = relationship("TagExperience", back_populates="experience")

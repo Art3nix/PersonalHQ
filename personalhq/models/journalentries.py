@@ -18,5 +18,7 @@ class JournalEntry(db.Model):
     content: Mapped[str] = mapped_column(nullable=False)
     created_at: Mapped[datetime] = mapped_column(default=get_local_now)
 
+    ai_insight: Mapped[str | None]
+
     journal = relationship("Journal", back_populates="entries")
     prompt = relationship("JournalPrompt")

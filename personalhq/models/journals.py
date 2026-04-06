@@ -27,6 +27,8 @@ class Journal(db.Model):
     color = db.Column(db.String(20), default='stone')
     frequency: Mapped[JournalFrequency] = mapped_column(Enum(JournalFrequency), default=JournalFrequency.DAILY)
 
+    ai_insight: Mapped[str | None]
+
     user = relationship("User", back_populates="journals")
     prompts = relationship("JournalPrompt", back_populates="journal", cascade="all, delete-orphan", order_by="JournalPrompt.id")
     entries = relationship("JournalEntry", back_populates="journal", cascade="all, delete-orphan", order_by="desc(JournalEntry.created_at)")

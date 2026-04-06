@@ -19,3 +19,4 @@ from .identities import Identity
 from .journals import Journal
 from .journalentries import JournalEntry
 from .journalprompts import JournalPrompt
+from .dailynotes import DailyNote
