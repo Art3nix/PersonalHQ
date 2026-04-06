@@ -1,14 +1,15 @@
 """Module handling the business logic for Deep Work focus sessions."""
 
-from datetime import date, timedelta
+from datetime import timedelta
 from sqlalchemy import func
 from personalhq.extensions import db
 from personalhq.models.focussessions import FocusSession, SessionStatus
-from personalhq.services.time_service import get_local_now, get_local_today
+from personalhq.models.users import User
+from personalhq.services.time_service import get_local_now, get_logical_today
 
 def start_session(user_id: int, name: str, duration_minutes: int = 60, identity_id: int = None) -> FocusSession:
     """Creates a new session and starts the timer."""
-    today = get_local_today()
+    today = get_logical_today(db.session.get(User, user_id))
     max_order = db.session.query(func.max(FocusSession.queue_order)).filter_by(
         user_id=user_id, target_date=today
     ).scalar() or 0
@@ -135,7 +136,7 @@ def get_session_time_data(session_id: int) -> dict:
 
 def carry_over_sessions(user_id: int) -> int:
     """Moves all NOT_STARTED sessions from yesterday to today's queue."""
-    today = get_local_today()
+    today = get_logical_today(db.session.get(User, user_id))
     yesterday = today - timedelta(days=1)
 
     missed_sessions = FocusSession.query.filter_by(

@@ -1,19 +1,21 @@
 """Module handling the business logic for Journals."""
 
 import random
+from personalhq.models.users import User
 from personalhq.models.journals import JournalFrequency
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_logical_today
+from personalhq.extensions import db
 
-def get_active_prompt(journal):
+def get_active_prompt(user_id: int, journal):
     """
     Determines which JournalPrompt to display based on the journal's 
     rotation frequency and the current date.
     """
-    if not journal.prompts: #
+    if not journal.prompts:
         return None
 
     count = len(journal.prompts)
-    today = get_local_today()
+    today = get_logical_today(db.session.get(User, user_id))
 
     # Calculate a deterministic index based on the frequency
     if journal.frequency == JournalFrequency.DAILY:

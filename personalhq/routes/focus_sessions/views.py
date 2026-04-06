@@ -7,14 +7,14 @@ from flask_login import login_required, current_user
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.identities import Identity
 from personalhq.models.dailynotes import DailyNote
-from personalhq.services.time_service import get_local_today, get_logical_today
+from personalhq.services.time_service import get_logical_today
 
 focus_view_bp = Blueprint('focus_view', __name__, url_prefix='/focus-planner')
 
 @focus_view_bp.route('/')
 @login_required
 def planner():
-    today = get_local_today()
+    today = get_logical_today(current_user)
     thirty_days_ago = today - timedelta(days=30)
     week_ago = today - timedelta(days=7)
 

@@ -9,7 +9,7 @@ from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalprompts import JournalPrompt
 from personalhq.models.habits import Habit
 from personalhq.models.timebuckets import TimeBucket
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_logical_today
 from personalhq.services.ai_service import generate_json
 
 identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/identities')
@@ -175,7 +175,7 @@ Use valid Lucide icon names.
             db.session.add(new_habit)
             
             # 3. Time Bucket
-            start_date = get_local_today()
+            start_date = get_logical_today(current_user)
             try:
                 end_date = start_date.replace(year=start_date.year + 10)
             except ValueError:

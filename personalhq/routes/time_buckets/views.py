@@ -8,7 +8,7 @@ from personalhq.models.coretheme import CoreTheme
 from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.models.dailynotes import DailyNote
 from personalhq.extensions import db
-from personalhq.services.time_service import get_local_today, get_logical_today
+from personalhq.services.time_service import get_logical_today
 
 time_buckets_view_bp = Blueprint('time_buckets_view', __name__, url_prefix='/life')
 
@@ -24,7 +24,7 @@ def manage():
     # ==========================================
     # AI COACH CONTEXT
     # ==========================================
-    today = get_local_today()
+    today = get_logical_today(current_user)
     daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
 
     # Fetch from DB
@@ -32,7 +32,7 @@ def manage():
     ai_lifemap_empty_state = daily_note.ai_lifemap_empty_state if daily_note else None
 
     if current_app.config['TEST_AI_NUDGES'] is True and current_user.date_of_birth:
-        today = get_local_today()
+        today = get_logical_today(current_user)
         # Roughly calculate current age
         current_age = today.year - current_user.date_of_birth.year - ((today.month, today.day) < (current_user.date_of_birth.month, current_user.date_of_birth.day))
 

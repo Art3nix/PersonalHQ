@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.extensions import db
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_logical_today
 from personalhq.services.habit_service import get_habit_status_and_sync, recalculate_habit_streaks
 
 habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
@@ -14,7 +14,7 @@ habits_api_bp = Blueprint('habits_api', __name__, url_prefix='/actions/habits')
 def get_ai_insight(habit, log, status_str):
     # 1. Localized imports to completely prevent Circular Import crashes
     from datetime import timedelta
-    from personalhq.services.time_service import get_local_today
+    from personalhq.services.time_service import get_logical_today
     from personalhq.models.habit_logs import HabitLog
 
     # If the habit is currently unlogged, we skip the positive reinforcements
@@ -26,7 +26,7 @@ def get_ai_insight(habit, log, status_str):
         return None
 
     # 2. Time & Database checks
-    today = get_local_today()
+    today = get_logical_today(current_user)
     yesterday = today - timedelta(days=1)
     day_before = today - timedelta(days=2)
     
@@ -61,7 +61,7 @@ def _get_date_from_request(data: dict):
             return datetime.strptime(target_date_str, '%Y-%m-%d').date()
         except ValueError:
             pass
-    return get_local_today()
+    return get_logical_today(current_user)
 
 @habits_api_bp.route('/<int:habit_id>/toggle', methods=['POST'])
 @login_required
@@ -143,7 +143,7 @@ def create_habit():
 
     # Generate historical logs so the streak engine finds them naturally
     if initial_streak > 0:
-        today = get_local_today()
+        today = get_logical_today(current_user)
         
         for i in range(1, initial_streak + 1):
             # Step backward by Days or Weeks depending on the frequency

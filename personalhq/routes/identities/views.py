@@ -5,7 +5,7 @@ from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.identities import Identity
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.dailynotes import DailyNote
-from personalhq.services.time_service import get_local_today, get_logical_today
+from personalhq.services.time_service import get_logical_today
 
 identities_view_bp = Blueprint('identities_view', __name__, url_prefix='/identity')
 
@@ -14,7 +14,7 @@ identities_view_bp = Blueprint('identities_view', __name__, url_prefix='/identit
 def matrix():
     """Renders the Identity Matrix scoreboard."""
     identities = Identity.query.filter_by(user_id=current_user.id).all()
-    today = get_local_today()
+    today = get_logical_today(current_user)
     start_of_week = today - timedelta(days=today.weekday())
 
     identity_stats = []

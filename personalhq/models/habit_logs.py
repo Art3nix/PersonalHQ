@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from personalhq.services.time_service import get_local_now, get_local_today
+from personalhq.services.time_service import get_local_now
 
 from personalhq.extensions import db
 
@@ -17,7 +17,7 @@ class HabitLog(db.Model):
     habit_id: Mapped[int] = mapped_column(ForeignKey('habits.id', ondelete='CASCADE'), nullable=False)
 
     # The calendar day this log belongs to
-    completed_date: Mapped[date] = mapped_column(nullable=False, default=get_local_today)
+    completed_date: Mapped[date] = mapped_column(nullable=False)
 
     # The Ledger Data
     progress: Mapped[int] = mapped_column(default=0, nullable=False)

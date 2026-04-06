@@ -8,7 +8,7 @@ from personalhq.models.journalentries import JournalEntry
 from personalhq.models.journalprompts import JournalPrompt
 from personalhq.models.dailynotes import DailyNote
 from personalhq.services import journal_service
-from personalhq.services.time_service import get_local_today, get_logical_today
+from personalhq.services.time_service import get_logical_today
 
 journals_view_bp = Blueprint('journals_view', __name__, url_prefix='/journals')
 
@@ -29,7 +29,7 @@ def index():
     # ==========================================
     # AI COACH CONTEXT
     # ==========================================
-    today = get_local_today()
+    today = get_logical_today(current_user)
     daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
 
     # Fetch from DB
@@ -42,7 +42,7 @@ def index():
         else:
             # 1. Global Subtitle
             # Check if they have written anything today across all journals
-            today = get_local_today()
+            today = get_logical_today(current_user)
             wrote_today = any(
                 entry.created_at.date() == today
                 for entries in recent_entries.values()
@@ -113,7 +113,7 @@ def write(journal_id):
     
     # Get the standard rotation prompt
     if not active_prompt and journal.prompts:
-        active_prompt = journal_service.get_active_prompt(journal)
+        active_prompt = journal_service.get_active_prompt(current_user.id, journal)
         
         # Absolute bulletproof fallback just in case the service returns None
         if not active_prompt:
@@ -122,7 +122,6 @@ def write(journal_id):
     # ==========================================
     # AI COACH CONTEXT
     # ==========================================
-    today = get_local_today()
     daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
 
     # Fetch from DB
@@ -169,7 +168,6 @@ def entries(journal_id):
     # ==========================================
     # AI COACH CONTEXT
     # ==========================================
-    today = get_local_today()
     daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
 
     # Fetch from DB

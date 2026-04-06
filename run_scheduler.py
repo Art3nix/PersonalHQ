@@ -4,9 +4,8 @@ from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 from apscheduler.schedulers.blocking import BlockingScheduler
 from personalhq import create_app
-from personalhq.extensions import db
 from personalhq.models.users import User
-from personalhq.services.time_service import recalculate_user_reset_hour
+from personalhq.services.user_service import recalculate_user_reset_hour
 from personalhq.services.ai_service import generate_daily_context
 
 # Create the Flask app context (but don't run the web server!)

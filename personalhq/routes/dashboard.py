@@ -8,7 +8,7 @@ from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.experiences import Experience
 from personalhq.models.bucket_experience import BucketExperience
-from personalhq.services.time_service import get_local_today, get_local_now, get_logical_today
+from personalhq.services.time_service import get_local_now, get_logical_today
 from personalhq.services.habit_service import (
     get_habit_status, bulk_load_recent_logs, run_daily_ledger_catchup
 )
@@ -24,14 +24,16 @@ def index():
     run_daily_ledger_catchup(current_user.id)
 
     habits = Habit.query.filter_by(user_id=current_user.id, is_active=True).all()
-    today = get_local_today()
+    today = get_logical_today(current_user)
     yesterday = today - timedelta(days=1)
     start_of_week = today - timedelta(days=today.weekday())
     now = get_local_now()
+    logical_today = get_logical_today(current_user)
+    is_overtime = now.date() > logical_today
 
     # ── HABIT & FOCUS LOGIC ──
     habit_ids = [h.id for h in habits]
-    logs_map = bulk_load_recent_logs(habit_ids, days_back=14)
+    logs_map = bulk_load_recent_logs(current_user, habit_ids, days_back=14)
     habit_statuses = {}
     current_counts = {}
     missed_yesterday = []
@@ -186,6 +188,7 @@ def index():
         queued_sessions=queued_sessions,
         SessionStatus=SessionStatus,
         today=today,
+        is_overtime=is_overtime,
         greeting=greeting,
         daily_completed=daily_completed,
         daily_total=len(daily_habits),

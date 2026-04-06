@@ -1,11 +1,13 @@
 """Module handling the business logic and streak calculations for Habits."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
+from zoneinfo import ZoneInfo
 from personalhq.extensions import db
 from personalhq.models.habits import Habit, HabitFrequency
+from personalhq.models.users import User
 from personalhq.models.habit_logs import HabitLog
-from personalhq.services.time_service import get_local_today
+from personalhq.services.time_service import get_logical_today, get_local_now
 
 
 # ---------------------------------------------------------------------------
@@ -25,7 +27,7 @@ def recalculate_habit_streaks(habit, logs=None):
         habit.last_completed = None
         return
 
-    today = get_local_today()
+    today = get_logical_today(habit.user)
     valid_dates = []
 
     if habit.frequency == HabitFrequency.DAILY:
@@ -107,8 +109,8 @@ def get_habit_status(habit, logs_by_date: dict) -> str:
     logs_by_date: {date: HabitLog} — pre-fetched for this habit, no DB calls.
     Streak is read directly from the model (written by recalculate_habit_streaks).
     """
-    today = get_local_today()
-    current_hour = datetime.now().hour
+    today = get_logical_today(habit.user)
+    current_hour = get_local_now().hour
 
     if habit.frequency == HabitFrequency.DAILY:
         log_today = logs_by_date.get(today)
@@ -136,8 +138,10 @@ def get_habit_status(habit, logs_by_date: dict) -> str:
 def get_habit_status_and_sync(habit) -> str:
     """Legacy wrapper — still works but fires individual queries. Prefer get_habit_status()."""
     recalculate_habit_streaks(habit)
-    today = get_local_today()
-    current_hour = datetime.now().hour
+
+    today = get_logical_today(habit.user)
+    current_hour = get_local_now().hour
+
     if habit.frequency == HabitFrequency.DAILY:
         log_today = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
         if log_today and log_today.progress >= habit.target_count:
@@ -167,7 +171,7 @@ def get_habit_status_and_sync(habit) -> str:
 
 
 def get_habit_current_count(habit) -> int:
-    today = get_local_today()
+    today = get_logical_today(habit.user)
     if habit.frequency == HabitFrequency.DAILY:
         log = HabitLog.query.filter_by(habit_id=habit.id, completed_date=today).first()
         return log.progress if log else 0
@@ -184,7 +188,7 @@ def get_habit_current_count(habit) -> int:
 # BULK HELPERS — load all logs for multiple habits in ONE query
 # ---------------------------------------------------------------------------
 
-def bulk_load_recent_logs(habit_ids: list, days_back: int = 14) -> dict:
+def bulk_load_recent_logs(user, habit_ids: list, days_back: int = 14) -> dict:
     """
     Returns {habit_id: {date: HabitLog}} for the last `days_back` days.
     ONE database query for all habits combined.
@@ -192,7 +196,7 @@ def bulk_load_recent_logs(habit_ids: list, days_back: int = 14) -> dict:
     if not habit_ids:
         return {}
 
-    today = get_local_today()
+    today = get_logical_today(user)
     since = today - timedelta(days=days_back)
 
     rows = HabitLog.query.filter(
@@ -220,7 +224,7 @@ def run_daily_ledger_catchup(user_id: int):
     Skipped if already run today for this user (in-process cache).
     On a multi-worker deployment, worst case it runs once per worker per day.
     """
-    today = get_local_today()
+    today = get_logical_today(db.session.get(User, user_id))
 
     # Skip if already ran today for this user
     if _ledger_last_run.get(user_id) == today:
@@ -245,8 +249,24 @@ def run_daily_ledger_catchup(user_id: int):
 
     new_logs = []
     target_map = {h.id: h.target_count for h in active_habits}
-    created_map = {h.id: (h.created_at.date() if h.created_at else limit_date)
-                   for h in active_habits}
+    # Create a helper block to safely translate the creation date
+    user = db.session.get(User, user_id)
+    created_map = {}
+
+    for h in active_habits:
+        if h.created_at:
+            # Convert the UTC created_at timestamp into the user's logical date
+            user_zone = ZoneInfo(user.timezone or "UTC")
+            aware_utc = h.created_at.replace(tzinfo=timezone.utc)
+            local_created = aware_utc.astimezone(user_zone)
+            
+            # Apply the offset midnight logic to the creation timestamp
+            if local_created.hour < user.day_reset_hour:
+                created_map[h.id] = (local_created - timedelta(days=1)).date()
+            else:
+                created_map[h.id] = local_created.date()
+        else:
+            created_map[h.id] = limit_date
 
     for habit in active_habits:
         start_date = max(limit_date, created_map[habit.id])

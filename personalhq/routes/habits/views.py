@@ -11,7 +11,7 @@ from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.habit_logs import HabitLog
 from personalhq.models.identities import Identity
 from personalhq.models.dailynotes import DailyNote
-from personalhq.services.time_service import get_local_today, get_logical_today
+from personalhq.services.time_service import get_logical_today
 from personalhq.services.habit_service import get_habit_status_and_sync, run_daily_ledger_catchup
 
 habits_view_bp = Blueprint('habits_view', __name__, url_prefix='/habits')
@@ -38,7 +38,7 @@ def manage():
     weekly_count = total_habits - daily_count
 
     # 30-Day Heatmap Logic
-    today = get_local_today()
+    today = get_logical_today(current_user)
     thirty_days_ago = today - timedelta(days=29)
     start_of_week = today - timedelta(days=today.weekday())
     end_of_week = start_of_week + timedelta(days=6)
@@ -163,7 +163,7 @@ def manage():
     # AI COACH CONTEXT
     # ==========================================
     
-    today = get_local_today() # Make sure this is defined in your route!
+    today = get_logical_today(current_user)
     daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
 
     # Fetch from DB (Mapping exactly to the DailyNote model)
@@ -243,7 +243,7 @@ def manage():
 @habits_view_bp.route('/calendar')
 @login_required
 def habit_calendar():
-    today = get_local_today()
+    today = get_logical_today(current_user)
     year = request.args.get('year', today.year, type=int)
     month = request.args.get('month', today.month, type=int)
     
