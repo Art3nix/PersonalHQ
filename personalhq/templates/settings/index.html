@@ -51,6 +51,27 @@
                     <p class="text-xs text-stone-400 mt-1.5 font-medium">Used for correct date assignment of habits and sessions. Current: <strong>{{ current_user.timezone }}</strong></p>
                 </div>
 
+                <div>
+                    <label for="day_reset_hour" class="block text-sm font-bold text-stone-900 mb-2">Day Reset Time</label>
+                    <div class="relative">
+                        <select id="day_reset_hour" name="day_reset_hour" class="appearance-none w-full bg-stone-50 border border-stone-200 text-stone-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 pr-10 transition-colors cursor-pointer outline-none">
+                            {% for hour in range(24) %}
+                                {% set display_hour = hour if hour > 0 and hour <= 12 else (12 if hour == 0 else hour - 12) %}
+                                {% set am_pm = 'AM' if hour < 12 else 'PM' %}
+                                <option value="{{ hour }}" {% if current_user.day_reset_hour == hour %}selected{% endif %}>
+                                    {{ display_hour }}:00 {{ am_pm }} {% if hour == 0 %}(Midnight){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-[11px] font-medium text-stone-500">
+                        Your logical midnight. Habits logged before this time will count towards "yesterday".
+                    </p>
+                </div>
+
                 <div class="pt-2">
                     <button type="submit" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
                         Save Profile

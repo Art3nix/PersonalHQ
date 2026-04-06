@@ -3,7 +3,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from personalhq.extensions import db, bcrypt
-from personalhq.models.users import User
 
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')
 
@@ -18,11 +17,20 @@ def index():
             first_name = request.form.get('first_name', '').strip()
             last_name = request.form.get('last_name', '').strip()
             timezone = request.form.get('timezone', 'UTC').strip()
+            
+            # Safely extract and validate the reset hour
+            try:
+                day_reset_hour = int(request.form.get('day_reset_hour', 0))
+                if not 0 <= day_reset_hour <= 23:
+                    day_reset_hour = 0
+            except ValueError:
+                day_reset_hour = 0
 
             if first_name and last_name:
                 current_user.first_name = first_name
                 current_user.last_name = last_name
                 current_user.timezone = timezone
+                current_user.day_reset_hour = day_reset_hour
                 db.session.commit()
                 flash('Profile updated successfully.', 'success')
             else:
