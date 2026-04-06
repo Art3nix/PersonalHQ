@@ -2,7 +2,7 @@
 
 from personalhq.extensions import db
 from personalhq.models.braindumps import BrainDump
-from personalhq.services.time_service import get_local_now
+from personalhq.services.time_service import get_utc_now
 
 
 def save_thought(user_id: int, content: str) -> dict:
@@ -13,7 +13,7 @@ def save_thought(user_id: int, content: str) -> dict:
     new_dump = BrainDump(
         user_id=user_id,
         content=content.strip(),
-        created_at=get_local_now(),  # Use user's local time, not UTC
+        created_at=get_utc_now(),  # Use user's local time, not UTC
         processed=False
     )
     db.session.add(new_dump)

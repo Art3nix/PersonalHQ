@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from personalhq.services.time_service import get_local_now
+from personalhq.services.time_service import get_utc_now
 
 from personalhq.extensions import db
 
@@ -24,7 +24,7 @@ class HabitLog(db.Model):
     target_at_time: Mapped[int] = mapped_column(default=1, nullable=False) # Freezes historical target
 
     # The exact timestamp the database last updated this log
-    logged_at: Mapped[datetime] = mapped_column(default=get_local_now, onupdate=get_local_now)
+    logged_at: Mapped[datetime] = mapped_column(default=get_utc_now, onupdate=get_utc_now)
 
     ai_celebration: Mapped[str | None]  # e.g., "Boom! 5 days straight."
     ai_intervention: Mapped[str | None] # e.g., "You missed this yesterday. Do 2 minutes today."

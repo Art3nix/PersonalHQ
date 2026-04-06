@@ -5,7 +5,7 @@ from sqlalchemy import func
 from personalhq.extensions import db
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.models.users import User
-from personalhq.services.time_service import get_local_now, get_logical_today
+from personalhq.services.time_service import get_utc_now, get_logical_today
 
 def start_session(user_id: int, name: str, duration_minutes: int = 60, identity_id: int = None) -> FocusSession:
     """Creates a new session and starts the timer."""
@@ -18,7 +18,7 @@ def start_session(user_id: int, name: str, duration_minutes: int = 60, identity_
         user_id=user_id,
         name=name,
         target_date=today,
-        start_time=get_local_now(),
+        start_time=get_utc_now(),
         status=SessionStatus.IN_PROGRESS,
         queue_order=max_order + 1,
         target_duration_minutes=duration_minutes,
@@ -36,7 +36,7 @@ def pause_session(session_id: int) -> bool:
         return False
     if session.status == SessionStatus.IN_PROGRESS:
         session.status = SessionStatus.PAUSED
-        session.last_paused_tick = get_local_now()
+        session.last_paused_tick = get_utc_now()
         db.session.commit()
         return True
     return False
@@ -52,13 +52,13 @@ def resume_session(session_id: int) -> bool:
     # Handle the very first start
     if session.status == SessionStatus.NOT_STARTED:
         session.status = SessionStatus.IN_PROGRESS
-        session.start_time = get_local_now()
+        session.start_time = get_utc_now()
         db.session.commit()
         return True
 
     # Handle resuming from a pause
     if session.status == SessionStatus.PAUSED:
-        pause_delta = (get_local_now() - session.last_paused_tick).total_seconds()
+        pause_delta = (get_utc_now() - session.last_paused_tick).total_seconds()
         current_total = session.total_paused_seconds or 0
         session.total_paused_seconds = current_total + int(pause_delta)
         session.status = SessionStatus.IN_PROGRESS
@@ -76,12 +76,12 @@ def end_session(session_id: int) -> bool:
 
     # Auto-pause if still running before ending
     if session.status == SessionStatus.IN_PROGRESS:
-        session.last_paused_tick = get_local_now()
+        session.last_paused_tick = get_utc_now()
         session.status = SessionStatus.PAUSED
 
     if session.status == SessionStatus.PAUSED:
         session.status = SessionStatus.FINISHED
-        session.end_time = get_local_now()
+        session.end_time = get_utc_now()
         db.session.commit()
         return True
     return False
@@ -106,7 +106,7 @@ def get_session_time_data(session_id: int) -> dict:
     if not session:
         return None
 
-    now = get_local_now()
+    now = get_utc_now()
     total_paused = session.total_paused_seconds or 0
 
     if session.status == SessionStatus.IN_PROGRESS:

@@ -3,7 +3,7 @@
 from datetime import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from personalhq.services.time_service import get_local_now
+from personalhq.services.time_service import get_utc_now
 
 from personalhq.extensions import db
 
@@ -16,7 +16,7 @@ class JournalEntry(db.Model):
     prompt_id: Mapped[int] = mapped_column(ForeignKey('journal_prompts.id', ondelete='SET NULL'), nullable=True)
 
     content: Mapped[str] = mapped_column(nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=get_local_now)
+    created_at: Mapped[datetime] = mapped_column(default=get_utc_now)
 
     ai_insight: Mapped[str | None]
 

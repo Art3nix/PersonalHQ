@@ -4,8 +4,18 @@ from zoneinfo import ZoneInfo
 from datetime import datetime, timedelta, timezone
 from flask_login import current_user
 
+def get_utc_now() -> datetime:
+    """
+    Returns the current absolute time in UTC (Naive).
+    USE THIS FOR ALL DATABASE DEFAULTS (logged_at, created_at, start_time).
+    """
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 def get_local_now() -> datetime:
-    """Returns the user's current wall-clock time as a naive datetime."""
+    """
+    Returns the current user's wall-clock time. 
+    USE FOR UI RENDERING ONLY, NOT FOR DATABASE STORAGE.
+    """
     utc_now = datetime.now(timezone.utc)
 
     tz_str = "UTC"
@@ -25,8 +35,22 @@ def get_local_now() -> datetime:
 
 def get_logical_today(user):
     """Returns the user's logical date based on their custom reset hour."""
-    local_now = get_local_now() 
+    utc_now = datetime.now(timezone.utc)
+    
+    # 1. Extract timezone from the passed user object (Works perfectly in background workers)
+    tz_str = "UTC"
+    if hasattr(user, 'timezone') and user.timezone:
+        tz_str = user.timezone
 
+    try:
+        user_zone = ZoneInfo(tz_str)
+    except Exception:
+        user_zone = ZoneInfo("UTC")
+        
+    # 2. Convert current UTC to the specific user's local time
+    local_now = utc_now.astimezone(user_zone)
+
+    # 3. Apply the offset midnight logic
     if local_now.hour < user.day_reset_hour:
         return (local_now - timedelta(days=1)).date()
 
