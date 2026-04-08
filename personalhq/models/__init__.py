@@ -20,3 +20,4 @@ from .journals import Journal
 from .journalentries import JournalEntry
 from .journalprompts import JournalPrompt
 from .dailynotes import DailyNote
+from .user_activity import UserActivity

@@ -1,7 +1,8 @@
 """Application factory for Personal HQ."""
 
 import os
-from flask import Flask, render_template
+import time
+from flask import Flask, render_template, session, request
 from flask_login import current_user
 from personalhq.services.time_service import get_local_now, get_logical_today
 from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail
@@ -99,5 +100,25 @@ def create_app(config_name=None):
             'is_overtime': False,
             'today': None
         }
+
+    @app.before_request
+    def track_user_activity():
+        """Logs passive page views to help calculate the user's sleep window."""
+        # Skip static files to save resources
+        if request.endpoint and 'static' in request.endpoint:
+            return
+
+        if current_user.is_authenticated:
+            now = time.time()
+            last_logged = session.get('last_activity_log', 0)
+
+            # Only write to the database if 15 minutes (900 seconds) have passed
+            if (now - last_logged) > 900:
+                new_log = models.user_activity.UserActivity(user_id=current_user.id)
+                db.session.add(new_log)
+                db.session.commit()
+
+                # Update the session with the new timestamp
+                session['last_activity_log'] = now
 
     return app
