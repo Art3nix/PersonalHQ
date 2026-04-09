@@ -2,6 +2,7 @@
 
 import os
 import time
+from datetime import timedelta
 from flask import Flask, render_template, session, request
 from flask_login import current_user
 from personalhq.services.time_service import get_local_now, get_logical_today
@@ -86,18 +87,29 @@ def create_app(config_name=None):
     def inject_global_template_variables():
         """Injects variables into ALL templates automatically."""
         if current_user.is_authenticated:
-            now = get_local_now()
-            logical_today = get_logical_today(current_user)
-            is_overtime = now.date() > logical_today
+            # 1. Temporarily clear override to find the true mathematical base day
+            temp_override = getattr(current_user, 'day_closed_on', None)
+            current_user.day_closed_on = None
+            true_base = get_logical_today(current_user)
+            current_user.day_closed_on = temp_override
             
+            # 2. Calculate the states
+            now = get_local_now()
+            is_overtime = now.date() > true_base
+            is_day_closed_early = (temp_override == true_base)
+            
+            # 3. Determine the final "Today" to display in the UI
+            display_today = true_base + timedelta(days=1) if is_day_closed_early else true_base
+
             return {
                 'is_overtime': is_overtime,
-                'today': logical_today # The banner also needs 'today' to show the day name!
+                'is_day_closed_early': is_day_closed_early,
+                'today': display_today 
             }
             
-        # If the user is not logged in (e.g., login page), return safe defaults
         return {
             'is_overtime': False,
+            'is_day_closed_early': False,
             'today': None
         }
 

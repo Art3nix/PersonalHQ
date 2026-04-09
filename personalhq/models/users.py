@@ -23,13 +23,15 @@ class User(UserMixin, db.Model):
     life_expectancy: Mapped[int | None]
     timezone: Mapped[str] = mapped_column(default="UTC", server_default="UTC")
     day_reset_hour: Mapped[int] = mapped_column(default=3, server_default="3")
+    # Tracks if the user manually ended their day early
+    day_closed_on: Mapped[date | None] = mapped_column(nullable=True)
 
     subscriptions = relationship("Subscription",
         back_populates="user",
         cascade="all, delete-orphan",
         lazy="dynamic"
     )
-    habits = relationship("Habit", 
+    habits = relationship("Habit",
         back_populates="user",
         cascade="all, delete-orphan"
     )

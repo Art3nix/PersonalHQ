@@ -36,8 +36,8 @@ def get_local_now() -> datetime:
 def get_logical_today(user):
     """Returns the user's logical date based on their custom reset hour."""
     utc_now = datetime.now(timezone.utc)
-    
-    # 1. Extract timezone from the passed user object (Works perfectly in background workers)
+
+    # Extract timezone from the passed user object (Works perfectly in background workers)
     tz_str = "UTC"
     if hasattr(user, 'timezone') and user.timezone:
         tz_str = user.timezone
@@ -46,12 +46,17 @@ def get_logical_today(user):
         user_zone = ZoneInfo(tz_str)
     except Exception:
         user_zone = ZoneInfo("UTC")
-        
-    # 2. Convert current UTC to the specific user's local time
+
+    # Convert current UTC to the specific user's local time
     local_now = utc_now.astimezone(user_zone)
 
-    # 3. Apply the offset midnight logic
+    # Calculate the standard "base" logical date
     if local_now.hour < user.day_reset_hour:
-        return (local_now - timedelta(days=1)).date()
+        base_date = (local_now - timedelta(days=1)).date()
+    else:
+        base_date = local_now.date()
 
-    return local_now.date()
+    if hasattr(user, 'day_closed_on') and user.day_closed_on == base_date:
+        return base_date + timedelta(days=1)
+
+    return base_date

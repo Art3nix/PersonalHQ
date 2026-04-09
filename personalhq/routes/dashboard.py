@@ -1,7 +1,7 @@
 """Module defining the main dashboard view."""
 
 from datetime import timedelta
-from flask import Blueprint, render_template, redirect, url_for, current_app
+from flask import Blueprint, render_template, redirect, url_for, current_app, flash
 from flask_login import login_required, current_user
 from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.focussessions import FocusSession, SessionStatus
@@ -13,6 +13,7 @@ from personalhq.services.habit_service import (
     get_habit_status, bulk_load_recent_logs, run_daily_ledger_catchup
 )
 from personalhq.models.dailynotes import DailyNote
+from personalhq.extensions import db
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
@@ -28,7 +29,6 @@ def index():
     yesterday = today - timedelta(days=1)
     start_of_week = today - timedelta(days=today.weekday())
     now = get_local_now()
-    logical_today = get_logical_today(current_user)
 
     # ── HABIT & FOCUS LOGIC ──
     habit_ids = [h.id for h in habits]
@@ -210,3 +210,26 @@ def onboarding():
         return redirect(url_for('dashboard.index'))
 
     return render_template('onboarding/index.html')
+
+@dashboard_bp.route('/toggle-end-day', methods=['POST'])
+@login_required
+def toggle_end_day():
+    """Manually fast-forwards the user's dashboard to tomorrow, or undoes it."""
+    
+    # 1. Temporarily clear the override to find out what the 'true' day currently is
+    current_override = current_user.day_closed_on
+    current_user.day_closed_on = None
+    true_base_today = get_logical_today(current_user)
+    
+    # 2. Toggle the state
+    if current_override == true_base_today:
+        # It was closed. Reopen it.
+        current_user.day_closed_on = None
+        flash("Day reopened. You are back in today.", "success")
+    else:
+        # It was open. Close it.
+        current_user.day_closed_on = true_base_today
+        flash("Day closed early. Welcome to tomorrow.", "success")
+        
+    db.session.commit()
+    return redirect(url_for('dashboard.index'))
