@@ -16,7 +16,7 @@
                     {% if 'Warning' in (ai_journals_subtitle|string) %}
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     {% endif %}
-                    {{ ai_journals_subtitle | default('Document your journey and reflect on your experiences.') }}
+                    {{ ai_journals_subtitle | default('Document your journey and reflect on your experiences.', true) }}
                 </p>
             </div>
             <button onclick="document.getElementById('slide-over-journal').classList.remove('translate-x-full')" class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200 flex items-center gap-2">
@@ -109,7 +109,7 @@
                     </div>
                     <h4 class="text-base font-extrabold text-stone-900">No journals yet</h4>
                     <p class="text-sm font-medium text-stone-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                        {{ ai_journals_empty_state | default('Create your first journal to start tracking your thoughts and progress.') }}
+                        {{ ai_journals_empty_state | default('Create your first journal to start tracking your thoughts and progress.', true) }}
                     </p>
                 </div>
             {% endfor %}

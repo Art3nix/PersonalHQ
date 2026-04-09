@@ -15,7 +15,7 @@
                 <div>
                     <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Habit Analytics</h1>
                     <p class="text-sm font-medium mt-2 {% if 'Warning' in (ai_habits_subtitle|string) %}text-amber-600 font-bold{% else %}text-stone-400{% endif %}">
-                        {{ ai_habits_subtitle | default('Track your consistency and manage your routines.') }}
+                        {{ ai_habits_subtitle | default('Track your consistency and manage your routines.', true) }}
                     </p>
                 </div>
                 <button onclick="document.getElementById('new-habit-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('new-habit-modal').classList.remove('translate-x-full'), 10);" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
@@ -42,7 +42,7 @@
                         </div>
                         <h4 class="text-base font-extrabold text-stone-900">No habits yet</h4>
                         <p class="text-sm font-medium text-stone-400 mt-1 max-w-xs mx-auto leading-relaxed">
-                            {{ ai_habits_empty_state | default('Start small. Pick one habit you want to build — daily or weekly. Consistency compounds.') }}
+                            {{ ai_habits_empty_state | default('Start small. Pick one habit you want to build — daily or weekly. Consistency compounds.', true) }}
                         </p>
                         <div class="mt-4 flex flex-wrap gap-2 justify-center">
                             {% for suggestion in [('Book reading', 'book-open'), ('Exercise', 'zap'), ('Meditation', 'wind'), ('Journaling', 'edit-3'), ('Cold shower', 'droplets')] %}

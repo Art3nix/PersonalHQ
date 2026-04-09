@@ -97,7 +97,7 @@
                         </div>
                         <h3 class="text-lg font-extrabold text-stone-900 tracking-tight">Your archive is empty</h3>
                         <p class="text-sm font-medium text-stone-400 mt-2 max-w-sm mx-auto leading-relaxed">
-                            {{ ai_archive_empty_state | default('Start writing in the main view to build your library.') }}
+                            {{ ai_archive_empty_state | default('Start writing in the main view to build your library.', true) }}
                         </p>
                     </div>
                 {% endif %}

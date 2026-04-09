@@ -85,7 +85,7 @@
                         {% if 'Warning' in (ai_planner_subtitle|string) %}
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                         {% endif %}
-                        {{ ai_planner_subtitle | default('Design your days and execute your deep work.') }}
+                        {{ ai_planner_subtitle | default('Design your days and execute your deep work.', true) }}
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
@@ -111,7 +111,7 @@
                     {% else %}
                         <div class="text-center py-12 border-2 border-dashed border-stone-100 rounded-3xl bg-stone-50/50 empty-state-msg pointer-events-none">
                             <p class="text-sm font-medium text-stone-400 max-w-sm mx-auto leading-relaxed">
-                                {{ ai_empty_state | default('Nothing queued for today. Enjoy the rest.') }}
+                                {{ ai_empty_state | default('Nothing queued for today. Enjoy the rest.', true) }}
                             </p>
                         </div>
                     {% endif %}

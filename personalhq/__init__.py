@@ -92,12 +92,12 @@ def create_app(config_name=None):
             current_user.day_closed_on = None
             true_base = get_logical_today(current_user)
             current_user.day_closed_on = temp_override
-            
+
             # 2. Calculate the states
             now = get_local_now()
             is_overtime = now.date() > true_base
             is_day_closed_early = (temp_override == true_base)
-            
+
             # 3. Determine the final "Today" to display in the UI
             display_today = true_base + timedelta(days=1) if is_day_closed_early else true_base
 
@@ -106,7 +106,7 @@ def create_app(config_name=None):
                 'is_day_closed_early': is_day_closed_early,
                 'today': display_today 
             }
-            
+
         return {
             'is_overtime': False,
             'is_day_closed_early': False,

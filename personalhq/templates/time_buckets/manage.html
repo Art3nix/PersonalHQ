@@ -13,7 +13,7 @@
                     {% if 'urgent' in (ai_map_subtitle|string|lower) %}
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                     {% endif %}
-                    {{ ai_map_subtitle | default('Die With Zero: Maximize fulfillment by planning experiences for the right decades.') }}
+                    {{ ai_map_subtitle | default('Die With Zero: Maximize fulfillment by planning experiences for the right decades.', true) }}
                 </p>
             </div>
             <div class="flex items-center gap-3 shrink-0">
@@ -186,7 +186,7 @@
                                 {% else %}
                                     <div class="col-span-full bg-stone-50 border border-stone-100 border-dashed rounded-2xl p-6 text-center">
                                         <p class="text-xs font-medium text-stone-400 italic">
-                                            {{ bucket.ai_empty_state | default("No experiences plotted for this Time Bucket yet.") }}
+                                            {{ bucket.ai_empty_state | default("No experiences plotted for this Time Bucket yet.", true) }}
                                         </p>
                                     </div>
                                 {% endif %}
@@ -197,7 +197,7 @@
                     {% else %}
                         <div class="text-center py-12">
                             <p class="text-sm font-medium text-stone-400">
-                                {{ ai_lifemap_empty_state | default("Your life map is currently empty. Add your first time bucket below.") }}
+                                {{ ai_lifemap_empty_state | default("Your life map is currently empty. Add your first time bucket below.", true) }}
                             </p>
                         </div>
                     {% endif %}
