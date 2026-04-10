@@ -39,6 +39,14 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    core_themes = relationship("CoreTheme",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+    emotional_values = relationship("EmotionalValue",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
     tasks = relationship("Task",
         back_populates="user",
         cascade="all, delete-orphan"

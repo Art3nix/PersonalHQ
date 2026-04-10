@@ -18,8 +18,8 @@ def manage():
     """Renders the Life Map / Time Buckets management page."""
     # Fetch all buckets in chronological order
     buckets = TimeBucket.query.filter_by(user_id=current_user.id).order_by(TimeBucket.start_date.asc()).all()
-    core_themes = CoreTheme.query.all()
-    emotional_values = EmotionalValue.query.all()
+    core_themes = CoreTheme.query.filter_by(user_id=current_user.id).all()
+    emotional_values = EmotionalValue.query.filter_by(user_id=current_user.id).all()
 
     # ==========================================
     # AI COACH CONTEXT
