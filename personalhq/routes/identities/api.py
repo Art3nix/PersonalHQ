@@ -1,16 +1,21 @@
 """API routes for Identity Matrix actions."""
 
-from datetime import timedelta
+from datetime import timedelta, date
 from flask import Blueprint, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
 from personalhq.extensions import db
 from personalhq.models.identities import Identity
 from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalprompts import JournalPrompt
-from personalhq.models.habits import Habit
+from personalhq.models.habits import Habit, HabitFrequency
 from personalhq.models.timebuckets import TimeBucket
+from personalhq.models.bucket_experience import BucketExperience
+from personalhq.models.experiences import Experience
+from personalhq.models.coretheme import CoreTheme
+from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.services.time_service import get_logical_today
 from personalhq.services.ai_service import generate_json
+from personalhq.services.ai_prompts import SYSTEM_KNOWLEDGE
 
 identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/identities')
 
@@ -98,121 +103,260 @@ def delete_identity(identity_id):
 @identities_api_bp.route('/generate_batch', methods=['POST'])
 @login_required
 def generate_batch():
-    """Takes MULTIPLE identities from onboarding, architects the whole system, and saves it."""
+    """Takes MULTIPLE identities from onboarding, architects the whole system dynamically, and saves it."""
     data = request.get_json()
     identities_input = data.get('identities', [])
     
     if not identities_input or len(identities_input) == 0:
         return jsonify({"status": "error", "message": "At least one identity is required."}), 400
 
-    # Format the user's inputs into a readable string for the LLM
-    identities_text = "\n".join([f"Identity {i}: '{req['name']}' - Vision: '{req['description']}'" for i, req in enumerate(identities_input)])
+    identities_text = "\n".join([f"- '{req['name']}': {req['description']}" for req in identities_input])
 
+    # --- NEW: Calculate current age ---
+    today = get_logical_today(current_user)
+    age_context = "Assume the user is in their late 20s." # Fallback
+    if current_user.date_of_birth:
+        current_age = today.year - current_user.date_of_birth.year - ((today.month, today.day) < (current_user.date_of_birth.month, current_user.date_of_birth.day))
+        age_context = f"The user is currently {current_age} years old."
+
+    # Update the prompt string:
     system_prompt = f"""
-You are an elite performance coach and system architect. 
+{SYSTEM_KNOWLEDGE}
+
+TASK: 
 The user is committing to a completely new lifestyle based on multiple identities.
+{age_context}
 
 Here are the identities they are claiming:
 {identities_text}
 
-Your job is to build a psychological and operational system to support EACH of these identities.
-You MUST respond with a RAW, valid JSON ARRAY containing an object for each identity in the exact order they were provided. Do NOT include markdown blocks.
+INSTRUCTIONS:
+Your job is to build a psychological and operational system to support this new lifestyle.
+YOU are in complete control of the system's architecture. 
 
-Use this exact structure (Return an ARRAY of these objects):
-[
-  {{
-    "habit": {{
-      "name": "Short, verb-driven habit",
-      "description": "Why this proves the identity",
-      "icon": "target"
-    }},
-    "time_bucket": {{
+- Generate 1-3 global Time Buckets based on the "Die With Zero" philosophy. Assign specific age ranges to these buckets based on the user's current age. Generate 2-4 compelling EXPERIENCES inside each bucket.
+- Generate 1-3 global Journals for compartmentalization. Determine how often they should be used.
+- For EACH identity provided, select an appropriate color, and generate 1-3 highly actionable Habits. Determine their frequency, target counts, and break them down using the 4 Laws of Behavior Change.
+
+You MUST respond with a RAW, valid JSON OBJECT using this exact structure. Do NOT include markdown blocks.
+
+{{
+  "time_buckets": [
+    {{
       "name": "Name of a decade/life chapter (e.g., 'The Foundation Years')",
-      "theme": "A short phrase describing the focus"
-    }},
-    "journal": {{
+      "theme": "A short phrase describing the focus",
+      "start_age": 25, // Integer
+      "end_age": 35, // Integer
+      "experiences": [
+        {{
+          "name": "A specific, memorable experience",
+          "details": "Why this creates a lasting Memory Dividend",
+          "core_theme": "A single word category (e.g., 'Adventure', 'Health', 'Career')",
+          "theme_color": "A valid tailwind color for the theme",
+          "emotional_value": "The core feeling (e.g., 'Awe', 'Connection', 'Pride')",
+          "emotion_color": "A valid tailwind color for the emotion"
+        }}
+      ]
+    }}
+  ],
+  "journals": [
+    {{
       "name": "Specific journal name",
       "description": "Purpose of this space",
       "icon": "book-open",
       "color": "emerald",
+      "frequency": "Must be exactly 'daily', 'weekly', or 'monthly'",
       "prompts": [
         "A deep reflection question",
-        "An action-oriented growth question"
+        "An action-oriented Next Action question"
       ]
     }}
-  }}
-]
+  ],
+  "identities": [
+    {{
+      "name": "The EXACT identity name provided by the user",
+      "color": "indigo",
+      "habits": [
+        {{
+          "name": "Short, verb-driven habit (2-Minute Rule)",
+          "description": "Why this proves the identity",
+          "icon": "target",
+          "frequency": "Must be exactly 'daily' or 'weekly'",
+          "target_count": 1, 
+          "trigger": "The exact physical cue",
+          "craving": "How to make the action attractive",
+          "reward": "The immediate satisfying payoff"
+        }}
+      ]
+    }}
+  ]
+}}
 
 Valid colors: slate, gray, zinc, neutral, stone, red, orange, amber, yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose.
 Use valid Lucide icon names.
 """
 
     try:
-        # One clean call to the global service. We get a list back directly.
-        ai_data_list = generate_json(system_prompt)
+        ai_data = generate_json(system_prompt)
         
-        # Loop through the user's inputs and the AI's outputs simultaneously
-        for i, req in enumerate(identities_input):
-            ai_data = ai_data_list[i]
-            
-            # 1. Core Identity
+        # 1. Create Identities first so we have their Database IDs
+        identity_map = {}
+        for req in identities_input:
             new_id = Identity(
                 user_id=current_user.id,
                 name=req['name'].strip(),
                 description=req['description'].strip() if req.get('description') else None
             )
             db.session.add(new_id)
-            db.session.flush() # Flush to get new_id.id
+            db.session.flush()
+            identity_map[req['name'].strip().lower()] = new_id
+
+        # 2. Process Time Buckets AND their nested Experiences
+        for tb_data in ai_data.get('time_buckets', []):
             
-            # 2. Habit
-            new_habit = Habit(
-                user_id=current_user.id,
-                identity_id=new_id.id, 
-                name=ai_data['habit']['name'],
-                description=ai_data['habit']['description'],
-                icon=ai_data['habit']['icon']
-            )
-            db.session.add(new_habit)
-            
-            # 3. Time Bucket
             start_date = get_logical_today(current_user)
-            try:
-                end_date = start_date.replace(year=start_date.year + 10)
-            except ValueError:
-                end_date = start_date + timedelta(days=3650)
+            end_date = start_date + timedelta(days=3650) # Fallback
+            
+            if current_user.date_of_birth and 'start_age' in tb_data and 'end_age' in tb_data:
+                dob = current_user.date_of_birth
+                start_age = int(tb_data['start_age'])
+                end_age = int(tb_data['end_age'])
+                
+                # Start Date: Their birthday on the year they turn start_age
+                try:
+                    start_date = date(dob.year + start_age, dob.month, dob.day)
+                except ValueError:
+                    start_date = date(dob.year + start_age, 2, 28) # Leap year catch
+                
+                # End Date: The day before they turn (end_age + 1)
+                try:
+                    next_bday = date(dob.year + end_age + 1, dob.month, dob.day)
+                except ValueError:
+                    next_bday = date(dob.year + end_age + 1, 2, 28)
+                end_date = next_bday - timedelta(days=1)
 
             new_bucket = TimeBucket(
                 user_id=current_user.id,
-                name=ai_data['time_bucket']['name'],
-                theme=ai_data['time_bucket']['theme'],
+                name=tb_data['name'],
+                theme=tb_data['theme'],
                 start_date=start_date,
                 end_date=end_date
             )
             db.session.add(new_bucket)
+            db.session.flush()
             
-            # 4. Journal
+            # --- PROCESS EXPERIENCES (With Association Table) ---
+            for exp_data in tb_data.get('experiences', []):
+                
+                # Get or Create Core Theme ONLY if provided
+                theme_id = None
+                theme_name = exp_data.get('core_theme')
+                if theme_name:
+                    theme_color = exp_data.get('theme_color', 'stone')
+                    core_theme = CoreTheme.query.filter_by(user_id=current_user.id, name=theme_name).first()
+                    if not core_theme:
+                        core_theme = CoreTheme(user_id=current_user.id, name=theme_name, color=theme_color)
+                        db.session.add(core_theme)
+                        db.session.flush()
+                    theme_id = core_theme.id
+                
+                # Get or Create Emotional Value ONLY if provided
+                emotion_id = None
+                emotion_name = exp_data.get('emotional_value')
+                if emotion_name:
+                    emotion_color = exp_data.get('emotion_color', 'rose')
+                    emotional_value = EmotionalValue.query.filter_by(user_id=current_user.id, name=emotion_name).first()
+                    if not emotional_value:
+                        emotional_value = EmotionalValue(user_id=current_user.id, name=emotion_name, color=emotion_color)
+                        db.session.add(emotional_value)
+                        db.session.flush()
+                    emotion_id = emotional_value.id
+
+                # 1. Create the base Experience (Do not pass time_bucket_id here!)
+                new_experience = Experience(
+                    # Depending on your model, include user_id=current_user.id if Experiences are tied to users
+                    name=exp_data['name'],
+                    details=exp_data.get('details'),
+                    theme_id=theme_id,             
+                    emotional_value_id=emotion_id  
+                )
+                db.session.add(new_experience)
+                db.session.flush() # Flush to get new_experience.id
+
+                # 2. Link the Experience to the Time Bucket using the Junction Table
+                link = BucketExperience(
+                    bucket_id=new_bucket.id,
+                    experience_id=new_experience.id
+                )
+                db.session.add(link)
+
+        # 3. Process Journals (With AI-Controlled Frequency)
+        for j_data in ai_data.get('journals', []):
+            
+            # Map the AI's text response safely to your Enum
+            ai_freq = j_data.get('frequency', '').lower()
+            if 'week' in ai_freq:
+                j_freq = JournalFrequency.WEEKLY
+            elif 'month' in ai_freq:
+                j_freq = JournalFrequency.MONTHLY
+            else:
+                j_freq = JournalFrequency.DAILY
+                
             new_journal = Journal(
                 user_id=current_user.id,
-                name=ai_data['journal']['name'],
-                description=ai_data['journal']['description'],
-                icon=ai_data['journal']['icon'],
-                color=ai_data['journal']['color'],
-                frequency=JournalFrequency.DAILY
+                name=j_data['name'],
+                description=j_data.get('description'),
+                icon=j_data['icon'],
+                color=j_data['color'],
+                frequency=j_freq
             )
             db.session.add(new_journal)
-            db.session.flush() 
-            
-            # 5. Prompts
-            for prompt_text in ai_data['journal']['prompts']:
+            db.session.flush()
+
+            for prompt_text in j_data.get('prompts', []):
                 new_prompt = JournalPrompt(
                     journal_id=new_journal.id,
                     text=prompt_text
                 )
                 db.session.add(new_prompt)
+
+        # 4. Process Identities and Habits (With AI-Controlled Targets)
+        for id_data in ai_data.get('identities', []):
+            identity_name = id_data['name'].strip().lower()
+            identity_obj = identity_map.get(identity_name)
+            
+            if identity_obj:
+                if 'color' in id_data:
+                    identity_obj.color = id_data['color']
                 
-        # Commit the entire batch!
+                for habit_data in id_data.get('habits', []):
+                    
+                    # --- THE FIX: Map the AI string to the Enum ---
+                    ai_habit_freq = habit_data.get('frequency', '').upper()
+                    if 'WEEK' in ai_habit_freq:
+                        h_freq = HabitFrequency.WEEKLY
+                    else:
+                        h_freq = HabitFrequency.DAILY
+                    
+                    new_habit = Habit(
+                        user_id=current_user.id,
+                        identity_id=identity_obj.id, 
+                        name=habit_data['name'],
+                        description=habit_data.get('description'),
+                        icon=habit_data['icon'],
+                        
+                        # Use the safely mapped Enum!
+                        frequency=h_freq,
+                        target_count=habit_data.get('target_count', 1), 
+                        is_active=True,
+                        
+                        trigger=habit_data.get('trigger', ''),
+                        craving=habit_data.get('craving', ''),
+                        reward=habit_data.get('reward', '')
+                    )
+                    db.session.add(new_habit)
+
         db.session.commit()
-        
         return jsonify({"status": "success"}), 200
 
     except ValueError as ve:
