@@ -207,7 +207,7 @@ def build_database_snapshot(user, logical_today):
     return snapshot_string
 
 def generate_daily_context(user, logical_date_to_prep):
-    """Feeds the DB snapshot to the AI to generate global context and targeted entity insights."""
+    """Feeds the DB snapshot to the AI to generate layered, encouraging coaching text."""
     
     daily_data = build_database_snapshot(user, logical_date_to_prep)
     
@@ -217,48 +217,65 @@ def generate_daily_context(user, logical_date_to_prep):
 {daily_data}
 
 TASK: 
-Act as a personal performance coach. Review the user's 14-day history and give them direct, actionable, text-message-style coaching.
-
-COACHING DIRECTIVES:
-1. Speak directly to the user ("You", "Your"). Never use third-person ("The user", "Businessman identity").
-2. No Cold Data: Never just state facts like "No entries" or "Habit execution stalled." Give them the "So what?" and a clear next step.
-3. Conversational Nudges: Instead of "Reflect on gratitude," say something like: "You haven't written in a few days. Take 2 minutes right now to drop a single bullet point and clear your head."
-4. Be firm but empathetic. Tell them to scale down if they are struggling.
+Act as a modern, collaborative performance coach. Review the user's 14-day history and generate highly targeted, practical coaching text.
 
 INSTRUCTIONS:
-- SPARCE GENERATION: Do NOT fill every field. Only generate an insight if it is HIGHLY RELEVANT right now.
-- If an entity does not urgently need coaching today, DO NOT include its ID in the entity_updates.
+- THE 50% NULL RULE: You should output `null` for roughly half of the subsystem fields. Only generate text for a specific area (like Habits or Inbox) if you have a genuinely useful observation or nudge for today. 
+- NO COMMANDING: Guide and challenge the user, but do not issue aggressive commands or demands.
+- Strictly follow the word limits.
 
-You MUST respond with a RAW, valid JSON OBJECT:
+You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
 
 {{
   "daily_note": {{
-    "ai_daily_briefing": "15-25 words. Conversational coaching based on their trends. Give them a game plan for today.",
-    
-    "ai_focus_empty_state": "Max 10 words. Friendly nudge to plan a session.",
-    "ai_habit_empty_state": "Max 10 words. Direct advice to create their first habit.",
-    "ai_inbox_subtitle": "Max 10 words. E.g., 'Let's clear the noise.'",
-    "ai_inbox_overload": "Max 15 words. Firm coaching to process their massive backlog.",
-    "ai_braindump_empty_state": "Max 15 words. Remind them to dump thoughts here.",
-    "ai_planner_subtitle": "Max 10 words. E.g., 'Protect your time.'",
-    "ai_planner_empty_state": "Max 10 words. Actionable nudge to schedule deep work.",
-    "ai_journal_subtitle": "Max 10 words. E.g., 'Clear your mind.'",
-    "ai_journal_empty_state": "Max 10 words. Friendly prompt to create a journal.",
-    "ai_map_subtitle": "Max 15 words. Casual reminder about their current Life Chapter.",
-    "ai_chapter_empty_state": "Max 15 words. Nudge to define this decade.",
-    "ai_lifemap_empty_state": "Max 15 words. Nudge to build their timeline."
+    // --- DASHBOARD (Global Coach) ---
+    "ai_daily_briefing": "[Global Coach] Direct, supportive coaching based on their 14-day reality. Offer a collaborative game plan for today. (15-25 words)",
+    "ai_focus_empty_state": "[UI Empty State] A grounded reminder to protect their time. Suggest scheduling a session. (Max 15 words)",
+    "ai_habit_empty_state": "[UI Empty State] Encourage them to cast their first vote for their identity. (Max 15 words)",
+    "ai_chapter_empty_state": "[UI Empty State] Remind them to define this decade of their life. (Max 15 words)",
+
+    // --- INBOX / BRAINDUMPS ---
+    "ai_inbox_subtitle": "[Subsystem Coach] An observation about their current mental load. (Max 15 words)",
+    "ai_inbox_overload": "[Warning] Supportive intervention ONLY if they have >10 open loops. Encourage them to process their inbox. (Max 15 words)",
+    "ai_braindump_empty_state": "[UI Empty State] Acknowledge they have a clear mind right now. (Max 15 words)",
+
+    // --- DEEP WORK / PLANNER ---
+    "ai_planner_subtitle": "[Subsystem Coach] Practical advice about today's scheduled focus workload. (Max 15 words)",
+    "ai_planner_empty_state": "[UI Empty State] Challenge them to block out time for deep work. (Max 15 words)",
+    "ai_focus_analysis": "[Subsystem Coach] Analyze their 14-day focus trend. Point out consistency or inconsistency. (Max 20 words)",
+
+    // --- HABITS ---
+    "ai_habits_subtitle": "[Subsystem Coach] A modern note about how their habits prove their identity. (Max 15 words)",
+    "ai_habits_empty_state": "[UI Empty State] Suggest lowering the friction to 2 minutes to just get started. (Max 15 words)",
+    "ai_heatmap_analysis": "[Subsystem Coach] Call out their 14-day record. Praise consistency or gently point out missing days. (Max 20 words)",
+    "ai_dow_analysis": "[Subsystem Coach] Point out specific day-of-week patterns plainly. (Max 20 words)",
+    "ai_momentum_analysis": "[Subsystem Coach] Leverage their streaks or lack thereof to encourage action today. (Max 20 words)",
+
+    // --- IDENTITIES ---
+    "ai_identity_empty_state": "[UI Empty State] Ask them who they want to become. (Max 15 words)",
+
+    // --- JOURNALS ---
+    "ai_journals_subtitle": "[Subsystem Coach] A practical note about clearing their head. (Max 15 words)",
+    "ai_journals_empty_state": "[UI Empty State] Prompt them to create a space to write. (Max 15 words)",
+    "ai_writing_coach": "[Writing Coach] Warm encouragement shown while they type. (Max 15 words)",
+    "ai_prompt_suggestion": "[Writing Prompt] A highly specific, practical question they should answer based on recent behavior. (Max 20 words)",
+    "ai_archive_insight": "[Subsystem Coach] An observation about their historical writing patterns. (Max 20 words)",
+    "ai_archive_empty_state": "[UI Empty State] Encourage them to log their first entry. (Max 15 words)",
+
+    // --- TIME BUCKETS (LIFE MAP) ---
+    "ai_map_subtitle": "[Subsystem Coach] A reminder about maximizing experiences before they get too old. (Max 20 words)",
+    "ai_lifemap_empty_state": "[UI Empty State] Tell them to map out their decades. (Max 20 words)"
   }},
   
   "entity_updates": {{
-    "time_buckets": [ 
-      {{ "id": 123, "ai_insight": "Max 15 words. Casual coaching note.", "ai_empty_state": "Max 15 words. Actionable advice." }} 
-    ],
-    "journals": [ {{ "id": 123, "ai_insight": "Max 15 words. Conversational writing prompt based on their habits." }} ],
-    "identities": [ {{ "id": 123, "ai_insight": "Max 15 words. Real-talk about whether their habits match this identity." }} ],
-    "focus_sessions": [ {{ "id": 123, "ai_insight": "Max 15 words.", "ai_intention": "Max 10 words." }} ]
+    "time_buckets": [ {{ "id": 123, "ai_insight": "[Item Coach] Specific, practical coaching for this life decade.", "ai_empty_state": "Max 15 words." }} ],
+    "journals": [ {{ "id": 123, "ai_insight": "[Item Coach] Specific coaching for this journal." }} ],
+    "identities": [ {{ "id": 123, "ai_insight": "[Item Coach] Supportive check: Do their recent actions align with this specific identity?" }} ],
+    "focus_sessions": [ {{ "id": 123, "ai_insight": "[Item Coach] Highly specific coaching for THIS exact session.", "ai_intention": "Max 15 words." }} ]
   }}
 }}
 """
+
     print(system_prompt)
     try:
         ai_data = generate_json(system_prompt)
@@ -271,19 +288,42 @@ You MUST respond with a RAW, valid JSON OBJECT:
             daily_note = DailyNote(user_id=user.id, logical_date=logical_date_to_prep)
             db.session.add(daily_note)
             
-        # mapping removed the non-existent title
+        # Dashboard
         daily_note.ai_daily_briefing = note_data.get('ai_daily_briefing')
         daily_note.ai_focus_empty_state = note_data.get('ai_focus_empty_state')
         daily_note.ai_habit_empty_state = note_data.get('ai_habit_empty_state')
+        daily_note.ai_chapter_empty_state = note_data.get('ai_chapter_empty_state')
+        
+        # Braindumps
         daily_note.ai_inbox_subtitle = note_data.get('ai_inbox_subtitle')
         daily_note.ai_inbox_overload = note_data.get('ai_inbox_overload')
         daily_note.ai_braindump_empty_state = note_data.get('ai_braindump_empty_state')
+        
+        # Deep Work
         daily_note.ai_planner_subtitle = note_data.get('ai_planner_subtitle')
         daily_note.ai_planner_empty_state = note_data.get('ai_planner_empty_state')
-        daily_note.ai_journal_subtitle = note_data.get('ai_journal_subtitle')
-        daily_note.ai_journal_empty_state = note_data.get('ai_journal_empty_state')
+        daily_note.ai_focus_analysis = note_data.get('ai_focus_analysis')
+        
+        # Habits
+        daily_note.ai_habits_subtitle = note_data.get('ai_habits_subtitle')
+        daily_note.ai_habits_empty_state = note_data.get('ai_habits_empty_state')
+        daily_note.ai_heatmap_analysis = note_data.get('ai_heatmap_analysis')
+        daily_note.ai_dow_analysis = note_data.get('ai_dow_analysis')
+        daily_note.ai_momentum_analysis = note_data.get('ai_momentum_analysis')
+        
+        # Identity
+        daily_note.ai_identity_empty_state = note_data.get('ai_identity_empty_state')
+        
+        # Journals
+        daily_note.ai_journals_subtitle = note_data.get('ai_journals_subtitle')
+        daily_note.ai_journals_empty_state = note_data.get('ai_journals_empty_state')
+        daily_note.ai_writing_coach = note_data.get('ai_writing_coach')
+        daily_note.ai_prompt_suggestion = note_data.get('ai_prompt_suggestion')
+        daily_note.ai_archive_insight = note_data.get('ai_archive_insight')
+        daily_note.ai_archive_empty_state = note_data.get('ai_archive_empty_state')
+        
+        # Time Buckets
         daily_note.ai_map_subtitle = note_data.get('ai_map_subtitle')
-        daily_note.ai_chapter_empty_state = note_data.get('ai_chapter_empty_state')
         daily_note.ai_lifemap_empty_state = note_data.get('ai_lifemap_empty_state')
         
         # --- 2. PROCESS TARGETED ENTITY UPDATES ---
