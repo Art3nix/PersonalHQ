@@ -1,0 +1,463 @@
+{% extends "app_layout.html" %}
+
+{% block title %}Inbox - Life HQ{% endblock %}
+
+{% block app_content %}
+    <div class="flex-1 flex overflow-hidden">
+        <main class="w-[70%] overflow-y-auto custom-scrollbar p-12">
+            
+            <header class="flex justify-between items-end mb-10 border-b border-stone-100 pb-6">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight flex items-center gap-3">
+                        Inbox
+                        {% if dump_count > 0 %}
+                            <span class="bg-indigo-100 text-indigo-700 text-sm py-1 px-3 rounded-lg font-bold">{{ dump_count }}</span>
+                        {% endif %}
+                    </h1>
+                    
+                    {% if ai_inbox_overload %}
+                        <p class="text-sm font-bold text-amber-600 mt-2 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            {{ ai_inbox_overload }}
+                        </p>
+                    {% else %}
+                        <p class="text-sm font-medium text-stone-500 mt-2">
+                            {{ ai_inbox_subtitle | default('Process your captured thoughts to keep your mind clear.', true) }}
+                        </p>
+                    {% endif %}
+                </div>
+            </header>
+
+            <form id="quick-capture-form" class="mb-8 flex items-center gap-4" onsubmit="submitNewThought(event)">
+                <input type="hidden" id="capture-csrf" value="{{ csrf_token() }}">
+                
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-stone-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                    </div>
+                    <input type="text" id="new-thought-input" required autocomplete="off" class="w-full bg-white border border-stone-200 rounded-2xl py-3.5 pl-12 pr-6 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none font-medium shadow-sm transition-all placeholder:text-stone-300" placeholder="Capture a new thought... (Press Enter)">
+                </div>
+                
+                <button type="submit" class="bg-indigo-600 text-white px-6 py-3.5 rounded-2xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 flex items-center gap-2 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add
+                </button>
+            </form>
+
+            <section class="space-y-4">
+                {% if braindumps %}
+                    {% for dump in braindumps %}
+                    <div id="dump-{{ dump.id }}" class="bg-white border border-stone-100 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-100 transition-all group flex flex-col gap-4">
+                        
+                        <div class="flex items-start justify-between gap-6 w-full">
+                            <div class="flex-1">
+                                <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
+                                    Captured {{ dump.created_at.strftime('%b %d, %H:%M') }}
+                                </p>
+                                <p id="dump-content-{{ dump.id }}" class="text-base font-semibold text-stone-900 leading-relaxed whitespace-pre-wrap">{{ dump.content }}</p>
+                            </div>
+
+                            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-1">
+                                <button onclick="openConvertModal({{ dump.id }}, '{{ dump.content | escape }}')" class="px-4 py-2 bg-stone-50 text-stone-600 rounded-xl text-xs font-bold hover:bg-indigo-50 hover:text-indigo-600 transition-colors border border-stone-100 hover:border-indigo-100">
+                                    Convert...
+                                </button>
+                                <div class="flex items-center gap-1">
+                                    <button type="button" data-id="{{ dump.id }}" onclick="openEditDumpModal(this.dataset)" class="p-2 text-stone-400 hover:text-indigo-500 hover:bg-indigo-50 rounded-xl transition-colors" title="Edit Thought">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </button>
+                                    <form id="delete-dump-{{ dump.id }}" action="{{ url_for('braindumps_api.delete_dump', dump_id=dump.id) }}" method="POST" class="inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="button" data-form-id="delete-dump-{{ dump.id }}" data-item-name="Thought: {{ dump.content[:20] }}..." onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" class="p-2 text-stone-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Discard">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if dump.ai_insight %}
+                        <div class="pt-3 border-t border-stone-100/60 flex items-start gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                            <p class="text-xs font-medium text-stone-500 leading-relaxed">{{ dump.ai_insight }}</p>
+                        </div>
+                        {% endif %}
+                        
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-20 border-2 border-dashed border-stone-100 rounded-[2.5rem] bg-stone-50/50">
+                        <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-100 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-stone-900">Your mind is clear.</h3>
+                        <p class="text-sm font-medium text-stone-400 mt-1 max-w-sm mx-auto leading-relaxed">
+                            {{ ai_empty_state | default("You've processed all captured thoughts. Return to the dashboard to execute your day.", true) }}
+                        </p>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
+            <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-6">The Inbox Guide</h3>
+            
+            <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-sm text-sm text-stone-600 mb-6 space-y-5">
+                <div>
+                    <h4 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide mb-1">A Safe Place For Your Mind</h4>
+                    <p class="text-[11px] font-medium leading-relaxed">Your mind is beautifully designed to create ideas, not to hold onto them. Every lingering thought or forgotten task quietly drains your energy. Think of this inbox as a pressure valve. The exact moment you write a worry or an idea down here, you are whispering to your brain: "I've got this. It is safe to let it go."</p>
+                </div>
+                
+                <hr class="border-stone-100">
+
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Just Get It Out</strong> <span class="text-[11px]">When a thought strikes, dump it here immediately. Don't worry about organizing it or making it sound smart. Just get it out of your head so you can stay present in your life.</span></div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Clear The Room</strong> <span class="text-[11px]">To keep your mind at peace, make a habit of clearing this list regularly. Think of it as a temporary waiting room, not a permanent storage closet.</span></div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <div class="w-6 h-6 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">X</div>
+                        <div><strong class="text-[11px] text-stone-900 block uppercase tracking-wide">Let Things Go</strong> <span class="text-[11px]">Not every passing thought is a mandate. If an idea no longer excites you or serves you, just delete it. Freeing up mental space is a beautiful thing.</span></div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-indigo-600 border border-indigo-700 rounded-2xl p-6 shadow-md text-center text-indigo-50 relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-white rounded-full opacity-10 blur-xl pointer-events-none"></div>
+                <p class="text-xs font-bold uppercase tracking-widest mb-2 opacity-80">Quick Capture</p>
+                <p class="text-sm font-medium leading-relaxed">Use the bar on this page, or press <kbd class="bg-indigo-800 text-white border border-indigo-500 px-2 py-0.5 rounded shadow-sm font-mono mx-1">/</kbd> anywhere on the dashboard to instantly drop a thought into this inbox.</p>
+            </div>
+        </aside>
+    </div>
+    <div id="edit-dump-modal" class="hidden fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('edit-dump-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-dump-modal').classList.add('hidden'), 300);"></div>
+
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Edit Thought</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Inbox Catcher</p>
+                </div>
+                <button onclick="document.getElementById('edit-dump-modal').classList.add('translate-x-full'); setTimeout(() => document.getElementById('edit-dump-modal').classList.add('hidden'), 300);" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto">
+                <form id="edit-dump-form" action="" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Thought Content</label>
+                        <textarea name="content" id="edit-dump-content" required class="w-full h-64 bg-stone-50 border border-stone-200 rounded-xl py-4 px-5 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium resize-none custom-scrollbar leading-relaxed"></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                    <button type="button" onclick="document.getElementById('edit-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.05l5.67-5.67"></path></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">Honoring your ideas</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">A judgment-free zone</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="edit-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-stone-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Don't Overthink It</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Sometimes your best ideas will sound a little crazy at first, and that is perfectly okay! If you filter yourself before you write them down, you might lose something brilliant. Don't worry about editing right now—just let your thoughts exist exactly as they are.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="convert-modal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('convert-modal').classList.add('translate-x-full')"></div>
+        
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Process Thought</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Choose what to convert this into</p>
+                </div>
+                <button onclick="document.getElementById('convert-modal').classList.add('translate-x-full')" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="flex border-b border-stone-100">
+                <button onclick="switchTab('focus')" id="tab-focus" class="flex-1 py-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 transition-colors flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Deep Work</button>
+                <button onclick="switchTab('experience')" id="tab-exp" class="flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-stone-400 hover:text-stone-600 transition-colors flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><star></star><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Experience</button>
+                <button onclick="switchTab('journal')" id="tab-journal" class="flex-1 py-4 text-sm font-bold border-b-2 border-transparent text-stone-400 hover:text-stone-600 transition-colors flex items-center justify-center gap-2"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> Journal</button>
+            </div>
+
+            <div class="p-8 flex-1 overflow-y-auto">
+                <form id="convert-form" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <input type="hidden" name="convert_type" id="convert-type-input" value="focus">
+                    
+                    <div id="title-field-group">
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Title</label>
+                        <input type="text" name="name" id="modal-title-input" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
+                    </div>
+
+                    <div id="focus-fields" class="space-y-6">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Date</label>
+                                <input type="date" name="target_date" id="focus-date" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium text-stone-600">
+                            </div>
+                            <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Minutes</label>
+                            <div class="relative">
+                                <input type="number" name="target_duration_minutes" value="50" min="1" max="720" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium pr-12 text-stone-900">
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span class="text-xs font-bold text-stone-400">min</span>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
+                            <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="">None (Unassigned)</option>
+                                {% for identity in identities %}
+                                    <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="exp-fields" class="space-y-6 hidden">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Time Bucket</label>
+                            <select name="bucket_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="" disabled selected>Select a time bucket...</option>
+                                {% for bucket in buckets %}
+                                    <option value="{{ bucket.id }}">{{ bucket.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Details (Optional)</label>
+                            <textarea name="details" id="exp-details-input" rows="3" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium resize-none"></textarea>
+                        </div>
+                    </div>
+                    <div id="journal-fields" class="space-y-6 hidden">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Select Journal</label>
+                            <select name="journal_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="" disabled selected>Choose a journal...</option>
+                                {% for journal in journals %}
+                                    <option value="{{ journal.id }}"><i data-lucide="{{ journal.icon }}" class="w-5 h-5"></i> {{ journal.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Entry Content</label>
+                            <textarea name="journal_content" id="journal-content-input" rows="6" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Process Item
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-4 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                    <button type="button" onclick="document.getElementById('inbox-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                        <div class="flex items-center gap-3">
+                            <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">From Chaos to Clarity</h4>
+                                <p class="text-[10px] font-medium text-stone-500 mt-0.5">Finding your next step</p>
+                            </div>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </button>
+                    
+                    <div id="inbox-pedagogy-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                        
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The 2-Minute Relief</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">If this thought takes less than two minutes to resolve (like sending a quick text or paying a bill), don't even bother scheduling it. Just do it right now, enjoy that little burst of momentum, and delete the thought!</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Define the Outcome</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Vague tasks cause stress because your brain doesn't know what "done" looks like. Change a vague word like "Taxes" to a clear outcome like "File 2025 tax return." Then, just ask yourself what the very first physical step is (like opening the spreadsheet) so you have an easy starting line.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                            <div>
+                                <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Give It a Home</h5>
+                                <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Where does this idea belong? If it's a project, send it to Deep Work. If it's a dream for the future, make it an Experience. If it's just a feeling, save it in your Journal. Every piece of your mind deserves a proper home.</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        function openEditDumpModal(data) {
+            // 1. Set the dynamic form action
+            document.getElementById('edit-dump-form').action = `/actions/braindumps/${data.id}/edit`;
+            
+            // 2. Fetch the text safely from the DOM (preserves line breaks and avoids escaping issues)
+            const content = document.getElementById(`dump-content-${data.id}`).innerText;
+            document.getElementById('edit-dump-content').value = content;
+            
+            // 3. Slide the modal open
+            const modal = document.getElementById('edit-dump-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.remove('translate-x-full'), 10);
+        }
+
+        function openConvertModal(dumpId, content) {
+            // Set the URL so the form knows which dump to convert/delete
+            document.getElementById('convert-form').action = `/actions/braindumps/${dumpId}/convert`;
+            
+            // Pre-fill the relevant inputs
+            const truncated = content.length > 80 ? content.substring(0, 80) + '...' : content;
+            document.getElementById('modal-title-input').value = truncated;
+            document.getElementById('journal-content-input').value = content;
+
+            // Clear the Experience Details (don't redundantly paste the title here)
+            document.getElementById('exp-details-input').value = ""; 
+            
+            // Default date to today for Focus Sessions
+            document.getElementById('focus-date').valueAsDate = new Date();
+
+            // Always reset the modal to the 'focus' tab when opened
+            switchTab('focus');
+
+            // Slide it open
+            document.getElementById('convert-modal').classList.remove('translate-x-full');
+        }
+
+        function switchTab(type) {
+            document.getElementById('convert-type-input').value = type;
+            
+            // 1. Handle the Title Field Visibility
+            const titleGroup = document.getElementById('title-field-group');
+            const titleInput = document.getElementById('modal-title-input');
+            
+            if (type === 'journal') {
+                titleGroup.classList.add('hidden');
+                titleInput.removeAttribute('required'); // Prevent HTML5 validation errors
+            } else {
+                titleGroup.classList.remove('hidden');
+                titleInput.setAttribute('required', 'required');
+            }
+            
+            // 2. Handle the Tab Panels
+            const tabs = ['focus', 'experience', 'journal'];
+            
+            tabs.forEach(t => {
+                const fields = document.getElementById(`${t === 'experience' ? 'exp' : t}-fields`);
+                const tabBtn = document.getElementById(`tab-${t === 'experience' ? 'exp' : t}`);
+                
+                if (t === type) {
+                    fields.classList.remove('hidden');
+                    tabBtn.classList.add('border-indigo-600', 'text-indigo-600');
+                    tabBtn.classList.remove('border-transparent', 'text-stone-400');
+                } else {
+                    fields.classList.add('hidden');
+                    tabBtn.classList.remove('border-indigo-600', 'text-indigo-600');
+                    tabBtn.classList.add('border-transparent', 'text-stone-400');
+                }
+            });
+        }
+
+        async function submitNewThought(event) {
+            event.preventDefault(); // Stop normal form submission
+            
+            const input = document.getElementById('new-thought-input');
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            const content = input.value.trim();
+            const csrfToken = document.getElementById('capture-csrf').value;
+            
+            if (!content) return;
+
+            // Give the user instant visual feedback
+            const originalBtnHTML = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="opacity-70">Saving...</span>';
+            submitBtn.disabled = true;
+
+            try {
+                // Send the thought to the Python backend
+                const response = await fetch('/actions/braindumps/catch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({ content: content })
+                });
+
+                if (response.ok) {
+                    showToast('Thought captured!', 'success');
+                    // Fetch fresh HTML quietly in the background
+                    const pageRes = await fetch(window.location.href);
+                    const html = await pageRes.text();
+                    const virtualDoc = new DOMParser().parseFromString(html, 'text/html');
+                    
+                    // 1. Swap the list of thoughts (this also handles replacing the empty state!)
+                    const currentList = document.querySelector('section.space-y-4');
+                    const newList = virtualDoc.querySelector('section.space-y-4');
+                    if (currentList && newList) currentList.innerHTML = newList.innerHTML;
+                    
+                    // 2. Swap the header to update the badge count
+                    const currentHeader = document.querySelector('header');
+                    const newHeader = virtualDoc.querySelector('header');
+                    if (currentHeader && newHeader) currentHeader.innerHTML = newHeader.innerHTML;
+
+                    // Clear the input so you can keep typing
+                    input.value = '';
+                }
+            } catch (error) { 
+                console.error('Error creating thought:', error); 
+            } finally {
+                // Reset the button state
+                submitBtn.innerHTML = originalBtnHTML;
+                submitBtn.disabled = false;
+                input.focus(); // Keep the cursor in the box for rapid-fire logging
+            }
+        }
+    </script>
+{% endblock %}

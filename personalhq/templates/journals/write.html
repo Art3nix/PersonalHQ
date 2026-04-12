@@ -1,0 +1,487 @@
+{% extends "app_layout.html" %}
+
+{% block title %}{{ journal.name }} - Life HQ{% endblock %}
+
+{% block app_content %}
+    {% set theme = journal.color or 'indigo' %}
+    <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50 h-full min-h-0">
+        
+        <header class="h-24 shrink-0 flex items-center justify-between px-12 z-20 border-b border-stone-100 bg-white/50 backdrop-blur-md">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                </a>
+                <div>
+                    <h1 class="text-xl font-extrabold text-stone-900 tracking-tight flex items-center gap-2">
+                        <i data-lucide="{{ journal.icon or 'book-open' }}" class="w-5 h-5 text-{{ journal.color or 'indigo' }}-500"></i>
+                        {{ journal.name }}
+                    </h1>
+                    <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-0.5">{{ journal.frequency.value }} • {{ entries|length }} Entries</p>
+                </div>
+            </div>
+            
+            <button onclick="document.getElementById('slide-over-prompts').classList.remove('translate-x-full')" class="xl:hidden flex items-center gap-2 px-4 py-2 bg-stone-50 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-100 transition-colors border border-stone-100 hover:border-stone-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                Manage Prompts
+            </button>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden min-h-0 bg-{{ theme }}-50">
+            
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-8 min-h-0">
+                <div class="max-w-3xl w-full mx-auto pt-8 pb-64">
+                    
+                    <h2 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">Today's Entry</h2>
+
+                    {% if ai_writing_coach %}
+                    <div class="mb-4 pb-3 border-b border-stone-100 flex items-start gap-2.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-{{ theme }}-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-xs font-semibold text-stone-500 leading-relaxed max-w-2xl">{{ ai_writing_coach }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if active_prompt %}
+                    <div class="mb-10 p-8 bg-{{ theme }}-100/50 border border-{{ theme }}-200 rounded-3xl shadow-sm transition-all relative group">
+                        <div class="flex justify-between items-start mb-3">
+                            <h3 class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                Current Prompt
+                            </h3>
+                            
+                            <button type="button" onclick="cyclePrompt()" class="text-{{ theme }}-400 hover:text-{{ theme }}-700 hover:bg-{{ theme }}-200/50 p-1.5 rounded-lg transition-colors flex items-center gap-1.5 opacity-0 group-hover:opacity-100" title="Get a different prompt">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-10.05l5.67-5.67"/></svg>
+                                <span class="text-[10px] font-bold uppercase tracking-widest">Shuffle</span>
+                            </button>
+                        </div>
+                        
+                        <p id="active-prompt-display" class="text-xl font-bold text-{{ theme }}-900 leading-snug transition-opacity duration-200">{{ active_prompt.text }}</p>
+                    </div>
+                    {% endif %}
+
+                    <form id="main-entry-form" action="{% if entry_to_edit %}{{ url_for('journals_api.edit_entry', entry_id=entry_to_edit.id) }}{% else %}{{ url_for('journals_api.add_entry', journal_id=journal.id) }}{% endif %}" method="POST" class="bg-white border border-stone-100 rounded-[2.5rem] p-10 shadow-xl shadow-stone-200/30">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+                        <input type="hidden" name="prompt_id" id="selected-prompt-id" value="{% if active_prompt %}{{ active_prompt.id }}{% endif %}">
+                        
+                        <textarea id="main-entry-content" name="content" placeholder="What's on your mind today?" required 
+                                  class="w-full min-h-[40vh] bg-transparent text-stone-800 text-lg placeholder:text-stone-300 outline-none resize-none font-medium leading-relaxed overflow-hidden">{% if entry_to_edit %}{{ entry_to_edit.content }}{% endif %}</textarea>
+                        
+                        <div class="flex justify-between items-center mt-8 pt-8 border-t border-stone-50">
+                            <p class="text-xs font-medium text-stone-400">Press <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Cmd</kbd> + <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-stone-500 font-mono text-[10px]">Enter</kbd> to save</p>
+                            <div class="flex items-center gap-3">
+                                {% if entry_to_edit %}
+                                <a href="{{ url_for('journals_view.entries', journal_id=journal.id) }}" class="px-5 py-3 text-sm font-bold text-stone-500 hover:text-stone-800 transition-colors">
+                                    Cancel Edit
+                                </a>
+                                {% endif %}
+                                <button id="main-submit-btn" type="submit" class="px-8 py-3.5 bg-{{ theme }}-600 text-white rounded-xl text-sm font-bold hover:bg-{{ theme }}-700 transition-colors shadow-lg shadow-{{ theme }}-200">
+                                    {% if entry_to_edit %}Update Entry{% else %}Save Entry{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="mt-8 w-full">
+                        <div class="group relative">
+                            <button type="button" 
+                                    onclick="document.getElementById('write-guide').classList.toggle('hidden'); this.classList.toggle('opacity-100');" 
+                                    class="flex items-center gap-2 text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em] hover:text-{{ theme }}-600 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                                Open Writing Guide
+                            </button>
+
+                            <div id="write-guide" class="hidden mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-extrabold text-stone-900 uppercase">Clear Your Mind</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
+                                        The goal right now is not to write a masterpiece. It is simply to move swirling thoughts out of your mind and onto the page. Do not worry about editing or sounding perfect. Just let the words flow so you can find some peace.
+                                    </p>
+                                </div>
+                                <div class="space-y-2">
+                                    <h5 class="text-xs font-extrabold text-stone-900 uppercase">Be Kind To Yourself</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed">
+                                        Your journal is a safe space, not a courtroom. If you had a tough day, write it down, but do it with self-compassion. You are just reflecting on exactly where you are right now so you can make tomorrow a little bit brighter.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="hidden xl:flex w-96 bg-white/60 border-l border-{{ theme }}-100 backdrop-blur-md flex-col overflow-hidden min-h-0">
+                <div class="p-8 border-b border-{{ theme }}-100/50 shrink-0">
+                    <h2 class="text-lg font-extrabold text-stone-900 tracking-tight">Journal Prompts</h2>
+                    <p class="text-[10px] font-bold text-{{ theme }}-600 uppercase tracking-widest mt-1">Rotation: {{ journal.frequency.value }}</p>
+                </div>
+
+                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+                    <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}" method="POST" class="mb-10">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <label class="block text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Add New Question</label>
+                        <div class="flex flex-col gap-2">
+                            <input type="text" name="text" required class="w-full bg-white border border-stone-200 rounded-xl py-2.5 px-4 text-sm focus:border-{{ theme }}-500 transition-all outline-none font-medium shadow-sm" placeholder="e.g., What energized me today?">
+                            <button type="submit" class="w-full py-2.5 bg-{{ theme }}-50 text-{{ theme }}-700 rounded-xl font-bold text-xs hover:bg-{{ theme }}-100 border border-{{ theme }}-200 transition-colors shadow-sm">
+                                Add Prompt
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if ai_prompt_suggestion %}
+                    <div class="mb-6 p-4 bg-{{ theme }}-50/50 border border-{{ theme }}-100 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-{{ theme }}-200 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-[10px] font-extrabold text-{{ theme }}-700 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="7" x2="12" y2="13"></line></svg>
+                                AI Suggestion
+                            </h4>
+                            <p class="text-xs font-medium text-stone-700 leading-snug mb-3">"{{ ai_prompt_suggestion }}"</p>
+                            <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}?set_active=true" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="text" value="{{ ai_prompt_suggestion }}">
+                                <button type="submit" class="text-[10px] font-bold text-{{ theme }}-600 hover:text-{{ theme }}-800 transition-colors flex items-center gap-1">
+                                    + Add to rotation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                        <button type="button" onclick="document.getElementById('prompt-pedagogy-desk').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
+                                    <p class="text-[9px] font-medium text-stone-500 mt-0.5">Sparking deeper reflection</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="prompt-pedagogy-desk" class="hidden p-4 border-t border-stone-100 bg-white space-y-3">
+                            <div class="flex items-start gap-2">
+                                <span class="text-xs font-black text-stone-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[11px] font-extrabold text-stone-900">Ask Open Questions</h5>
+                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Instead of asking if today was good, try asking what brought you energy today. Open questions give your mind the space it needs to actually reflect.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-xs font-black text-stone-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[11px] font-extrabold text-stone-900">Focus on Growth</h5>
+                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Great prompts do not just look backwards. Asking yourself what small thing you can do better tomorrow turns your reflection into gentle action.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-xs font-black text-stone-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[11px] font-extrabold text-stone-900">Keep It Kind</h5>
+                                    <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Your journal is a safe space. Write prompts that invite self-compassion rather than harsh judgment. You are here to understand yourself, not interrogate yourself.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-4">Active Prompts ({{ prompts|length }})</h3>
+                        <div class="space-y-3">
+                            {% for prompt in prompts %}
+                            <div class="flex justify-between items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl group hover:border-{{ theme }}-200 transition-colors shadow-sm">
+                                <p class="text-xs font-medium text-stone-700 leading-snug">{{ prompt.text }}</p>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button type="button" data-id="{{ prompt.id }}" data-text="{{ prompt.text }}" onclick="openEditPromptModal(this.dataset)" class="p-1.5 text-stone-300 hover:text-{{ theme }}-600 hover:bg-{{ theme }}-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </button>
+                                    <form id="delete-prompt-desk-{{ prompt.id }}" action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST" class="inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="button" data-form-id="delete-prompt-desk-{{ prompt.id }}" data-item-name="Journal Prompt" onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+        <div id="slide-over-prompts" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+            <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')"></div>
+            
+            <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200 overflow-hidden min-h-0">
+                <div class="p-8 border-b border-stone-100 flex justify-between items-center bg-stone-50/50 shrink-0">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Journal Prompts</h2>
+                        <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Rotation: {{ journal.frequency.value }}</p>
+                    </div>
+                    <button onclick="document.getElementById('slide-over-prompts').classList.add('translate-x-full')" class="p-2 bg-white text-stone-400 border border-stone-100 rounded-xl hover:bg-stone-50 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <div class="p-8 flex-1 overflow-y-auto custom-scrollbar min-h-0">
+                    
+                    <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}" method="POST" class="mb-10">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Add New Question</label>
+                        <div class="flex gap-3">
+                            <input type="text" name="text" required class="flex-1 bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 transition-all outline-none font-medium" placeholder="e.g., What energized me today?">
+                            <button type="submit" class="px-4 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                                Add
+                            </button>
+                        </div>
+                    </form>
+
+                    {% if ai_prompt_suggestion %}
+                    <div class="mb-6 p-4 bg-{{ theme }}-50/50 border border-{{ theme }}-100 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-{{ theme }}-200 rounded-full blur-2xl opacity-40 pointer-events-none"></div>
+                        <div class="relative z-10">
+                            <h4 class="text-[10px] font-extrabold text-{{ theme }}-700 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><line x1="9" y1="10" x2="15" y2="10"></line><line x1="12" y1="7" x2="12" y2="13"></line></svg>
+                                AI Suggestion
+                            </h4>
+                            <p class="text-xs font-medium text-stone-700 leading-snug mb-3">"{{ ai_prompt_suggestion }}"</p>
+                            <form action="{{ url_for('journals_api.add_prompt', journal_id=journal.id) }}?set_active=true" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <input type="hidden" name="text" value="{{ ai_prompt_suggestion }}">
+                                <button type="submit" class="text-[10px] font-bold text-{{ theme }}-600 hover:text-{{ theme }}-800 transition-colors flex items-center gap-1">
+                                    + Add to rotation
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <div class="mb-8 border border-stone-200 rounded-xl overflow-hidden bg-white">
+                            <button type="button" onclick="document.getElementById('prompt-pedagogy-mobile').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-3 bg-stone-50 hover:bg-stone-100 transition-colors text-left group">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-5 h-5 rounded-md bg-stone-200 text-stone-600 flex items-center justify-center shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[10px] font-bold text-stone-900 uppercase tracking-widest">How to write prompts</h4>
+                                        <p class="text-[9px] font-medium text-stone-500 mt-0.5">Sparking deeper reflection</p>
+                                    </div>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            
+                            <div id="prompt-pedagogy-mobile" class="hidden p-4 border-t border-stone-100 bg-white space-y-3">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">1</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Ask Open Questions</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Instead of asking if today was good, try asking what brought you energy today. Open questions give your mind the space it needs to actually reflect.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">2</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Focus on Growth</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Great prompts do not just look backwards. Asking yourself what small thing you can do better tomorrow turns your reflection into gentle action.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="text-xs font-black text-stone-300 mt-0.5">3</span>
+                                    <div>
+                                        <h5 class="text-[11px] font-extrabold text-stone-900">Keep It Kind</h5>
+                                        <p class="text-[10px] font-medium text-stone-500 leading-relaxed mt-0.5">Your journal is a safe space. Write prompts that invite self-compassion rather than harsh judgment. You are here to understand yourself, not interrogate yourself.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xs font-bold text-stone-400 uppercase tracking-wider mb-4 border-b border-stone-100 pb-2">Active Prompts ({{ prompts|length }})</h3>
+                        
+                        <div class="space-y-3">
+                            {% for prompt in prompts %}
+                            <div class="flex justify-between items-start gap-4 p-4 bg-white border border-stone-100 rounded-2xl group hover:border-stone-200 transition-colors shadow-sm">
+                                <p class="text-sm font-medium text-stone-700 leading-snug">{{ prompt.text }}</p>
+                                
+                                <div class="flex items-center gap-1 shrink-0">
+                                    <button type="button" 
+                                            data-id="{{ prompt.id }}"
+                                            data-text="{{ prompt.text }}"
+                                            onclick="openEditPromptModal(this.dataset)"
+                                            class="p-1.5 text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                                    </button>
+                                    <form id="delete-prompt-{{ prompt.id }}" action="{{ url_for('journals_api.delete_prompt', prompt_id=prompt.id) }}" method="POST" class="inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="button" 
+                                                data-form-id="delete-prompt-{{ prompt.id }}" 
+                                                data-item-name="Journal Prompt"
+                                                onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" 
+                                                class="p-1.5 text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-6 bg-stone-50 rounded-2xl border border-stone-100 border-dashed">
+                                <p class="text-xs font-medium text-stone-400">No prompts added yet.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="edit-prompt-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center opacity-0 transition-opacity duration-200">
+        <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onclick="closeEditPromptModal()"></div>
+        <div class="relative bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 border border-stone-100 transform scale-95 transition-transform duration-200" id="edit-prompt-box">
+            <h3 class="text-xl font-extrabold text-stone-900 mb-6">Edit Prompt</h3>
+            <form id="edit-prompt-form" action="" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="text" name="text" id="edit-prompt-text" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium mb-6">
+                
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeEditPromptModal()" class="flex-1 py-3.5 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-colors">Cancel</button>
+                    <button type="submit" class="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // 1. GLOBALS
+        const form = document.getElementById('main-entry-form');
+        const composer = document.getElementById('main-entry-content');
+        
+        // --- BULLETPROOF AUTO-EXPANDING TEXTAREA ---
+        function autoResize() {
+            if (!composer) return;
+            // The 1px trick forces all browsers to reliably reset their scrollHeight cache
+            composer.style.height = '1px'; 
+            // Snap it precisely to the new content height
+            composer.style.height = composer.scrollHeight + 'px';
+        }
+
+        if (composer) {
+            // Fire on typing
+            composer.addEventListener('input', autoResize);
+            // Fire on load (tiny delay to let Tailwind paint the DOM)
+            window.addEventListener('load', () => setTimeout(autoResize, 10));
+        }
+
+        // --- QUICK SAVE SHORTCUT ---
+        document.addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.tagName.toLowerCase() === 'textarea') {
+                    activeElement.closest('form').submit();
+                }
+            }
+        });
+
+        // --- PROMPT MODAL LOGIC ---
+        function openEditPromptModal(data) {
+            document.getElementById('edit-prompt-form').action = `/actions/journals/prompts/${data.id}/edit`;
+            document.getElementById('edit-prompt-text').value = data.text;
+            
+            const modal = document.getElementById('edit-prompt-modal');
+            const box = document.getElementById('edit-prompt-box');
+            
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                box.classList.remove('scale-95');
+            });
+        }
+
+        function closeEditPromptModal() {
+            const modal = document.getElementById('edit-prompt-modal');
+            const box = document.getElementById('edit-prompt-box');
+            
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        // --- PROMPT SHUFFLE LOGIC ---
+        // Pull both the ID and the Text from the database
+        const availablePrompts = [
+            {% for p in prompts %}
+                { id: {{ p.id }}, text: {{ p.text | tojson }} },
+            {% endfor %}
+        ];
+        
+        let currentPromptIndex = -1;
+
+        function cyclePrompt() {
+            if (availablePrompts.length <= 1) return;
+            
+            const display = document.getElementById('active-prompt-display');
+            const hiddenInput = document.getElementById('selected-prompt-id'); // NEW
+            if (!display) return;
+
+            // Find where we currently are in the array
+            if (currentPromptIndex === -1) {
+                currentPromptIndex = availablePrompts.findIndex(p => p.text === display.innerText.trim());
+                if (currentPromptIndex === -1) currentPromptIndex = 0;
+            }
+            
+            // Move to the next prompt
+            currentPromptIndex = (currentPromptIndex + 1) % availablePrompts.length;
+            const newPrompt = availablePrompts[currentPromptIndex]; // NEW
+            
+            // Fade out, swap text AND hidden ID, fade in
+            display.style.opacity = 0; 
+            setTimeout(() => {
+                display.innerText = newPrompt.text;
+                if (hiddenInput) hiddenInput.value = newPrompt.id; // NEW
+                display.style.opacity = 1; 
+            }, 200);
+        }
+
+        // --- AUTO-SAVE & RECOVERY LOGIC ---
+        const draftKey = `journal_draft_{{ journal.id }}`;
+        // Tell the script if we are in Edit Mode
+        const isEditing = {{ 'true' if entry_to_edit else 'false' }};
+        let isDirty = false;
+        
+        // ONLY run draft recovery if we are writing a NEW entry
+        if (composer && form && !isEditing) {
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                composer.value = savedDraft;
+                isDirty = true;
+                setTimeout(autoResize, 10);
+            }
+
+            composer.addEventListener('input', () => {
+                isDirty = true;
+                localStorage.setItem(draftKey, composer.value);
+                // Visual indicator: asterisk on save button
+                const submitBtn = document.getElementById('main-submit-btn');
+                if (submitBtn && !submitBtn.textContent.includes('*')) {
+                    submitBtn.textContent = submitBtn.textContent.trim() + ' *';
+                }
+            });
+
+            form.addEventListener('submit', () => {
+                isDirty = false;
+                localStorage.removeItem(draftKey);
+                showToast('Entry saved!', 'success');
+            });
+
+            window.addEventListener('beforeunload', (event) => {
+                if (isDirty && composer.value.trim().length > 0) {
+                    event.preventDefault(); 
+                    event.returnValue = ''; 
+                }
+            });
+        }
+    </script>
+{% endblock %}

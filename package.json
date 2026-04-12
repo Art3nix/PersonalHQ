@@ -1,0 +1,13 @@
+{
+  "name": "personalhq",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i personalhq/static/css/input.css -o personalhq/static/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -i personalhq/static/css/input.css -o personalhq/static/css/tailwind.css --watch",
+    "build": "npm run build:css"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

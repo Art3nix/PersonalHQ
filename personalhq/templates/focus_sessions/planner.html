@@ -1,0 +1,729 @@
+{% extends "app_layout.html" %}
+
+{% block title %}Focus Planner - Life HQ{% endblock %}
+
+{% block extra_head %}
+    <script src="{{ url_for('static', filename='js/sortable.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+{% endblock %}
+
+{% block app_content %}
+
+    {% macro render_session(session, is_today=False, is_past=False) %}
+    <div data-id="{{ session.id }}" id="session-card-{{ session.id }}" class="bg-white border {% if session.status == SessionStatus.FINISHED %}border-emerald-200 bg-emerald-50/30{% else %}border-stone-100{% endif %} rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex flex-col gap-4">
+        
+        <div class="flex items-start gap-4 w-full">
+            {% if not is_past %}
+            <div class="drag-handle cursor-grab active:cursor-grabbing text-stone-200 hover:text-stone-400 mt-1 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>
+            </div>
+            {% endif %}
+
+            <button onclick="toggleSession({{ session.id }})" class="mt-0.5 shrink-0 transition-colors text-stone-300 hover:text-emerald-500">
+                <svg id="icon-empty-{{ session.id }}" class="w-6 h-6 {% if session.status == SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+                <svg id="icon-check-{{ session.id }}" class="w-6 h-6 text-emerald-500 {% if session.status != SessionStatus.FINISHED %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </button>
+
+            <div class="flex-1">
+                <div class="flex items-center gap-3 mb-1">
+                    {% if is_today %}
+                        <span class="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md bg-indigo-100 text-indigo-700">Today</span>
+                    {% endif %}
+                    
+                    <span class="text-xs font-bold text-stone-400 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        {{ session.target_duration_minutes }}m
+                    </span>
+
+                    {% if session.identity %}
+                    <span class="text-[10px] font-bold text-indigo-500 bg-indigo-50 border border-indigo-100 uppercase tracking-widest px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        {{ session.identity.name }}
+                    </span>
+                    {% endif %}
+
+                    {% if not is_past %}
+                    <span id="queue-badge-{{ session.id }}" class="queue-badge text-[10px] font-bold text-stone-300 uppercase tracking-widest ml-auto">
+                        Q-{{ session.queue_order }}
+                    </span>
+                    {% endif %}
+                </div>
+                <h4 id="session-title-{{ session.id }}" class="text-base font-bold text-stone-800 transition-all {% if session.status == SessionStatus.FINISHED %}line-through text-stone-400{% endif %}">
+                    {{ session.name }}
+                </h4>
+            </div>
+
+            <div class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex items-center gap-1 shrink-0">
+                <button type="button" data-id="{{ session.id }}" data-name="{{ session.name }}" data-date="{{ session.target_date.strftime('%Y-%m-%d') }}" data-duration="{{ session.target_duration_minutes }}" data-identity="{{ session.identity_id or '' }}" onclick="openEditSessionModal(this.dataset)" class="text-stone-300 hover:text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors p-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                </button>
+                <form id="delete-session-{{ session.id }}" action="{{ url_for('focus_api.delete_session', session_id=session.id) }}" method="POST" class="inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="button" data-form-id="delete-session-{{ session.id }}" data-item-name="{{ session.name }}" onclick="confirmDelete(this.dataset.formId, this.dataset.itemName)" class="text-stone-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors p-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if session.ai_insight %}
+        <div class="pt-3 border-t border-stone-100/60 flex items-start gap-2 ml-10">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+            <p class="text-xs font-medium text-stone-500 leading-relaxed">{{ session.ai_insight }}</p>
+        </div>
+        {% endif %}
+        
+    </div>
+    {% endmacro %}
+    <div class="flex-1 flex overflow-hidden">
+        <main class="w-[70%] overflow-y-auto custom-scrollbar p-12">
+            
+            <header class="flex justify-between items-end mb-12">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-stone-900 tracking-tight">Focus Planner</h1>
+                    <p class="text-sm font-medium mt-2 {% if 'Warning' in (ai_planner_subtitle|string) %}text-amber-600 font-bold flex items-center gap-2{% else %}text-stone-400{% endif %}">
+                        {% if 'Warning' in (ai_planner_subtitle|string) %}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        {% endif %}
+                        {{ ai_planner_subtitle | default('Design your days and execute your deep work.', true) }}
+                    </p>
+                </div>
+                <div class="flex items-center gap-3">
+                    {% if missed_yesterday > 0 %}
+                    <button onclick="carryOver()" class="flex items-center gap-2 bg-amber-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-amber-600 transition-all shadow-md shadow-amber-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 .49-3.33"></path></svg>
+                        Carry Over ({{ missed_yesterday }})
+                    </button>
+                    {% endif %}
+                    <button onclick="openNewSessionModal()" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+                        + Schedule Session
+                    </button>
+                </div>
+            </header>
+
+            <div class="mb-12">
+                <h2 class="text-sm font-bold text-stone-900 mb-4 flex items-center gap-2">Today's Focus</h2>
+                <section class="space-y-4 sortable-list min-h-[50px]" data-date="{{ today.strftime('%Y-%m-%d') }}">
+                    {% if today_sessions %}
+                        {% for session in today_sessions %}
+                            {{ render_session(session, is_today=True, is_past=False) }}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-12 border-2 border-dashed border-stone-100 rounded-3xl bg-stone-50/50 empty-state-msg pointer-events-none">
+                            <p class="text-sm font-medium text-stone-400 max-w-sm mx-auto leading-relaxed">
+                                {{ ai_empty_state | default('Nothing queued for today. Enjoy the rest.', true) }}
+                            </p>
+                        </div>
+                    {% endif %}
+                </section>
+            </div>
+
+            <div class="mb-12">
+                <h2 class="text-sm font-bold text-stone-900 mb-6 flex items-center gap-2">Upcoming Pipeline</h2>
+                {% if upcoming_grouped %}
+                    <div class="space-y-8">
+                        {% for target_date, sessions in upcoming_grouped.items() %}
+                            <div>
+                                <h3 class="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+                                    {{ target_date.strftime('%A, %b %d') }}
+                                </h3>
+                                <div class="space-y-3 sortable-list min-h-[50px]" data-date="{{ target_date.strftime('%Y-%m-%d') }}">
+                                    {% for session in sessions %}
+                                        {{ render_session(session, is_today=False, is_past=False) }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <p class="text-sm font-medium text-stone-400">Your future pipeline is clear.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if past_grouped %}
+            <details class="group border border-stone-100 rounded-3xl bg-stone-50/30">
+                <summary class="text-sm font-bold text-stone-500 p-6 flex justify-between items-center cursor-pointer list-none hover:text-stone-900 transition-colors">
+                    <span class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>
+                        View Recent Archive (Last 7 Days)
+                    </span>
+                    <svg class="w-4 h-4 transition-transform group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                </summary>
+                
+                <div class="px-6 pb-6 space-y-8">
+                    {% for target_date, sessions in past_grouped.items() %}
+                        <div class="opacity-75 hover:opacity-100 transition-opacity">
+                            <h3 class="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{{ target_date.strftime('%b %d, %Y') }}</h3>
+                            <div class="space-y-3">
+                                {% for session in sessions %}
+                                    {{ render_session(session, is_today=False, is_past=True) }}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </details>
+            {% endif %}
+
+            <div class="mt-16 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm max-w-4xl mx-auto">
+                <button type="button" onclick="document.getElementById('planner-guide-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to master your attention</h4>
+                            <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Focus Engine</p>
+                        </div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+
+                <div id="planner-guide-content" class="hidden p-5 border-t border-stone-100 bg-white space-y-5">
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">1</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Deep vs Shallow Work</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Deep work pushes your cognitive capabilities to their absolute limit. Shallow work is just logistical busywork like checking emails or Slack. Do not confuse the two. Only queue up true deep work here.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">2</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Focus Equation</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">High quality work equals time spent multiplied by intensity of focus. By maximizing your intensity, you can drastically reduce the time needed to produce elite results.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">3</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">Drain the Shallows</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Shallow work consists of minor, logistical tasks that do not create real value. You must give every single hour of your day a job. When you map out your schedule, you instantly expose exactly how much time you are wasting on busywork. Constrain the shallows so you can protect your focus.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-sm font-black text-indigo-300 mt-0.5">4</span>
+                        <div>
+                            <h5 class="text-xs font-extrabold text-stone-900 uppercase tracking-wide">The Shutdown Ritual</h5>
+                            <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">At the end of the workday, you must shut down completely. No checking email after dinner. Disconnect. This ensures your mental energy is fully recharged for tomorrow.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10 pt-12">
+            <h3 class="text-xs font-bold text-stone-900 uppercase tracking-widest mb-8">Performance Context</h3>
+            
+            <div class="space-y-6">
+                <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Lifetime Focus</p>
+                        <p class="text-2xl font-black text-stone-900">{{ stats.total_hours }} <span class="text-sm text-stone-400 font-bold">hrs</span></p>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm flex items-center gap-5">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest" title="Sessions finished in the last 7 days">7-Day Score</p>
+                        <p class="text-2xl font-black text-stone-900">{{ stats.week_completed }} <span class="text-sm text-stone-400 font-bold">/ {{ stats.week_scheduled }}</span></p>
+                    </div>
+                </div>
+                <div class="bg-white border border-stone-100 p-6 rounded-[2rem] shadow-sm">
+                    <div class="mb-4">
+                        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">History</p>
+                        <h3 class="text-sm font-bold text-stone-900">Daily Focus (Last 14 Days)</h3>
+                    </div>
+                    <div class="relative h-28 w-full">
+                        <canvas id="sessionHistoryChart" data-sessions="{{ session_history_json | default('[]') }}"></canvas>
+                    </div>
+                    <p class="text-[10px] font-medium text-stone-400 mt-3 text-center">Minutes of deep work per day</p>
+                    
+                    {% if ai_analysis %}
+                    <div class="mt-5 pt-4 border-t border-stone-100 flex items-start gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <p class="text-[11px] font-medium text-stone-500 leading-relaxed">{{ ai_analysis }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <div id="slide-over-session" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('slide-over-session').classList.add('translate-x-full')"></div>
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Queue Session</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Focus Planner</p>
+                </div>
+                <button onclick="document.getElementById('slide-over-session').classList.add('translate-x-full')" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="p-8 flex-1 overflow-y-auto">
+                <form action="{{ url_for('focus_api.schedule_session') }}" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Session Name</label>
+                        <input type="text" name="name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium" placeholder="e.g., Architect Database Schema">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Date</label>
+                            <input type="date" name="target_date" id="new-session-date" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium text-stone-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Minutes</label>
+                            <div class="relative">
+                                <input type="number" name="target_duration_minutes" id="new-session-duration" value="50" min="1" max="720" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium pr-12 text-stone-900">
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span class="text-xs font-bold text-stone-400">min</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
+                        <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
+                            <option value="">None (Unassigned)</option>
+                            {% for identity in identities %}
+                                <option value="{{ identity.id }}">{{ identity.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Add to Queue
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-8 space-y-3">
+                    <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">The Deep Work Playbook</h4>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-philosophy-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to schedule your time</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 4 Philosophies</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-philosophy-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Monastic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Isolate yourself completely for long periods. This is best for extreme focus, like writing a book or doing heavy research.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Bimodal Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Divide your time clearly. Dedicate specific full days to deep work and leave the rest of the week open for shallow obligations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Rhythmic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Generate a simple daily habit. Do 90 minutes every single morning before checking your phone. This is the most practical method for a standard career.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">4</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Journalistic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Fit deep work into whatever free time you have. Shift into intense focus instantly like a journalist on a tight deadline. This requires practice.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-execution-new').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Execution Rules</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-execution-new" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Build The Ritual</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Decide exactly where you will work and how long you will work before you start the timer. Define exactly what done looks like. Leave your phone in another room.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Zero Context Switching</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick one cognitively demanding task. Do not check email or Slack. Multitasking is a myth. Every time you switch tabs you leave attention residue behind. This ruins your cognitive performance.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Embrace The Boredom</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Focus is a muscle. When your brain craves a quick dopamine hit, recognize the urge, ignore it, and push through. That friction is your brain actually rewiring.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-session-modal" class="fixed inset-0 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex justify-end">
+        <div class="absolute inset-0 bg-stone-900/20 backdrop-blur-sm" onclick="document.getElementById('edit-session-modal').classList.add('translate-x-full')"></div>
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col border-l border-stone-200">
+            <div class="p-8 border-b border-stone-100 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-extrabold text-stone-900 tracking-tight">Edit Session</h2>
+                    <p class="text-xs font-bold text-stone-400 uppercase tracking-widest mt-1">Focus Planner</p>
+                </div>
+                <button onclick="document.getElementById('edit-session-modal').classList.add('translate-x-full')" class="p-2 bg-stone-50 text-stone-400 rounded-xl hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="p-8 flex-1 overflow-y-auto">
+                <form id="edit-session-form" action="" method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Session Name</label>
+                        <input type="text" name="name" id="edit-session-name" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Date</label>
+                            <input type="date" name="target_date" id="edit-session-date" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium text-stone-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Target Minutes</label>
+                            <div class="relative">
+                                <input type="number" name="target_duration_minutes" id="edit-session-duration" min="1" max="720" required class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium pr-12 text-stone-900">
+                                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                    <span class="text-xs font-bold text-stone-400">min</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity</label>
+                        <select name="identity_id" id="edit-session-identity" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
+                            <option value="">None (Unassigned)</option>
+                            {% for identity in identities %}
+                                <option value="{{ identity.id }}">{{ identity.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 space-y-3">
+                    <h4 class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3 px-1">The Deep Work Playbook</h4>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-philosophy-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to schedule your time</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The 4 Philosophies</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-philosophy-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Monastic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Isolate yourself completely for long periods. This is best for extreme focus, like writing a book or doing heavy research.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Bimodal Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Divide your time clearly. Dedicate specific full days to deep work and leave the rest of the week open for shallow obligations.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Rhythmic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Generate a simple daily habit. Do 90 minutes every single morning before checking your phone. This is the most practical method for a standard career.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-indigo-300 mt-0.5">4</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">The Journalistic Philosophy</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Fit deep work into whatever free time you have. Shift into intense focus instantly like a journalist on a tight deadline. This requires practice.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-stone-200 rounded-xl overflow-hidden bg-stone-50/50 hover:bg-stone-50 transition-colors">
+                        <button type="button" onclick="document.getElementById('focus-execution-edit').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 text-left group">
+                            <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-xs font-bold text-stone-900 uppercase tracking-widest">How to execute Deep Work</h4>
+                                    <p class="text-[10px] font-medium text-stone-500 mt-0.5">The Execution Rules</p>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chevron text-stone-400 transition-transform duration-300"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </button>
+                        
+                        <div id="focus-execution-edit" class="hidden p-5 border-t border-stone-100 bg-white space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">1</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Build The Ritual</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Decide exactly where you will work and how long you will work before you start the timer. Define exactly what done looks like. Leave your phone in another room.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">2</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Zero Context Switching</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Pick one cognitively demanding task. Do not check email or Slack. Multitasking is a myth. Every time you switch tabs you leave attention residue behind. This ruins your cognitive performance.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="text-[10px] font-black text-emerald-300 mt-0.5">3</span>
+                                <div>
+                                    <h5 class="text-[10px] font-extrabold text-stone-900 uppercase tracking-wide">Embrace The Boredom</h5>
+                                    <p class="text-[11px] font-medium text-stone-500 leading-relaxed mt-1">Focus is a muscle. When your brain craves a quick dopamine hit, recognize the urge, ignore it, and push through. That friction is your brain actually rewiring.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+    <script>
+        // --- MIDNIGHT ROLLOVER WATCHER ---
+        function checkMidnightRollover() {
+            const todaySection = document.querySelector('section[data-date]');
+            if (!todaySection) return;
+
+            const serverDate = todaySection.getAttribute('data-date');
+            
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0');
+
+            // If the tab was left open and crossed midnight, silently fetch fresh HTML
+            if (serverDate && serverDate !== localDate) {
+                window.location.reload();
+            }
+        }
+
+        // Check every 60 seconds, and immediately whenever you switch back to this tab
+        setInterval(checkMidnightRollover, 60000);
+        window.addEventListener('focus', checkMidnightRollover);
+        
+        // Run once on load to catch back-button caching
+        checkMidnightRollover();
+        
+        async function toggleSession(sessionId) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const checkIcon = document.getElementById(`icon-check-${sessionId}`);
+            const isCurrentlyFinished = checkIcon && !checkIcon.classList.contains('hidden');
+            if (isCurrentlyFinished) {
+                const confirmed = window.confirm("Are you sure you want to uncheck this session?\n\nThis will permanently erase the tracked deep work time.");
+                if (!confirmed) {
+                    return; 
+                }
+            }
+            try {
+                const response = await fetch(`/actions/focus/${sessionId}/toggle`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const card = document.getElementById(`session-card-${sessionId}`);
+                    const title = document.getElementById(`session-title-${sessionId}`);
+                    const iconEmpty = document.getElementById(`icon-empty-${sessionId}`);
+                    const iconCheck = document.getElementById(`icon-check-${sessionId}`);
+
+                    showToast(data.is_finished ? '✓ Session completed!' : 'Session reopened.', 'success');
+                    if (data.is_finished) {
+                        card.classList.add('border-emerald-200', 'bg-emerald-50/30');
+                        card.classList.remove('border-stone-100');
+                        title.classList.add('line-through', 'text-stone-400');
+                        iconEmpty.classList.add('hidden');
+                        iconCheck.classList.remove('hidden');
+                    } else {
+                        card.classList.remove('border-emerald-200', 'bg-emerald-50/30');
+                        card.classList.add('border-stone-100');
+                        title.classList.remove('line-through', 'text-stone-400');
+                        iconCheck.classList.add('hidden');
+                        iconEmpty.classList.remove('hidden');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to toggle session:', error);
+            }
+        }
+        
+        // Initialize SortableJS for ALL active and future day groups
+        document.querySelectorAll('.sortable-list').forEach(list => {
+            new Sortable(list, {
+                group: 'planner', // Allows dragging between different days
+                handle: '.drag-handle',
+                animation: 150,
+                ghostClass: 'opacity-50',
+                
+                onEnd: async function (evt) {
+                    const toList = evt.to;
+                    const items = Array.from(toList.children);
+                    // Filter out any empty state messages just in case
+                    const validItems = items.filter(item => item.hasAttribute('data-id'));
+                    const newOrder = validItems.map(item => item.getAttribute('data-id'));
+                    const targetDate = toList.getAttribute('data-date'); // The date bucket we landed in
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    try {
+                        await fetch('/actions/focus/reorder', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({ 
+                                session_ids: newOrder,
+                                target_date: targetDate 
+                            })
+                        });
+                        
+                        // If it moved to a DIFFERENT day, reload to clean up the UI tags
+                        if (evt.from !== evt.to) {
+                            window.location.reload();
+                        } else {
+                            // If just reordered in the same day, update badges locally
+                            validItems.forEach((item, index) => {
+                                const badge = item.querySelector('.queue-badge') || item.querySelector('[id^="queue-badge-"]');
+                                if (badge) badge.innerText = `Q-${index + 1}`;
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Failed to save new queue order:', error);
+                    }
+                }
+            });
+        });
+
+        function openEditSessionModal(data) {
+            document.getElementById('edit-session-form').action = `/actions/focus/${data.id}/edit`;
+            document.getElementById('edit-session-name').value = data.name;
+            document.getElementById('edit-session-date').value = data.date;
+            document.getElementById('edit-session-duration').value = data.duration;
+            document.getElementById('edit-session-identity').value = data.identity;
+            
+            document.getElementById('edit-session-modal').classList.remove('translate-x-full');
+        }
+
+        function openNewSessionModal() {
+            const now = new Date();
+            const localDate = now.getFullYear() + '-' + 
+                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                              String(now.getDate()).padStart(2, '0');
+            
+            document.getElementById('new-session-date').value = localDate;
+            document.getElementById('slide-over-session').classList.remove('translate-x-full');
+        }
+        // Session History Chart
+        const histCanvas = document.getElementById('sessionHistoryChart');
+        if (histCanvas) {
+            const rawData = JSON.parse(histCanvas.dataset.sessions || '[]');
+            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+            Chart.defaults.color = '#a8a29e';
+            new Chart(histCanvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: rawData.map(d => d.label),
+                    datasets: [{
+                        data: rawData.map(d => d.minutes),
+                        backgroundColor: rawData.map(d => d.minutes > 0 ? '#6366f1' : '#f5f5f4'),
+                        borderRadius: 4,
+                        borderSkipped: false,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: {
+                        callbacks: { label: ctx => `${ctx.raw} min` }
+                    }},
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f5f5f4' }, border: { display: false },
+                             ticks: { maxTicksLimit: 4 } },
+                        x: { grid: { display: false }, border: { display: false },
+                             ticks: { maxTicksLimit: 7 } }
+                    }
+                }
+            });
+        }
+
+        async function carryOver() {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const res = await fetch('/actions/focus/carry-over', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                setTimeout(() => window.location.reload(), 800);
+            }
+        }
+    </script>
+{% endblock %}

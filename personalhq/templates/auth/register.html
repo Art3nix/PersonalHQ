@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Request Access - Life HQ{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex items-center justify-center p-6 py-12">
+
+    <div class="w-full max-w-md">
+        <div class="flex flex-col items-center justify-center mb-10">
+            <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-indigo-200 mb-4">HQ</div>
+            <h1 class="font-extrabold tracking-tighter text-3xl">Request Access</h1>
+            <p class="text-sm font-medium text-stone-400 mt-2">Set up your personal command center.</p>
+        </div>
+
+        <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-2xl shadow-stone-200/40">
+            <form method="POST" action="">
+                {{ form.hidden_tag() }}
+
+                <div class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            {{ form.first_name.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
+                            {{ form.first_name(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="Jacob", autofocus=true) }}
+                            {% for error in form.first_name.errors %}
+                                <p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            {{ form.last_name.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
+                            {{ form.last_name(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="Workspace") }}
+                            {% for error in form.last_name.errors %}
+                                <p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        {{ form.email.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
+                        {{ form.email(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="jacob@example.com") }}
+                        {% for error in form.email.errors %}
+                            <p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        {{ form.password.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
+                        <div class="relative">
+                            {{ form.password(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-12 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="••••••••") }}
+                            <button type="button" onclick="togglePassword(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-indigo-600 transition-colors p-1 focus:outline-none">
+                                <svg class="eye-open w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <svg class="eye-closed w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                            </button>
+                        </div>
+                        {% for error in form.password.errors %}
+                            <p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        {{ form.confirm_password.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
+                        <div class="relative">
+                            {{ form.confirm_password(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-12 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="••••••••") }}
+                            <button type="button" onclick="togglePassword(this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-indigo-600 transition-colors p-1 focus:outline-none">
+                                <svg class="eye-open w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                <svg class="eye-closed w-4 h-4 hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                            </button>
+                        </div>
+                        {% for error in form.confirm_password.errors %}
+                            <p class="text-[10px] text-red-500 font-bold mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="pt-4">
+                        {{ form.submit(class="w-full bg-[#1A1C1E] text-white py-4 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 cursor-pointer") }}
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="text-center mt-8">
+            <p class="text-xs font-medium text-stone-400">
+                Already have an account? 
+                <a href="{{ url_for('auth.login') }}" class="font-bold text-stone-900 hover:text-indigo-600 transition-colors">Sign In</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
