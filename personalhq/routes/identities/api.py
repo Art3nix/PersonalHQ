@@ -15,7 +15,7 @@ from personalhq.models.coretheme import CoreTheme
 from personalhq.models.emotionalvalue import EmotionalValue
 from personalhq.services.time_service import get_logical_today
 from personalhq.services.ai_service import generate_json
-from personalhq.services.ai_prompts import SYSTEM_KNOWLEDGE
+from personalhq.services.ai_prompts import SYSTEM_ARCHITECT_PROMPT
 
 identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/identities')
 
@@ -121,7 +121,7 @@ def generate_batch():
 
     # Update the prompt string:
     system_prompt = f"""
-{SYSTEM_KNOWLEDGE}
+{SYSTEM_ARCHITECT_PROMPT}
 
 TASK: 
 The user is committing to a completely new lifestyle based on multiple identities.

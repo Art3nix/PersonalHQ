@@ -233,3 +233,43 @@ def toggle_end_day():
         
     db.session.commit()
     return redirect(url_for('dashboard.index'))
+
+from flask import jsonify
+from flask_login import login_required, current_user
+from personalhq.services.ai_service import generate_daily_context
+from personalhq.services.time_service import get_logical_today
+from personalhq.models.dailynotes import DailyNote
+
+@dashboard_bp.route('/test-ai-daily') # Make sure to attach this to a valid Blueprint if needed
+@login_required
+def test_ai_daily():
+    """Temporary testing route to trigger the AI Coach."""
+    
+    logical_today = get_logical_today(current_user)
+    
+    # 1. Manually delete today's note if it exists so we force a fresh AI generation
+    existing_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=logical_today).first()
+    if existing_note:
+        db.session.delete(existing_note)
+        db.session.commit()
+        print("🗑️ Deleted existing Daily Note for testing.")
+
+    print("🤖 Triggering AI Daily Context Generation...")
+    
+    # 2. Run the master function
+    new_note = generate_daily_context(current_user, logical_today)
+    
+    if not new_note:
+        return jsonify({"status": "error", "message": "AI Generation failed. Check console."}), 500
+        
+    # 3. Return the generated data to the browser so you can read it instantly
+    return jsonify({
+        "status": "success",
+        "date": str(new_note.logical_date),
+        "global_briefing": new_note.ai_daily_briefing,
+        "empty_states": {
+            "focus": new_note.ai_focus_empty_state,
+            "habit": new_note.ai_habit_empty_state,
+            "inbox": new_note.ai_inbox_subtitle
+        }
+    })
