@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:15
+    container_name: personalhq_postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -16,12 +17,11 @@ services:
 
   web:
     build: .
+    container_name: personalhq_web
     restart: always
     command: gunicorn --reload --config gunicorn_config.py "personalhq:create_app()"
     env_file:
       - .env
-    ports:
-      - "8000:8000"
     volumes:
       - .:/usr/src/app
     depends_on:
@@ -32,8 +32,13 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    networks:
+      - default
+      - proxy-network
+
   ai_worker:
     build: .
+    container_name: personalhq_worker
     env_file:
       - .env
     volumes:
@@ -41,23 +46,24 @@ services:
     command: python run_scheduler.py
     depends_on:
       - web
-  tailwind:
-    image: node:20-slim
-    working_dir: /app
-    volumes:
-      - .:/app
-    command: sh -c "npm install --silent && npx tailwindcss -i personalhq/static/css/input.css -o personalhq/static/css/tailwind.css --watch"
-    restart: no
+
   pgadmin:
     image: dpage/pgadmin4
-    restart: no
-    ports:
-      - "8888:80"
+    container_name: personalhq_pgadmin
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - default
+      - proxy-network
+
 volumes:
   postgres_data:
   pgadmin-data:
+
+networks:
+  proxy-network:
+    external: true
