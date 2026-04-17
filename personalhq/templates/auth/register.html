@@ -3,6 +3,14 @@
 {% block title %}Request Access - Life HQ{% endblock %}
 
 {% block content %}
+<style>
+    /* Tablet/Mobile Overrides: Stacks the name grid and reduces padding for small screens */
+    @media (max-width: 639px) {
+        .auth-card { padding: 1.5rem !important; }
+        .name-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+    }
+</style>
+
 <div class="flex-1 flex items-center justify-center p-6 py-12">
 
     <div class="w-full max-w-md">
@@ -12,12 +20,12 @@
             <p class="text-sm font-medium text-stone-400 mt-2">Set up your personal command center.</p>
         </div>
 
-        <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-2xl shadow-stone-200/40">
+        <div class="auth-card bg-white border border-stone-100 rounded-[2rem] p-8 shadow-2xl shadow-stone-200/40">
             <form method="POST" action="">
                 {{ form.hidden_tag() }}
 
                 <div class="space-y-5">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="name-grid grid grid-cols-2 gap-4">
                         <div>
                             {{ form.first_name.label(class="block text-[10px] font-bold text-stone-900 uppercase tracking-wider mb-2") }}
                             {{ form.first_name(class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium", placeholder="Jacob", autofocus=true) }}
