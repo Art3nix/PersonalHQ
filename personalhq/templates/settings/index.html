@@ -2,6 +2,41 @@
 
 {% block title %}Settings - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. Shrink massive desktop padding */
+            main > div.max-w-2xl {
+                padding: 1.5rem 1rem !important;
+            }
+            section.p-8 {
+                padding: 1.5rem !important;
+            }
+
+            /* 2. Stack the First Name / Last Name grid */
+            form .grid.grid-cols-2 {
+                grid-template-columns: 1fr !important;
+                gap: 1.25rem !important;
+            }
+
+            /* 3. Make all Action Buttons full-width for easy tapping */
+            form button[type="submit"] {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+            section.bg-rose-50 a {
+                width: 100% !important;
+                justify-content: center !important;
+                display: flex !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block app_content %}
 <main class="flex-1 overflow-y-auto custom-scrollbar">
     <div class="max-w-2xl mx-auto px-8 py-12">

@@ -2,9 +2,163 @@
 
 {% block title %}Consistency Calendar - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1024px)
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            
+            /* 1. Main Layout Reset */
+            .flex-1.flex.overflow-hidden.bg-stone-50\/30 {
+                flex-direction: column !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                padding: 1rem !important;
+                padding-bottom: 6rem !important; /* Space for fixed guide */
+            }
+
+            #cal-main-col {
+                width: 100% !important;
+                padding: 0 !important;
+                overflow: visible !important;
+            }
+
+            /* 2. Analytics Deck - Force Horizontal Scroll */
+            #cal-analytics-deck {
+                display: flex !important;
+                flex-direction: row !important;
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory;
+                gap: 1rem !important;
+                margin: 0 -1rem 1.5rem -1rem !important;
+                padding: 0 1rem 1.5rem 1rem !important;
+            }
+            
+            /* THE FIX: Fixed width instead of percentage */
+            #cal-analytics-deck > div {
+                flex: 0 0 auto !important;
+                width: 280px !important;         /* Perfect widget size for Tablets */
+                max-width: 80vw !important;      /* Graceful shrinking for Mobile */
+                scroll-snap-align: center;
+                margin-bottom: 0 !important;
+            }
+
+            /* 3. Calendar Grid Compression & THE PERFECT CIRCLE FIX */
+            #cal-grid-card {
+                padding: 1rem !important;
+                border-radius: 1.5rem !important;
+            }
+            
+            /* EXTREME GAP REDUCTION: Gives the circles breathing room on narrow screens */
+            #cal-grid-card .grid-cols-7 {
+                gap: 0.25rem !important; 
+            }
+
+            .min-h-\[100px\] { 
+                min-height: 3.5rem !important; 
+                padding: 0.25rem !important; 
+            }
+            .grid-cols-7 > .text-\[10px\] { 
+                font-size: 0.65rem !important; 
+                margin-bottom: 0.5rem !important; 
+            }
+            
+            /* Enforce perfect circle math */
+            .calendar-day-btn .w-12.h-12 { 
+                width: 2.25rem !important; 
+                height: 2.25rem !important; 
+                min-width: 2.25rem !important; 
+                min-height: 2.25rem !important; 
+                aspect-ratio: 1 / 1 !important; 
+                flex-shrink: 0 !important; 
+                margin-bottom: 0.15rem !important;
+            }
+            
+            .w-2.h-2 { width: 0.35rem !important; height: 0.35rem !important; }
+            .mt-2.flex.flex-wrap { gap: 0.15rem !important; margin-top: 0.15rem !important; }
+            .text-sm.font-bold { font-size: 0.8rem !important; }
+
+            /* 4. Guide Box - Fixed Bottom Sheet */
+            #cal-guide-box {
+                position: fixed !important;
+                bottom: 0 !important; left: 0 !important; right: 0 !important;
+                margin: 0 !important;
+                border-radius: 1.5rem 1.5rem 0 0 !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(12px) !important;
+                z-index: 45 !important;
+                border-top: 1px solid var(--border-soft) !important;
+                box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.05) !important;
+            }
+            #calendar-pedagogy-content { max-height: 50vh !important; overflow-y: auto !important; padding-bottom: 2rem !important; }
+
+            /* 5. Daily Breakdown Slide-Over */
+            #cal-breakdown-panel {
+                position: fixed !important;
+                top: 0 !important; right: 0 !important; bottom: 0 !important;
+                width: 100% !important; max-width: 380px !important;
+                background: white !important; z-index: 100 !important;
+                margin: 0 !important; padding: 1.5rem !important;
+                box-shadow: -15px 0 30px rgba(0,0,0,0.1) !important;
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #cal-breakdown-panel.slide-open { transform: translateX(0) !important; }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            #calendar-header > div.flex.justify-between {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1rem !important;
+            }
+            #calendar-header .text-4xl { font-size: 2rem !important; line-height: 1.1 !important; }
+            
+            /* Further shrink the circles on tiny 375px phones so they never squish */
+            .calendar-day-btn .w-12.h-12 { 
+                width: 2rem !important; 
+                height: 2rem !important; 
+                min-width: 2rem !important; 
+                min-height: 2rem !important; 
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth <= 1024) {
+                const breakdownPanel = document.getElementById('cal-breakdown-panel');
+
+                if (breakdownPanel) {
+                    // 1. Close Button inside the slide-over
+                    const closeBtn = document.createElement('button');
+                    closeBtn.className = "absolute top-5 right-5 p-2 bg-stone-100 text-stone-500 rounded-full hover:bg-stone-200 z-50";
+                    closeBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+                    
+                    breakdownPanel.insertBefore(closeBtn, breakdownPanel.firstChild);
+
+                    closeBtn.onclick = () => breakdownPanel.classList.remove('slide-open');
+
+                    // 2. THE MAGIC CLICK LISTENER: Opens panel automatically when any date is tapped
+                    document.addEventListener('click', (e) => {
+                        const clickedDay = e.target.closest('.calendar-day-btn');
+                        if (clickedDay) {
+                            breakdownPanel.classList.add('slide-open');
+                        }
+                    });
+                }
+            }
+        });
+    </script>
+{% endblock %}
+
 {% block app_content %}
 <div class="flex-1 flex overflow-hidden bg-stone-50/30">
-    <main class="w-[70%] overflow-y-auto custom-scrollbar p-12">
+    <main id="cal-main-col" class="w-[70%] overflow-y-auto custom-scrollbar p-12">
         <div class="max-w-5xl mx-auto">
             
             <header id="calendar-header" class="mb-10">
@@ -77,7 +231,7 @@
             </header>
 
             <div id="calendar-content-wrapper">
-                <div class="grid grid-cols-3 gap-6 mb-8">
+                <div id="cal-analytics-deck" class="grid grid-cols-3 gap-6 mb-8">
                     <div class="bg-indigo-600 border border-indigo-500 rounded-[2rem] p-6 shadow-xl shadow-indigo-600/20 flex items-center gap-5 text-white transition-transform hover:scale-[1.02]">
                         <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
@@ -118,7 +272,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-xl shadow-stone-200/20">
+                <div id="cal-grid-card" class="bg-white border border-stone-100 rounded-[2rem] p-8 shadow-xl shadow-stone-200/20">
                     <div class="grid grid-cols-7 gap-4 mb-4 text-center">
                         {% for day in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
                             <div class="text-[10px] font-bold text-stone-400 uppercase tracking-widest">{{ day }}</div>
@@ -170,7 +324,7 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
+                <div id="cal-guide-box" class="mt-8 border border-stone-200 rounded-xl overflow-hidden bg-white/50 backdrop-blur-sm">
                     <button type="button" onclick="document.getElementById('calendar-pedagogy-content').classList.toggle('hidden'); this.querySelector('svg.chevron').classList.toggle('rotate-180');" class="w-full flex items-center justify-between p-4 hover:bg-white transition-colors text-left group">
                         <div class="flex items-center gap-3">
                             <div class="w-6 h-6 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
@@ -213,7 +367,7 @@
         </div>
     </main>
 
-    <aside class="w-[30%] border-l border-stone-100 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.02)] z-10 p-10 flex flex-col h-full">
+    <aside id="cal-breakdown-panel" class="w-[30%] border-l border-stone-100 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.02)] z-10 p-10 flex flex-col h-full">
         <div id="default-panel" class="text-center py-20 opacity-60">
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-4 text-stone-400"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             <p class="text-sm font-bold text-stone-500">Select a day on the calendar<br>to view the breakdown.</p>

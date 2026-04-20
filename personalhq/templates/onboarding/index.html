@@ -2,6 +2,78 @@
 
 {% block title %}Welcome to Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1024px)
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            
+            /* 1. Guide Box - Fixed Bottom Sheet */
+            .max-w-4xl > div.mt-8.border {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin: 0 !important;
+                border-radius: 1.5rem 1.5rem 0 0 !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(12px) !important;
+                z-index: 50 !important; /* Kept high to float above the background blur circles */
+                border-top: 1px solid var(--border-soft) !important;
+                box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.05) !important;
+                max-width: 100% !important;
+            }
+            #onboarding-guide-content { 
+                max-height: 50vh !important; 
+                overflow-y: auto !important; 
+                padding-bottom: 2rem !important; 
+            }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. The Scroll/Clipping Fix: 
+               Changes vertical centering to top-alignment so you can actually scroll.
+               Increased padding-bottom to 8rem to clear the new floating guide! */
+            .min-h-screen.flex.items-center.justify-center {
+                align-items: flex-start !important;
+                padding-top: 3rem !important;
+                padding-bottom: 8rem !important; 
+                height: auto !important;
+            }
+
+            /* 2. Shrink Header Text so it fits cleanly */
+            h1.text-4xl {
+                font-size: 2rem !important;
+                line-height: 1.1 !important;
+                margin-bottom: 1rem !important;
+            }
+
+            /* 3. Reclaim space inside the choice cards */
+            .grid.md\:grid-cols-2 > button,
+            .grid.md\:grid-cols-2 > form > button {
+                padding: 1.5rem !important; /* Shrinks p-10 to p-6 */
+                border-radius: 1.75rem !important;
+            }
+
+            /* 4. Shrink the icons inside the cards slightly */
+            .grid.md\:grid-cols-2 .w-14.h-14 {
+                width: 3rem !important;
+                height: 3rem !important;
+                margin-bottom: 1rem !important;
+            }
+            .grid.md\:grid-cols-2 .w-14.h-14 svg {
+                width: 1.25rem !important;
+                height: 1.25rem !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 <div class="min-h-screen bg-stone-50 flex items-center justify-center p-6 relative overflow-hidden">
     <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-indigo-300/30 rounded-full blur-[120px] pointer-events-none"></div>

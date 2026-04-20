@@ -3,6 +3,88 @@
 
 {% block title %}Archive: {{ journal.name }} - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1024px)
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            
+            /* 1. The Hover Fix: Make Delete buttons permanently visible on touchscreens */
+            .group-hover\:opacity-100 {
+                opacity: 1 !important;
+            }
+
+            /* 2. The Slide-over Bug Fix: 
+               Tailwind's 'hidden xl:flex' permanently hides the prompts panel on tablet/mobile. 
+               We force it to display: flex so the translate-x animation actually works! */
+            #slide-over-prompts {
+                display: flex !important;
+            }
+            
+            /* 3. The Color Picker Fix:
+               Mercilessly hide the faked-hover tooltips on touchscreens so they never overlap */
+            #edit-journal-form label.group > div.absolute.-top-8 {
+                display: none !important;
+            }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. Fix the Header (Remove hardcoded height, allow it to stack) */
+            header.h-24 {
+                height: auto !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 1.25rem !important;
+                gap: 1.25rem !important;
+            }
+            
+            /* Make the left side (Title & Back Button) full width */
+            header > div.flex.items-center.gap-4:first-child {
+                width: 100% !important;
+            }
+
+            /* 2. Make the right side (Actions) wrap perfectly */
+            header > div.flex.items-center.gap-4:last-child {
+                width: 100% !important;
+                flex-wrap: wrap !important;
+                gap: 0.75rem !important;
+            }
+            
+            /* Force Search Bar to take the entire top row of the actions area */
+            header .relative.w-64 {
+                width: 100% !important;
+            }
+            
+            /* Make the action buttons share the next row beautifully */
+            header > div.flex.items-center.gap-4:last-child > button,
+            header > div.flex.items-center.gap-4:last-child > a {
+                flex: 1 1 auto !important;
+                justify-content: center !important;
+            }
+            
+            /* Keep the settings icon button as a tight square instead of stretching */
+            header > div.flex.items-center.gap-4:last-child > button:last-child {
+                flex: 0 0 auto !important;
+            }
+
+            /* 3. Shrink massive desktop padding on the main view */
+            main.p-12 {
+                padding: 1rem !important;
+            }
+            
+            /* 4. Shrink interior card padding so the text has more room to breathe */
+            .archive-card {
+                padding: 1.25rem !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block app_content %}
     {% set theme = journal.color or 'indigo' %}
     <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50">

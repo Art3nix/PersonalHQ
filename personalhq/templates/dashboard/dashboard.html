@@ -39,6 +39,116 @@
         .hour-hand { stroke: var(--text-main); stroke-width: 4; }
         .min-hand { stroke: var(--text-sub); stroke-width: 3; }
         .sec-hand { stroke: var(--accent-indigo); stroke-width: 1.5; }
+
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1023px)
+           ---------------------------------------------------- */
+        @media (max-width: 1023px) {
+            /* 1. Dissolve column boundaries so we can interleave their children */
+            .flex-1.flex.overflow-hidden {
+                flex-direction: column !important;
+                overflow-y: auto !important; 
+                padding: 1.25rem !important;
+                gap: 1.5rem !important;
+            }
+            main.w-\[70\%\], aside.w-\[30\%\] {
+                display: contents !important;
+            }
+
+            /* 2. Surgically reorder the internal sections */
+            main.w-\[70\%\] > div.mb-14 { order: 1 !important; margin-bottom: 0 !important; }
+            aside.w-\[30\%\] > section.mb-12 { 
+                order: 2 !important; margin-bottom: 0 !important; padding: 1.5rem 0; 
+                border-top: 1px solid var(--border-soft); border-bottom: 1px solid var(--border-soft); 
+            }
+            main.w-\[70\%\] > section.mb-20 { order: 3 !important; margin-bottom: 0 !important; }
+            main.w-\[70\%\] > section:not(.mb-20) { order: 4 !important; margin-bottom: 0 !important; }
+            aside.w-\[30\%\] > section.mb-20 { 
+                order: 5 !important; margin-bottom: 0 !important; padding-top: 1.5rem; 
+                border-top: 1px solid var(--border-soft); 
+            }
+            
+            /* 3. Adjust Header Spacing */
+            header.h-24 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+            .p-10 { padding: 1.5rem !important; }
+
+            /* 4. Tablet Deep Work Timer (Keeps horizontal layout, removes awkward divider) */
+            #deep-work-card .border-l {
+                border-left: none !important; /* Removes the floating line */
+                min-width: 0 !important;      /* Lets the timer shrink naturally */
+                padding-left: 1rem !important;
+            }
+            #timer-display { font-size: 4.5rem !important; }
+
+            /* 5. Habit Card Grid Restructuring */
+            .habit-row-item > div > .flex.items-center.justify-between.w-full {
+                display: grid !important; grid-template-columns: 1fr auto !important; gap: 1rem !important;
+            }
+            .habit-row-item > div > .flex.items-center.justify-between.w-full > .flex.items-center.gap-4:first-child {
+                grid-column: 1 / 2 !important; grid-row: 1 / 2 !important; align-self: center !important;
+            }
+            .habit-row-item > div > .flex.items-center.justify-between.w-full > .flex.items-center.gap-4:last-child {
+                display: contents !important;
+            }
+            [id^="streak-container-"] {
+                grid-column: 2 / 3 !important; grid-row: 1 / 2 !important; align-self: center !important; justify-self: end !important;
+            }
+            .habit-row-item > div > .flex.items-center.justify-between.w-full > .flex.items-center.gap-4:last-child > div:not([id^="streak-container-"]) {
+                grid-column: 1 / 3 !important; grid-row: 2 / 3 !important; width: 100% !important; justify-content: flex-end !important; 
+            }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            /* 1. Reduce main side-padding to reclaim screen space */
+            .flex-1.flex.overflow-hidden {
+                padding: 1rem !important;
+            }
+
+            /* 2. Deep Work Card stacked and compressed */
+            #deep-work-card {
+                padding: 1.25rem !important;
+                border-radius: 1.5rem !important;
+            }
+            #deep-work-card > .flex {
+                flex-direction: column !important;
+                gap: 1.25rem !important;
+                align-items: stretch !important;
+            }
+            #session-title { font-size: 2.25rem !important; line-height: 1.1 !important; }
+            #deep-work-card .mb-8 { margin-bottom: 1rem !important; }
+            
+            /* Stack timer controls beautifully */
+            #timer-controls { flex-direction: column !important; gap: 0.5rem !important; }
+            #main-timer-btn, #end-session-btn { width: 100% !important; }
+            
+            /* Apply the top-border divider for the stacked timer */
+            #deep-work-card .border-l {
+                border-top: 1px solid var(--border-soft) !important;
+                padding-top: 1.25rem !important;
+                padding-left: 0 !important;
+                width: 100% !important;
+                margin-top: 0.5rem !important;
+            }
+            #timer-display { font-size: 3.5rem !important; }
+
+            /* 3. Empty States elegantly stacked */
+            main.w-\[70\%\] div.border-dashed.justify-between {
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 1.25rem !important;
+                padding: 1.25rem !important;
+            }
+            main.w-\[70\%\] div.border-dashed.justify-between > div.flex {
+                flex-direction: column !important;
+            }
+            main.w-\[70\%\] div.border-dashed.justify-between a {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+        }
     </style>
 {% endblock %}
 
