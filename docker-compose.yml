@@ -22,8 +22,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    volumes:
-      - .:/usr/src/app
     depends_on:
       db:
         condition: service_healthy
@@ -37,8 +35,6 @@ services:
     build: .
     env_file:
       - .env
-    volumes:
-      - .:/app
     command: python run_scheduler.py
     depends_on:
       - web
