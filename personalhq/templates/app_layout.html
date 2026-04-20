@@ -8,31 +8,80 @@
     }
 </script>
 <style>
-    html.sidebar-is-collapsed #main-sidebar { width: 5rem !important; }
-    html.sidebar-is-collapsed .sidebar-text { display: none !important; }
-    html.sidebar-is-collapsed #sidebar-toggle-btn { transform: translateY(-50%) rotate(180deg) !important; }
-    html.sidebar-is-collapsed .custom-scrollbar::-webkit-scrollbar { display: none !important; }
-    html.sidebar-is-collapsed .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    html.sidebar-is-collapsed .sidebar-link {
-        width: 3rem !important;
-        height: 3rem !important;
-        margin: 0 auto !important;
-        padding: 0 !important;
-        justify-content: center !important;
+    /* 1. DESKTOP LOGIC (Completely untouched, protected by min-width) */
+    @media (min-width: 1024px) {
+        html.sidebar-is-collapsed #main-sidebar { width: 5rem !important; }
+        html.sidebar-is-collapsed .sidebar-text { display: none !important; }
+        html.sidebar-is-collapsed #sidebar-toggle-btn { transform: translateY(-50%) rotate(180deg) !important; }
+        html.sidebar-is-collapsed .custom-scrollbar::-webkit-scrollbar { display: none !important; }
+        html.sidebar-is-collapsed .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        html.sidebar-is-collapsed .sidebar-link {
+            width: 3rem !important;
+            height: 3rem !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            justify-content: center !important;
+        }
+        html.sidebar-is-collapsed #sidebar-profile-box {
+            background-color: transparent !important;
+            border-color: transparent !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            gap: 0.75rem !important;
+        }
+        html.sidebar-is-collapsed .sidebar-avatar-container {
+            justify-content: center !important;
+        }
+
+        /* Force hide mobile UI on desktop */
+        #mobile-header { display: none !important; }
+        #mobile-overlay { display: none !important; }
     }
-    html.sidebar-is-collapsed #sidebar-profile-box {
-        background-color: transparent !important;
-        border-color: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        gap: 0.75rem !important;
-    }
-    html.sidebar-is-collapsed .sidebar-avatar-container {
-        justify-content: center !important;
+
+    /* 2. TABLET/MOBILE LOGIC (Overrides layout strictly below 1024px) */
+    @media (max-width: 1023px) {
+        /* Stack the header and content vertically */
+        .app-container {
+            flex-direction: column !important;
+        }
+        /* Hide the desktop collapse button */
+        #sidebar-toggle-btn {
+            display: none !important;
+        }
+        /* Turn the sidebar into a fixed off-canvas drawer */
+        #main-sidebar {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            height: 100% !important;
+            width: 16rem !important;
+            background-color: white !important; /* Removes original transparency */
+            z-index: 50 !important;
+            transform: translateX(-100%);
+        }
+        /* Slide in sidebar when activated via JS */
+        #main-sidebar.mobile-open {
+            transform: translateX(0) !important;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
     }
 </style>
 
-<div class="h-screen flex w-full overflow-hidden bg-canvas">
+<div class="h-screen flex w-full overflow-hidden bg-canvas app-container">
+
+    <div id="mobile-header" class="flex items-center justify-between px-6 py-4 bg-white border-b border-stone-100 shrink-0 z-30 w-full">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-md shadow-indigo-200 flex items-center justify-center shrink-0 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+            </div>
+            <h1 class="text-xl font-black text-stone-900 tracking-tighter whitespace-nowrap">Life<span class="text-indigo-600">HQ</span></h1>
+        </div>
+        <button onclick="toggleMobileMenu()" class="p-2 -mr-2 text-stone-500 hover:text-stone-900 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+    </div>
+
+    <div id="mobile-overlay" onclick="toggleMobileMenu()" class="fixed inset-0 bg-stone-900/50 z-40 transition-opacity duration-300" style="display: none; opacity: 0;"></div>
 
     <aside id="main-sidebar" class="w-64 bg-stone-50/50 border-r border-stone-100 flex flex-col h-screen shrink-0 z-40 transition-all duration-300 relative">
 
@@ -168,18 +217,30 @@
 
 </div>
 
-<!-- Global Toast Notification System -->
 <div id="toast-container" class="fixed top-6 right-6 z-[200] space-y-3 pointer-events-none"></div>
 
 <script>
+    // New Pure-JS Mobile Toggle
+    function toggleMobileMenu() {
+        const sidebar = document.getElementById('main-sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+        
+        sidebar.classList.toggle('mobile-open');
+        
+        if (sidebar.classList.contains('mobile-open')) {
+            overlay.style.display = 'block';
+            setTimeout(() => overlay.style.opacity = '1', 10);
+        } else {
+            overlay.style.opacity = '0';
+            setTimeout(() => overlay.style.display = 'none', 300);
+        }
+    }
+
     function toggleSidebar() {
         const isCollapsed = document.documentElement.classList.toggle('sidebar-is-collapsed');
         localStorage.setItem('lifehq_sidebar_state', isCollapsed ? 'collapsed' : 'expanded');
     }
 
-    // ============================================================
-    // GLOBAL TOAST NOTIFICATION SYSTEM
-    // ============================================================
     function showToast(message, type = 'success', duration = 3500) {
         const container = document.getElementById('toast-container');
 
@@ -206,14 +267,12 @@
 
         container.appendChild(toast);
 
-        // Slide in
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-x-full', 'opacity-0');
             });
         });
 
-        // Slide out and remove
         setTimeout(() => {
             toast.classList.add('translate-x-full', 'opacity-0');
             setTimeout(() => toast.remove(), 300);

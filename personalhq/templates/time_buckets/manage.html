@@ -3,6 +3,121 @@
 
 {% block title %}Time Buckets - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Global Fixes
+           ---------------------------------------------------- */
+        /* Prevent long tags from breaking the flex container and pushing buttons out */
+        [id^="exp-card-"] .flex-1 {
+            min-width: 0 !important; 
+        }
+        [id^="exp-card-"] .flex-1 > div.flex.items-center.gap-2 {
+            flex-wrap: wrap !important;
+            row-gap: 0.5rem !important; /* Adds vertical breathing room when tags stack */
+        }
+
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1024px)
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            
+            /* 1. Add scrolling to the main container and space for the guide */
+            main.max-w-6xl {
+                height: 100% !important;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                padding-bottom: 6rem !important; 
+            }
+            
+            /* 2. Guide Box - Fixed Bottom Sheet */
+            main.max-w-6xl > div.mt-16.border {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                margin: 0 !important;
+                border-radius: 1.5rem 1.5rem 0 0 !important;
+                background: rgba(255, 255, 255, 0.95) !important;
+                backdrop-filter: blur(12px) !important;
+                z-index: 45 !important;
+                border-top: 1px solid var(--border-soft) !important;
+                box-shadow: 0 -10px 25px -5px rgba(0,0,0,0.05) !important;
+                max-width: 100% !important;
+            }
+            #lifemap-guide-content { max-height: 50vh !important; overflow-y: auto !important; padding-bottom: 2rem !important; }
+
+            /* 3. The Hover Fix: Force Edit/Delete buttons to be permanently visible */
+            .group-hover\:opacity-100 {
+                opacity: 1 !important;
+            }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. Shrink massive outer padding */
+            main.max-w-6xl {
+                padding: 1.25rem !important;
+                padding-bottom: 6rem !important;
+            }
+
+            /* 2. Stack Header and Buttons */
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1.5rem !important;
+            }
+            header > div.shrink-0 {
+                width: 100% !important;
+                flex-direction: column !important;
+                gap: 0.75rem !important;
+            }
+            header > div.shrink-0 > button {
+                width: 100% !important;
+                justify-content: center !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+
+            /* 3. The Timeline Recalculation */
+            /* Shift the vertical line to the far left */
+            section.relative > div.absolute.w-0\.5 {
+                left: 1rem !important; /* Moves line to 16px */
+            }
+            
+            /* Shift the Bucket wrappers to reclaim space */
+            section.relative .pl-20 {
+                padding-left: 3rem !important; /* Changes 80px padding to 48px */
+            }
+            
+            /* Snap the circular markers perfectly onto the new line position */
+            section.relative .absolute.w-5.h-5 {
+                left: 0.45rem !important; /* Mathematically centers a 20px node on a 16px line */
+            }
+
+            /* 4. Fix Bucket Headers */
+            /* Force the Edit/Delete actions to flow naturally on the left */
+            .mb-6.flex.flex-col > .text-right {
+                text-align: left !important;
+                flex-direction: row-reverse !important;
+                justify-content: flex-end !important;
+            }
+            
+            /* 5. Fix Birthday Form on fresh accounts */
+            form.flex.items-center.gap-3.max-w-sm {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            form.flex.items-center.gap-3.max-w-sm > button {
+                width: 100% !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block app_content %}
     <main class="flex-1 w-full max-w-6xl mx-auto px-12 py-12">
         

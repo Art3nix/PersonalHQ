@@ -2,6 +2,91 @@
 
 {% block title %}{{ journal.name }} - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Tablet & General Mobile Overrides (max-width: 1024px)
+           ---------------------------------------------------- */
+        @media (max-width: 1024px) {
+            /* Force Hover Actions (Shuffle Prompt, Delete Prompt) to be permanently visible */
+            .group-hover\:opacity-100 { 
+                opacity: 1 !important; 
+            }
+        }
+
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. Header Un-Cramping */
+            header.h-24 {
+                height: auto !important;
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                padding: 1.25rem !important;
+                gap: 1.25rem !important;
+            }
+            header.h-24 > div.flex.items-center.gap-4 { 
+                width: 100% !important; 
+            }
+            header.h-24 > button.xl\:hidden { 
+                width: 100% !important; 
+                justify-content: center !important; 
+            }
+
+            /* 2. Main Area Reclaiming Space */
+            main.p-8 { 
+                padding: 1rem !important; 
+            }
+            main.p-8 > div.max-w-3xl { 
+                padding-top: 1rem !important; 
+            }
+
+            /* 3. The Form & Textarea Container */
+            /* Shrink the massive 40px padding so the text area isn't crushed */
+            #main-entry-form {
+                padding: 1.25rem !important;
+                border-radius: 1.5rem !important;
+            }
+
+            /* 4. The Action Footer */
+            #main-entry-form > div.flex.justify-between.items-center {
+                flex-direction: column !important;
+                margin-top: 1rem !important;
+                padding-top: 1.5rem !important;
+            }
+            
+            /* Hide the desktop keyboard shortcut text entirely */
+            #main-entry-form > div.flex.justify-between.items-center > p {
+                display: none !important;
+            }
+            
+            /* Make the Cancel/Save buttons stack and fill width */
+            #main-entry-form > div.flex.justify-between.items-center > div.flex {
+                width: 100% !important;
+                flex-direction: column-reverse !important; /* Puts Save on top, Cancel below */
+                gap: 0.75rem !important;
+            }
+            #main-entry-form > div.flex.justify-between.items-center > div.flex > * {
+                width: 100% !important;
+                justify-content: center !important;
+                text-align: center !important;
+            }
+            
+            /* 5. Prompt Box Tweaks */
+            .mb-10.p-8.bg-indigo-100\/50 {
+                padding: 1.25rem !important;
+                border-radius: 1.5rem !important;
+                margin-bottom: 1.5rem !important;
+            }
+            #active-prompt-display {
+                font-size: 1.125rem !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block app_content %}
     {% set theme = journal.color or 'indigo' %}
     <div class="flex-1 flex flex-col min-w-0 bg-{{ theme }}-50 h-full min-h-0">

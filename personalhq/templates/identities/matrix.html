@@ -3,8 +3,63 @@
 
 {% block title %}Identity Matrix - Life HQ{% endblock %}
 
+{% block extra_head %}
+    <style>
+        /* ----------------------------------------------------
+           Mobile Specific Overrides (max-width: 767px)
+           ---------------------------------------------------- */
+        @media (max-width: 767px) {
+            
+            /* 1. Shrink the massive desktop padding on the main container */
+            main.max-w-\[1400px\] {
+                padding: 1.25rem !important;
+                padding-bottom: 4rem !important; 
+            }
+
+            /* 2. Stack the Header and make Action Buttons full-width */
+            header.flex.justify-between.items-end {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1.5rem !important;
+            }
+            
+            header > div.flex.items-center.gap-3 {
+                width: 100% !important;
+                flex-direction: column !important;
+                gap: 0.75rem !important;
+            }
+            
+            header > div.flex.items-center.gap-3 > button {
+                width: 100% !important;
+                justify-content: center !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+
+            /* 3. Empty State Fixes for tiny screens */
+            .col-span-full.text-center.py-16 {
+                padding: 2rem 1.25rem !important; /* Shrink inner padding */
+            }
+            
+            /* Give the 3 archetype emojis breathing room */
+            .grid.grid-cols-3.max-w-xs {
+                gap: 0.5rem !important;
+            }
+            
+            /* Force the AI generation button to span full width */
+            div.mt-8.flex.flex-col.items-center.gap-4 {
+                width: 100% !important;
+            }
+            div.mt-8.flex.flex-col.items-center.gap-4 > button {
+                width: 100% !important;
+                justify-content: center !important;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block app_content %}
-    <main class="flex-1 w-full px-12 py-12 max-w-[1400px] mx-auto">
+    <main class="flex-1 w-full h-full overflow-y-auto custom-scrollbar px-12 py-12 max-w-[1400px] mx-auto">
         
         <header class="flex justify-between items-end mb-12 border-b border-stone-100 pb-6">
             <div>
