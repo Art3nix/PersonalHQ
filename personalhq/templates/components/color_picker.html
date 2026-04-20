@@ -14,7 +14,7 @@
                 
                 <div class="w-10 h-10 mx-auto rounded-full bg-{{ color }}-500 shadow-sm border-2 border-transparent peer-checked:border-stone-900 peer-checked:ring-4 peer-checked:ring-{{ color }}-200 transition-all group-hover:scale-110"></div>
                 
-                <div class="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-900 text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">
+                <div class="hidden lg:block absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-900 text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">
                     {% if color == 'stone' %}Monochrome{% else %}{{ color | title }}{% endif %}
                 </div>
             </label>
