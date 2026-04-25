@@ -22,8 +22,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    volumes:
-      - .:/usr/src/app
     depends_on:
       db:
         condition: service_healthy
@@ -32,18 +30,18 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
   ai_worker:
     build: .
     env_file:
       - .env
-    volumes:
-      - .:/app
     command: python run_scheduler.py
     depends_on:
       - web
+
   pgadmin:
     image: dpage/pgadmin4
-    restart: no
+    restart: always
     ports:
       - "8888:80"
     environment:
@@ -51,6 +49,8 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+
 volumes:
   postgres_data:
   pgadmin-data:
+

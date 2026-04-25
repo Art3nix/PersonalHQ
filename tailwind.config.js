@@ -1,22 +1,36 @@
 /** @type {import('tailwindcss').Config} */
+
+// 1. Define your parameters
+const colors = ['stone', 'red', 'orange', 'amber', 'yellow', 'lime', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'fuchsia', 'rose'];
+const prefixes = ['bg', 'text', 'border', 'ring'];
+const shades = ['50', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+
+// 2. Pre-compute the exact list of strings
+const mySafelist = [];
+
+colors.forEach(color => {
+  // Generate the main color classes
+  shades.forEach(shade => {
+    prefixes.forEach(prefix => {
+      mySafelist.push(`${prefix}-${color}-${shade}`);
+      mySafelist.push(`hover:${prefix}-${color}-${shade}`); // Explicitly add the hover variant
+    });
+  });
+  
+  // Generate the specific opacity backgrounds
+  ['500', '600'].forEach(shade => {
+    mySafelist.push(`bg-${color}-${shade}/10`);
+    mySafelist.push(`bg-${color}-${shade}/20`);
+  });
+});
+
 module.exports = {
   content: [
     "./personalhq/templates/**/*.html",
     "./personalhq/static/**/*.js",
   ],
-  safelist: [
-    // Trimmed: Removed 'shadow', 'from', 'to' unless you specifically use dynamic gradients.
-    // Trimmed: Removed 'group-hover' and 'peer-checked' variants.
-    {
-      pattern: /^(bg|text|border|ring)-(stone|red|orange|amber|yellow|lime|emerald|teal|cyan|sky|blue|indigo|violet|fuchsia|rose)-(50|100|200|300|400|500|600|700|800|900)/,
-      variants: ['hover'], 
-    },
-    // Trimmed: Only generate opacities for background colors on a few mid-range shades
-    // (Usually, dynamic UI backgrounds only use /10 or /20 opacities)
-    {
-      pattern: /^bg-(stone|red|orange|amber|yellow|lime|emerald|teal|cyan|sky|blue|indigo|violet|fuchsia|rose)-(500|600)\/(10|20)/,
-    }
-  ],
+  // 3. Feed the exact array to Tailwind
+  safelist: mySafelist,
   theme: {
     extend: {},
   },

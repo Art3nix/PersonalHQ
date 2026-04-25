@@ -2,7 +2,8 @@
 import multiprocessing
 
 # Workers: 2-4 x CPU cores
-workers = multiprocessing.cpu_count() * 2 + 1
+workers = 1
+threads = 4
 worker_class = "sync"
 timeout = 120
 keepalive = 5
