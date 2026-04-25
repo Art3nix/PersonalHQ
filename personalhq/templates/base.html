@@ -194,19 +194,34 @@
         }
 
         function selectPickerIcon(pickerId, iconName) {
-            // 1. Update the hidden input for the database
-            document.getElementById('hidden-' + pickerId).value = iconName;
+            // --- SAFETY NET 1: Prevent crash if Lucide failed to download ---
+            if (typeof lucide === 'undefined') {
+                console.warn("Lucide library is missing. Skipping icon render.");
+                // Still update the hidden input so the form data saves successfully
+                document.getElementById('hidden-' + pickerId).value = iconName;
+                return;
+            }
+
+            // --- SAFETY NET 2: Catch AI Hallucinations ---
+            let safeIconName = iconName;
+            if (!lucide.icons[safeIconName]) {
+                console.warn(`AI Hallucinated invalid icon: "${iconName}". Falling back to default.`);
+                safeIconName = 'target'; 
+            }
+
+            // 1. Update the hidden input for the database using the safe icon
+            document.getElementById('hidden-' + pickerId).value = safeIconName;
 
             // 2. Replace the visible icon with a fresh <i> tag
             const displayContainer = document.getElementById('display-container-' + pickerId);
-            displayContainer.innerHTML = `<i data-lucide="${iconName}" class="w-6 h-6 transition-transform group-hover:scale-110 text-indigo-600"></i>`;
+            displayContainer.innerHTML = `<i data-lucide="${safeIconName}" class="w-6 h-6 transition-transform group-hover:scale-110 text-indigo-600"></i>`;
             lucide.createIcons({ root: displayContainer });
 
             // 3. Update the highlights in the dropdown grid
             const dropdown = document.getElementById('dropdown-' + pickerId);
             if (dropdown) {
                 dropdown.querySelectorAll('button[data-icon-name]').forEach(btn => {
-                    if (btn.getAttribute('data-icon-name') === iconName) {
+                    if (btn.getAttribute('data-icon-name') === safeIconName) {
                         // Apply active highlight classes
                         btn.className = "w-10 h-10 flex items-center justify-center rounded-xl transition-all hover:bg-indigo-50 hover:text-indigo-600 hover:scale-110 shadow-sm bg-indigo-100 text-indigo-700 border-2 border-indigo-400";
                     } else {
