@@ -12,8 +12,7 @@ COPY personalhq/templates personalhq/templates
 
 RUN npx tailwindcss \
       -i personalhq/static/css/input.css \
-      -o personalhq/static/css/tailwind.css \
-      --minify
+      -o personalhq/static/css/tailwind.css
 
 # ── Stage 2: Python app ───────────────────────────────────────────────────
 FROM python:3.12-slim
