@@ -54,6 +54,10 @@ FORMATTING RULES (Length & Structure constraints):
 3. EXPERIENCE DESCRIPTIONS (Time Buckets):
 - Must be 1 to 2 sentences. Target 15-25 words.
 - Capture the emotional essence or lifelong value, but do NOT write a paragraph.
+
+4. ALLOWED VALUES (CRITICAL):
+- COLORS: You may ONLY use these exact colors: stone, red, orange, amber, yellow, lime, emerald, teal, cyan, sky, blue, indigo, violet, fuchsia, rose.
+- ICONS: You may ONLY use these exact Lucide icon names: book-open, target, zap, heart, briefcase, coffee, compass, feather, flame, activity, anchor, award, crosshair, crown, dumbbell, flag, key, lightbulb, map, rocket, star, sun, sword, trophy. Do not invent others.
 """
 
 # --- 3. COACHING PSYCHOLOGY (Used ONLY by Daily Coach) ---
