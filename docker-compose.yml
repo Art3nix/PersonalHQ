@@ -30,6 +30,9 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    volumes:
+      # Syncs the host's ./logs folder with the container's logs folder
+      - ./logs:/usr/src/app/logs
 
   ai_worker:
     build: .
