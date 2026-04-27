@@ -27,7 +27,7 @@
                 height: 100% !important;
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
-                padding-bottom: 6rem !important; 
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
             }
             
             /* 2. Guide Box - Fixed Bottom Sheet */
@@ -61,7 +61,7 @@
             /* 1. Shrink massive outer padding */
             main.max-w-6xl {
                 padding: 1.25rem !important;
-                padding-bottom: 6rem !important;
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
             }
 
             /* 2. Stack Header and Buttons */
@@ -119,7 +119,7 @@
 {% endblock %}
 
 {% block app_content %}
-    <main class="flex-1 w-full max-w-6xl mx-auto px-12 py-12">
+    <main class="flex-1 w-full h-full overflow-y-auto custom-scrollbar max-w-6xl mx-auto px-12 py-12">
         
         <header class="flex justify-between items-end gap-8 mb-16 border-b border-stone-100 pb-6">
             <div class="max-w-2xl">

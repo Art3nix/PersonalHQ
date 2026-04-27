@@ -11,6 +11,10 @@
            ---------------------------------------------------- */
         @media (max-width: 1024px) {
             
+            main.max-w-\[1400px\] {
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
+            }
+
             /* 1. The Hover Fix: Force Edit/Delete buttons to be permanently visible */
             .group-hover\:opacity-100 {
                 opacity: 1 !important;
@@ -42,7 +46,7 @@
             /* 1. Shrink desktop padding and add buffer for the bottom sheet */
             main.max-w-\[1400px\] {
                 padding: 1.25rem !important;
-                padding-bottom: 6rem !important;
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
             }
 
             /* 2. Stack Header and Buttons */

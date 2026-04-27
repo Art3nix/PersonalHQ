@@ -179,13 +179,27 @@
             }
         } catch (error) {
             clearInterval(textInterval);
-            document.getElementById('loading-status-text').innerText = "An error occurred. Please try again.";
-            document.getElementById('loading-status-text').classList.add('text-red-500');
+            
+            // 1. Fire the global red toast so the error is impossible to miss
+            if (typeof showToast === 'function') {
+                showToast(error.message, 'error');
+            }
+
+            // 2. Update the spinner text so they know it stopped
+            const statusText = document.getElementById('loading-status-text');
+            statusText.innerText = "Generation failed.";
+            statusText.classList.add('text-red-500');
+
+            // 3. Bounce them back to the input state much faster (1.5s instead of 3s)
             setTimeout(() => {
                 document.getElementById('wizard-loading-state').classList.add('hidden');
                 document.getElementById('wizard-loading-state').classList.remove('flex');
+                
+                // Reset the text color for their next attempt
+                statusText.classList.remove('text-red-500'); 
+                
                 document.getElementById('wizard-input-state').classList.remove('hidden');
-            }, 3000);
+            }, 1500);
         }
     }
 </script>
