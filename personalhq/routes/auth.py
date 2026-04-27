@@ -10,10 +10,16 @@ from personalhq.extensions import db
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+def redirect_user_state(user):
+    """Helper function to route users based on whether their system is empty."""
+    if not user.identities and not user.habits and not user.journals:
+        return redirect(url_for('dashboard.onboarding'))
+    return redirect(url_for('dashboard.index'))
+
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+        return redirect_user_state(current_user)
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -31,7 +37,7 @@ def login():
             if client_timezone and user.timezone != client_timezone:
                 user.timezone = client_timezone
                 db.session.commit()
-            return redirect(url_for('dashboard.index'))
+            return redirect_user_state(user)
 
         flash('Invalid email or password', 'danger')
 
@@ -47,7 +53,7 @@ def logout():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+        return redirect_user_state(current_user)
 
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -57,20 +63,20 @@ def register():
             last_name=form.last_name.data.strip(),
             password=form.password.data
         )
-        
+
         if not user:
             flash('Email already registered.', 'danger')
             return render_template('auth/register.html', form=form)
 
-        flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('auth.login'))
+        login_user(user)
+        return redirect_user_state(user)
 
     return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+        return redirect_user_state(current_user)
 
     form = ForgotPasswordForm()
     if form.validate_on_submit():
@@ -88,7 +94,7 @@ def forgot_password():
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     if current_user.is_authenticated:
-        return redirect(url_for('dashboard.index'))
+        return redirect_user_state(current_user)
 
     email = auth_service.verify_reset_token(token)
     if not email:
