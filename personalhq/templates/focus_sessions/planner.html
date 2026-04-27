@@ -18,7 +18,7 @@
                 overflow-y: auto !important;
                 overflow-x: hidden !important;
                 padding: 1.25rem !important;
-                padding-bottom: 6rem !important; 
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
             }
 
             /* 2. Swap Order: Analytics Top, Planner Bottom */
@@ -146,7 +146,7 @@
         @media (max-width: 767px) {
             .flex-1.flex.overflow-hidden {
                 padding: 1rem !important;
-                padding-bottom: 6rem !important; 
+                padding-bottom: calc(8rem + env(safe-area-inset-bottom)) !important;
             }
             aside.w-\[30\%\] > div.space-y-6 {
                 margin: 0 -1rem !important;
