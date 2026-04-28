@@ -41,11 +41,11 @@
         .sec-hand { stroke: var(--accent-indigo); stroke-width: 1.5; }
 
         /* ----------------------------------------------------
-           Tablet & General Mobile Overrides (max-width: 1023px)
+           Tablet & General Mobile Overrides (max-width: 1124px)
            ---------------------------------------------------- */
-        @media (max-width: 1023px) {
+        @media (max-width: 1124px) {
             /* 1. Dissolve column boundaries so we can interleave their children */
-            .flex-1.flex.overflow-hidden {
+            #dashboard-content-row {
                 flex-direction: column !important;
                 overflow-y: auto !important; 
                 padding: 1.25rem !important;
@@ -177,8 +177,8 @@
     {% endif %}
     <div id="focus-overlay" class="fixed inset-0 bg-stone-950/85 backdrop-blur-md z-[100] opacity-0 pointer-events-none transition-all duration-700 ease-in-out"></div>
 
-    <div class="flex-1 flex flex-col min-w-0">
-        <header class="h-24 flex items-center justify-between px-12 z-20">
+    <div class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+        <header class="h-24 shrink-0 flex items-center justify-between px-12 z-20">
             <div class="flex-1"></div>
             
             <div class="w-full max-w-2xl relative">
@@ -198,8 +198,8 @@
             <div class="flex-1 flex justify-end"></div>
         </header>
 
-        <div class="flex-1 flex overflow-hidden">
-            <main class="w-[70%] overflow-y-auto custom-scrollbar p-12 pt-4">
+        <div id="dashboard-content-row" class="flex-1 flex overflow-y-auto custom-scrollbar min-h-0">
+            <main class="w-[70%] p-12 pt-4 pb-24">
                 <div class="mb-14">
                     <h2 class="text-3xl font-bold text-stone-400">{{ greeting }}, <span class="text-stone-900">{{ current_user.first_name }}.</span></h2>
 
@@ -296,7 +296,7 @@
                     {% endif %}
                 </section>
 
-                <section>
+                <section class="pb-24">
                     <div class="flex justify-between items-center mb-10 px-1">
                         <div class="flex justify-between items-end mb-6 px-1">
                             <h3 class="text-sm font-bold text-stone-900 flex items-center gap-3">
@@ -436,7 +436,7 @@
                 </section>
             </main>
 
-            <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 overflow-y-auto custom-scrollbar p-10">
+            <aside class="w-[30%] border-l border-stone-100 bg-stone-50/20 p-10">
                 <section class="flex flex-col items-center mb-12">
                     <svg id="analog-clock" viewBox="0 0 100 100" class="mb-6 drop-shadow-sm">
                         <circle cx="50" cy="50" r="48" fill="white" stroke="#E7E5E4" stroke-width="1" />
