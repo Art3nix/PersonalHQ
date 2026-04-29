@@ -696,25 +696,20 @@
 
 {% block extra_scripts %}
     <script>
-        // --- MIDNIGHT ROLLOVER WATCHER ---
+        // --- MIDNIGHT ROLLOVER WATCHER (Timezone Safe) ---
+        // Store the local date from the exact moment the page loads
+        const pageLoadDate = new Date().toDateString();
+
         function checkMidnightRollover() {
-            const todaySection = document.querySelector('section[data-date]');
-            if (!todaySection) return;
-
-            const serverDate = todaySection.getAttribute('data-date');
+            const currentDate = new Date().toDateString();
             
-            const now = new Date();
-            const localDate = now.getFullYear() + '-' + 
-                              String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                              String(now.getDate()).padStart(2, '0');
-
-            // If the tab was left open and crossed midnight, silently fetch fresh HTML
-            if (serverDate && serverDate !== localDate) {
+            // If the user's local date changes while the tab is left open, fetch fresh data
+            if (currentDate !== pageLoadDate) {
                 window.location.reload();
             }
         }
 
-        // Check every 60 seconds, and immediately whenever you switch back to this tab
+        // Check every 60 seconds, and whenever the user switches back to this tab
         setInterval(checkMidnightRollover, 60000);
         window.addEventListener('focus', checkMidnightRollover);
         
