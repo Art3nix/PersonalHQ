@@ -197,25 +197,22 @@
             // --- SAFETY NET 1: Prevent crash if Lucide failed to download ---
             if (typeof lucide === 'undefined') {
                 console.warn("Lucide library is missing. Skipping icon render.");
-                // Still update the hidden input so the form data saves successfully
                 document.getElementById('hidden-' + pickerId).value = iconName;
                 return;
             }
 
-            // --- SAFETY NET 2: Catch AI Hallucinations ---
-            let safeIconName = iconName;
-            if (!lucide.icons[safeIconName]) {
-                console.warn(`AI Hallucinated invalid icon: "${iconName}". Falling back to default.`);
-                safeIconName = 'target'; 
-            }
+            // (Safety Net 2 was removed here because it was falsely flagging valid hyphenated icons!)
+            const safeIconName = iconName || 'target';
 
-            // 1. Update the hidden input for the database using the safe icon
+            // 1. Update the hidden input for the database
             document.getElementById('hidden-' + pickerId).value = safeIconName;
 
             // 2. Replace the visible icon with a fresh <i> tag
             const displayContainer = document.getElementById('display-container-' + pickerId);
             displayContainer.innerHTML = `<i data-lucide="${safeIconName}" class="w-6 h-6 transition-transform group-hover:scale-110 text-indigo-600"></i>`;
-            lucide.createIcons({ root: displayContainer });
+            
+            // Render the new icon (Calling it empty scans the DOM and safely replaces the new tag)
+            lucide.createIcons();
 
             // 3. Update the highlights in the dropdown grid
             const dropdown = document.getElementById('dropdown-' + pickerId);
