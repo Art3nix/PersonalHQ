@@ -42,6 +42,9 @@ class Habit(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=get_utc_now, nullable=True)
 
+    ai_insight: Mapped[str | None] = mapped_column(db.Text, nullable=True)
+    ai_celebration: Mapped[str | None] = mapped_column(db.Text, nullable=True)
+
     identity = relationship("Identity", back_populates="habits")
     user = relationship("User", back_populates="habits")
     logs = relationship("HabitLog", back_populates="habit", cascade="all, delete-orphan", order_by="desc(HabitLog.completed_date)")

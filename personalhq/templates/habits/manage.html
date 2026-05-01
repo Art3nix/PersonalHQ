@@ -371,10 +371,16 @@
                                 {% endfor %}
                             </div>
                             {% endif %}
-                            {% if habit.ai_insight %}
+                            {% if habit.ai_insight or habit.ai_celebration %}
                             <div class="mt-5 pt-4 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %} flex items-start gap-2.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="{% if is_completed %}text-white/80{% else %}text-{{ theme }}-400{% endif %} mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">{{ habit.ai_insight }}</p>
+                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">
+                                    {% if is_completed and habit.ai_celebration %}
+                                        {{ habit.ai_celebration }}
+                                    {% else %}
+                                        {{ habit.ai_insight }}
+                                    {% endif %}
+                                </p>
                             </div>
                             {% endif %}
                             <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
@@ -534,11 +540,18 @@
                                     </div>
                                 {% endif %}
                             </div>
-                            {% if habit.ai_insight %}
+                            {% if habit.ai_insight or habit.ai_celebration %}
                             <div class="mt-5 pt-4 border-t {% if is_completed %}border-white/20{% else %}border-stone-100{% endif %} flex items-start gap-2.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="{% if is_completed %}text-white/80{% else %}text-{{ theme }}-400{% endif %} mt-[2px] shrink-0 opacity-80"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
-                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">{{ habit.ai_insight }}</p>
+                                <p class="text-[11px] font-semibold {% if is_completed %}text-white/90{% else %}text-stone-600{% endif %} leading-relaxed">
+                                    {% if is_completed and habit.ai_celebration %}
+                                        {{ habit.ai_celebration }}
+                                    {% else %}
+                                        {{ habit.ai_insight }}
+                                    {% endif %}
+                                </p>
                             </div>
+                            {% endif %}
                             {% endif %}
                             <a href="{{ url_for('habits_view.habit_calendar', habit_id=habit.id) }}" class="mt-5 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-1 transition-opacity {% if is_completed %}text-white opacity-60 hover:opacity-100{% else %}text-stone-400 opacity-60 hover:opacity-100 hover:text-stone-900{% endif %}">
                                 Full Calendar <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>

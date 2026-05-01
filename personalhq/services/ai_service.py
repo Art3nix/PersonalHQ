@@ -264,9 +264,15 @@ Act as a modern, collaborative performance coach. Review the user's 14-day histo
 INSTRUCTIONS:
 1. MANDATORY FIELDS: You MUST ALWAYS generate text for the global `ai_daily_briefing` and ALL `_subtitle` fields. These set the daily tone and cannot be null.
 2. EMPTY STATES: ONLY generate text for `_empty_state` fields if the database snapshot explicitly shows that the user has ZERO items in that category. If they have active items, the empty state field MUST be `null`.
-3. BALANCED DISTRIBUTION (CATEGORY CAPS): You must distribute your coaching evenly. Do not put all your feedback into Journals and ignore Habits. For the `entity_updates` arrays, you may ONLY generate insights for a MAXIMUM of 2 to 3 items per category. If the user has 10 habits, pick the 2 most important ones to comment on today and ignore the rest.
-4. NO COMMANDING: Guide and challenge the user gently. Do not issue aggressive demands.
-5. Strictly follow the word limits.
+3. BALANCED DISTRIBUTION: For Time Buckets, Journals, and Focus Sessions, generate insights for a MAXIMUM of 2 to 3 items. For Habits, generate data for the majority of them, but intentionally leave a few completely blank (omit them from the JSON array) so the coaching feels organic and not overwhelming.
+4. HABIT ALGORITHM: Generate both `ai_insight` (Pre-action advice) and `ai_celebration` (Post-action praise) using this deterministic logic:
+   - NO MAD LIBS: NEVER use formulaic, repetitive phrases like "To be 'Identity', you must do X." Do NOT put identity names in apostrophes or quotes.
+   - BE CREATIVE & SPECIFIC: Make the text deeply encouraging and intimately specific to the habit's actual action (e.g., if the habit is reading, talk about pages, ideas, or expanding the mind, not just "doing the habit").
+   - If they missed yesterday: Insight warns about sliding; Celebration praises the recovery.
+   - If on a streak: Insight reminds them of momentum; Celebration hypes up the specific streak number.
+   - If at an all-time best: Insight hypes the record; Celebration focuses on the new milestone.
+   - If 0 streak: Insight pushes the 2-minute rule to just start; Celebration congratulates taking the first step.
+5. NO COMMANDING: Guide and challenge the user gently. Do not issue aggressive demands.
 
 You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
 
@@ -316,7 +322,14 @@ You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
     "time_buckets": [ {{ "id": 123, "ai_insight": "[Item Coach] Specific coaching for this decade.", "ai_empty_state": "Max 15 words." }} ],
     "journals": [ {{ "id": 123, "ai_insight": "[Item Coach] Specific coaching for this journal." }} ],
     "identities": [ {{ "id": 123, "ai_insight": "[Item Coach] Supportive check: Do recent actions align with this specific identity?" }} ],
-    "focus_sessions": [ {{ "id": 123, "ai_insight": "[Item Coach] Highly specific coaching for THIS exact session.", "ai_intention": "Max 15 words." }} ]
+    "focus_sessions": [ {{ "id": 123, "ai_insight": "[Item Coach] Highly specific coaching for THIS exact session.", "ai_intention": "Max 15 words." }} ],
+    "habits": [ 
+      {{ 
+        "id": 123, 
+        "ai_insight": "[PRE-ACTION] Insight to read BEFORE doing the habit.", 
+        "ai_celebration": "[POST-ACTION] Praise to read AFTER completing it." 
+      }} 
+    ]
   }}
 }}
 """
@@ -373,6 +386,13 @@ You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
         
         # --- 2. PROCESS TARGETED ENTITY UPDATES ---
         updates = ai_data.get('entity_updates', {})
+        
+        # Add this new Habit block:
+        for h_update in updates.get('habits', []):
+            h = db.session.get(Habit, h_update.get('id'))
+            if h and h.user_id == user.id:
+                if 'ai_insight' in h_update: h.ai_insight = h_update.get('ai_insight')
+                if 'ai_celebration' in h_update: h.ai_celebration = h_update.get('ai_celebration')
         
         for tb_update in updates.get('time_buckets', []):
             tb = db.session.get(TimeBucket, tb_update.get('id'))
