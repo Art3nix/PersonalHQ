@@ -96,8 +96,8 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
                 # Check for 503 (High Demand) or 429 (Rate Limit)
                 if e.code in [503, 429] and attempt < max_retries_per_model - 1:
                     
-                    # Exponential Backoff (2s, 4s, 8s) + Random Jitter (0.0 to 1.0s)
-                    sleep_time = (2 ** (attempt + 1)) + random.uniform(0, 1)
+                    # Exponential Backoff (5s, 10s, 20s) + Random Jitter
+                    sleep_time = (5 * (2 ** attempt)) + random.uniform(0, 1)
                     sys_logger.warning(f"[AI_API_ERROR] {model_name} Error ({e.code}) | Latency: {latency_ms}ms. Retrying in {sleep_time:.2f}s (Attempt {attempt + 1}/{max_retries_per_model})...")
                     
                     time.sleep(sleep_time)
