@@ -339,6 +339,14 @@ You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
         ai_data = generate_json(system_prompt)
         sys_logger.info(f"[COACH_RESPONSE_RECEIVED] Successfully parsed JSON for {user.email}.")
         
+        # --- 0. WIPE STALE ENTITY INSIGHTS ---
+        # Clear out yesterday's item-specific coaching so we only see fresh, relevant notes today.
+        Habit.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_celebration': None})
+        TimeBucket.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_empty_state': None})
+        Journal.query.filter_by(user_id=user.id).update({'ai_insight': None})
+        Identity.query.filter_by(user_id=user.id).update({'ai_insight': None})
+        FocusSession.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_intention': None})
+        
         # --- 1. PROCESS DAILY NOTE (GLOBAL) ---
         note_data = ai_data.get('daily_note', {})
         daily_note = DailyNote.query.filter_by(user_id=user.id, logical_date=logical_date_to_prep).first()
