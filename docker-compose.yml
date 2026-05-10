@@ -39,8 +39,12 @@ services:
     env_file:
       - .env
     command: python run_scheduler.py
+    environment:
+      - PYTHONUNBUFFERED=1
     depends_on:
       - web
+    volumes:
+      - ./logs:/usr/src/app/logs
 
   pgadmin:
     image: dpage/pgadmin4
