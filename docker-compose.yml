@@ -39,6 +39,7 @@ services:
     env_file:
       - .env
     command: python run_scheduler.py
+    restart: always
     environment:
       - PYTHONUNBUFFERED=1
     depends_on:
