@@ -66,7 +66,10 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
         sys_logger.error("[AI_FATAL] GEMINI_API_KEY is missing from .env")
         raise ValueError("AI configuration missing.")
         
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(
+        api_key=api_key,
+        http_options={'timeout': 60.0}
+    )
     
     # 1. Loop through the Fallback Chain
     for model_name in models:
@@ -96,8 +99,8 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
                 # Check for 503 (High Demand) or 429 (Rate Limit)
                 if e.code in [503, 429] and attempt < max_retries_per_model - 1:
                     
-                    # Exponential Backoff (5s, 10s, 20s) + Random Jitter
-                    sleep_time = (5 * (2 ** attempt)) + random.uniform(0, 1)
+                    # Exponential Backoff (10s, 20s, 40s) + Random Jitter
+                    sleep_time = (10 * (2 ** attempt)) + random.uniform(0, 1)
                     sys_logger.warning(f"[AI_API_ERROR] {model_name} Error ({e.code}) | Latency: {latency_ms}ms. Retrying in {sleep_time:.2f}s (Attempt {attempt + 1}/{max_retries_per_model})...")
                     
                     time.sleep(sleep_time)
