@@ -52,6 +52,8 @@ def create_app(config_name=None):
         return render_template('errors/500.html'), 500
 
     # Register Blueprints
+    from personalhq.routes.landing import landing_bp
+    app.register_blueprint(landing_bp)
     from personalhq.routes.dashboard import dashboard_bp
     app.register_blueprint(dashboard_bp)
     from personalhq.routes.auth import auth_bp
