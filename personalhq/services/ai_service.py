@@ -52,7 +52,7 @@ if not sys_logger.handlers:
 # The Routing Chain: Try the fastest/smartest first, then fall back to stable older models.
 FALLBACK_MODELS = [
     'gemini-2.5-flash', # Primary: Fast, but prone to high-demand spikes
-    'gemini-1.5-flash', # Backup 1: Older, highly stable, huge capacity
+    'gemini-1.5-flash-latest', # Backup 1: Older, highly stable, huge capacity
     'gemini-2.5-pro'    # Backup 2: Slower and more expensive, but different compute cluster
 ]
 
@@ -68,7 +68,7 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
         
     client = genai.Client(
         api_key=api_key,
-        http_options={'timeout': 60.0}
+        http_options={'timeout': 120000} # 120s
     )
     
     # 1. Loop through the Fallback Chain
