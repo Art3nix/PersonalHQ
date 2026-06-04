@@ -36,6 +36,38 @@
         /* Custom Gradients for Bento Box */
         .bento-gradient-1 { background: linear-gradient(135deg, #EEF2FF 0%, #FFFFFF 100%); }
         .bento-gradient-2 { background: linear-gradient(135deg, #F0FDF4 0%, #FFFFFF 100%); }
+
+        /* Entrance Animations */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-up {
+            animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0; /* Ensures it stays hidden before animation starts */
+        }
+
+        /* Custom Bento Grid Layout */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Mobile default: 1 column */
+            gap: 1.5rem;
+        }
+        
+        /* Desktop Breakpoint */
+        @media (min-width: 992px) {
+            .bento-grid {
+                grid-template-columns: repeat(12, 1fr);
+            }
+            .bento-item-focus { 
+                grid-column: span 7; 
+                grid-row: span 2; 
+            }
+            .bento-item-habits { grid-column: span 5; }
+            .bento-item-inbox { grid-column: span 5; }
+            .bento-item-whatsapp { grid-column: span 4; }
+            .bento-item-lifemap { grid-column: span 8; }
+        }
     </style>
 </head>
 <body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
@@ -50,8 +82,8 @@
             </div>
 
             <div class="hidden md:flex items-center gap-8 text-sm font-bold text-stone-500">
-                <a href="#beliefs" class="hover:text-stone-900 transition-colors">Our Beliefs</a>
-                <a href="#platform" class="hover:text-stone-900 transition-colors">The Platform</a>
+                <a href="#methodology" class="hover:text-stone-900 transition-colors">How it works</a>
+                <a href="#platform" class="hover:text-stone-900 transition-colors">Features</a>
                 <a href="#pricing" class="hover:text-stone-900 transition-colors">Pricing</a>
             </div>
 
@@ -65,38 +97,62 @@
         </div>
     </nav>
 
-    <main class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-grid">
-        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-400/20 rounded-full blur-[100px] pointer-events-none"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400/10 rounded-full blur-[100px] pointer-events-none"></div>
+    <main class="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-[#FDFDFB]">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/20 rounded-full blur-[120px] mix-blend-multiply animate-[pulse_8s_ease-in-out_infinite]"></div>
+        <div class="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-emerald-400/20 rounded-full blur-[120px] mix-blend-multiply animate-[pulse_10s_ease-in-out_infinite_reverse]"></div>
 
-        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[11px] font-bold uppercase tracking-widest mb-8 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                A dedicated space for mental clarity
+        <div class="max-w-7xl mx-auto px-6 relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+            <div class="text-left">
+                <a href="#pricing" class="animate-slide-up group inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-stone-100 border border-stone-200 text-stone-600 text-xs font-bold mb-8 transition-colors hover:bg-stone-200 cursor-pointer" style="animation-delay: 0s;">
+                    <span class="text-indigo-600 font-extrabold">New</span>
+                    <span class="w-px h-3 bg-stone-300"></span>
+                    Meet your AI Coach <i data-lucide="arrow-right" class="w-3 h-3 text-stone-400 group-hover:translate-x-0.5 transition-transform"></i>
+                </a>
+                
+                <h1 class="animate-slide-up text-5xl lg:text-7xl font-extrabold tracking-tighter text-stone-900 leading-[1.05] mb-6" style="animation-delay: 0.1s;">
+                    A clear workspace <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-emerald-500">for your life.</span>
+                </h1>
+                
+                <p class="text-lg text-stone-500 font-medium mb-10 max-w-lg leading-relaxed">
+                    A unified workspace connecting your daily habits, deep focus, and self-reflection. We synthesize your actions to deliver precise, uncompromising clarity.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-4">
+                    <a href="#pricing" class="w-full sm:w-auto px-6 py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-sm font-bold transition-all shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center gap-2">
+                        Claim your space
+                        <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400"></i>
+                    </a>
+                    <a href="#platform" class="w-full sm:w-auto px-6 py-3.5 bg-white border border-stone-200 hover:border-stone-300 text-stone-700 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm">
+                        See what's inside
+                    </a>
+                </div>
             </div>
-            
-            <h1 class="text-5xl lg:text-7xl font-black tracking-tighter text-stone-900 leading-[1.1] mb-6">
-                Master your attention. <br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-indigo-400">Become the person you want to be.</span>
-            </h1>
-            
-            <p class="text-lg lg:text-xl text-stone-500 font-medium mb-12 max-w-2xl mx-auto leading-relaxed">
-                Most apps give you empty checklists that only add to your mental clutter. Personal HQ is different. It is a beautifully designed workspace that connects your daily habits, deep focus, and self reflection. We gently guide you toward your long term goals.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                <a href="#pricing" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-base font-bold transition-all shadow-xl shadow-indigo-200 flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
-                    Begin Your Journey
-                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                </a>
-                <a href="#platform" class="w-full sm:w-auto px-8 py-4 bg-white border border-stone-200 hover:bg-stone-50 text-stone-700 rounded-2xl text-base font-bold transition-all flex items-center justify-center gap-2">
-                    Explore the platform
-                </a>
+
+            <div class="relative hidden lg:block perspective-1000">
+                <div class="w-full aspect-square md:aspect-[4/3] bg-white/60 backdrop-blur-2xl border border-white/80 rounded-3xl shadow-[0_20px_50px_rgb(0,0,0,0.1)] p-6 transform rotate-y-[-5deg] rotate-x-[5deg] hover:rotate-0 transition-transform duration-700">
+                    <div class="flex items-center gap-2 border-b border-stone-100 pb-4 mb-4">
+                        <div class="w-3 h-3 rounded-full bg-stone-200"></div>
+                        <div class="w-3 h-3 rounded-full bg-stone-200"></div>
+                        <div class="w-3 h-3 rounded-full bg-stone-200"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="h-8 w-1/3 bg-stone-100 rounded-lg"></div>
+                        <div class="h-24 w-full bg-indigo-50/50 rounded-xl border border-indigo-100/50 flex items-center px-4">
+                            <div class="w-2 h-2 rounded-full bg-indigo-500 mr-3"></div>
+                            <div class="h-4 w-3/4 bg-indigo-100 rounded"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="h-32 bg-stone-50 rounded-xl border border-stone-100"></div>
+                            <div class="h-32 bg-stone-50 rounded-xl border border-stone-100"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </main>
 
-    <section class="py-24 bg-stone-900 text-white relative overflow-hidden" id="beliefs">
+    <section class="py-24 bg-stone-900 text-white relative overflow-hidden" id="methodology">
         <div class="max-w-7xl mx-auto px-6 relative z-10">
             <div class="grid md:grid-cols-2 gap-16 items-center">
                 <div>
@@ -105,7 +161,7 @@
                         When your goals, journals, and daily tasks are scattered across a dozen different apps, you aren't getting organized. You are just creating more mental overhead. You lose sight of the bigger picture.
                     </p>
                     <p class="text-stone-400 font-medium leading-relaxed">
-                        Personal HQ is built to be the exact opposite. It is a single space that ties your daily actions directly to your long term identity. We don't just give you empty boxes to check. We give you the framework to actually execute.
+                        Personal HQ is built to be the exact opposite. It is a single space that ties your daily actions directly to your long term identity. We don't just give you empty boxes to check. We give you the clarity and support to actually follow through.
                     </p>
                 </div>
                 
@@ -115,8 +171,8 @@
                             <i data-lucide="compass" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-white mb-1">Identity Driven Action</h4>
-                            <p class="text-sm text-stone-400 leading-relaxed">Every focus session and tracked habit is tied to a specific identity. You aren't just crossing off tasks. You are actively casting votes for the person you want to become.</p>
+                            <h4 class="font-bold text-white mb-1">Systems Over Goals</h4>
+                            <p class="text-sm text-stone-400 leading-relaxed">You do not rise to the level of your goals, you fall to the level of your systems. Every tracked habit in Personal HQ isn't just a chore, it is a vote cast for your new identity.</p>
                         </div>
                     </div>
                     <div class="flex gap-4 items-start bg-stone-800/50 p-6 rounded-3xl border border-stone-700">
@@ -124,10 +180,89 @@
                             <i data-lucide="heart" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-white mb-1">Actionable Coaching</h4>
-                            <p class="text-sm text-stone-400 leading-relaxed">Your AI assistant doesn't just regurgitate your data. It understands your recent patterns and gives you highly specific daily coaching to keep your momentum alive.</p>
+                            <h4 class="font-bold text-white mb-1">Guilt-Free Recovery</h4>
+                            <p class="text-sm text-stone-400 leading-relaxed">Perfection is a trap. When life gets busy and you miss a day, your AI coach doesn't punish you. Instead, it scales your tasks down to help you effortlessly restart your momentum.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Framework / Mental Connection Section -->
+    <section class="py-24 bg-white relative border-b border-stone-100" id="framework">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl font-extrabold text-stone-900 mb-4">The Architecture of Intent</h2>
+                <p class="text-stone-500 font-medium max-w-2xl mx-auto">Most apps give you a scattered to-do list. LifeHQ connects your daily actions directly to your ultimate life goals.</p>
+            </div>
+
+            <div class="relative">
+                <!-- Vertical Line connecting the steps -->
+                <div class="absolute left-[27px] md:left-1/2 top-4 bottom-4 w-px bg-gradient-to-b from-stone-100 via-stone-200 to-stone-100 md:-translate-x-1/2 hidden sm:block"></div>
+
+                <div class="space-y-12">
+                    
+                    <!-- Step 1 -->
+                    <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
+                        <div class="md:w-1/2 md:text-right order-2 md:order-1">
+                            <h4 class="text-xl font-bold text-stone-900 mb-2">1. Time Buckets</h4>
+                            <p class="text-sm text-stone-500 leading-relaxed">We start at the very end. Define your ultimate life goals and strategically assign them to the decades they make the most sense.</p>
+                        </div>
+                        <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-100 flex items-center justify-center text-rose-500 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-rose-200 group-hover:scale-110 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                        <div class="md:w-1/2 order-3 hidden md:block"></div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
+                        <div class="md:w-1/2 order-3 md:order-1 hidden md:block"></div>
+                        <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-100 flex items-center justify-center text-stone-700 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-stone-300 group-hover:scale-110 transition-all">
+                            <i data-lucide="user" class="w-6 h-6"></i>
+                        </div>
+                        <div class="md:w-1/2 text-left order-2 md:order-3 pt-14 md:pt-0 pl-20 md:pl-0">
+                            <h4 class="text-xl font-bold text-stone-900 mb-2">2. Identity</h4>
+                            <p class="text-sm text-stone-500 leading-relaxed">To achieve those goals, who do you have to become? We map your ambitions to a concrete personal identity.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
+                        <div class="md:w-1/2 text-left md:text-right order-2 md:order-1 pt-14 md:pt-0 pl-20 md:pl-0">
+                            <h4 class="text-xl font-bold text-stone-900 mb-2">3. Habits</h4>
+                            <p class="text-sm text-stone-500 leading-relaxed">Your identity is formed by what you do consistently. We break your new identity down into trackable, daily actions.</p>
+                        </div>
+                        <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-100 flex items-center justify-center text-emerald-500 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-emerald-200 group-hover:scale-110 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-6 h-6"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </div>
+                        <div class="md:w-1/2 order-3 hidden md:block"></div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
+                        <div class="md:w-1/2 order-3 md:order-1 hidden md:block"></div>
+                        <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-100 flex items-center justify-center text-indigo-500 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-indigo-200 group-hover:scale-110 transition-all">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-6 h-6"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                        <div class="md:w-1/2 text-left order-2 md:order-3 pt-14 md:pt-0 pl-20 md:pl-0">
+                            <h4 class="text-xl font-bold text-stone-900 mb-2">4. Deep Work</h4>
+                            <p class="text-sm text-stone-500 leading-relaxed">We protect the time needed to execute those actions through dedicated, distraction-free focus sessions.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
+                        <div class="md:w-1/2 text-left md:text-right order-2 md:order-1 pt-14 md:pt-0 pl-20 md:pl-0">
+                            <h4 class="text-xl font-bold text-stone-900 mb-2">5. Journal & Inbox</h4>
+                            <p class="text-sm text-stone-500 leading-relaxed">Finally, we close the loop. Clear your mind of friction in the Inbox, and reflect on your daily progress in the Journal.</p>
+                        </div>
+                        <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-100 flex items-center justify-center text-amber-500 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-amber-200 group-hover:scale-110 transition-all">
+                            <i data-lucide="book-open" class="w-6 h-6"></i>
+                        </div>
+                        <div class="md:w-1/2 order-3 hidden md:block"></div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -136,50 +271,60 @@
     <section class="py-32 bg-white" id="platform">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16 max-w-2xl mx-auto">
-                <h2 class="text-4xl font-extrabold text-stone-900 mb-4">Everything in one place. Perfectly balanced.</h2>
+                <h2 class="text-4xl font-extrabold tracking-tighter text-stone-900 mb-4">Everything in one place. Perfectly balanced.</h2>
                 <p class="text-stone-500 font-medium">A seamlessly integrated space designed for calm organization and personal growth.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[250px]">
+            <div class="bento-grid">
                 
-                <div class="md:col-span-2 rounded-[2rem] border border-indigo-100 p-8 bento-gradient-1 flex flex-col justify-between group overflow-hidden relative">
-                    <div class="absolute -right-10 -bottom-10 opacity-10 text-indigo-600 group-hover:scale-110 transition-transform duration-700">
-                        <i data-lucide="timer" class="w-64 h-64"></i>
+                <!-- 1. Deep Work (Spans 2 Rows, Left Side) -->
+                <div class="bento-item-focus bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col justify-between group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="absolute -right-10 -bottom-10 opacity-10 text-indigo-600 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-64 h-64"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                     </div>
                     <div class="relative z-10">
                         <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-indigo-600 shadow-sm border border-indigo-50 mb-6">
-                            <i data-lucide="target" class="w-6 h-6"></i>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         </div>
-                        <h3 class="text-2xl font-bold text-stone-900 mb-2">Deep Focus Environment</h3>
-                        <p class="text-stone-600 font-medium max-w-md">Find your flow state. A distraction free area that helps you disconnect from the noise, protect your time, and do your most meaningful work.</p>
+                        <h3 class="text-2xl font-bold text-stone-900 mb-2">Deep Work</h3>
+                        <p class="text-stone-600 font-medium max-w-md">It is incredibly easy to lose your day to emails, meetings, and constant coordination. However, the most meaningful progress happens during periods of distraction-free concentration. By building these focus sessions into your daily routine, you can unlock a rewarding flow state. Tune out the noise and create high-quality work quickly.</p>
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-emerald-100 p-8 bento-gradient-2 flex flex-col justify-between group relative overflow-hidden">
-                    <div class="absolute -right-4 -bottom-4 opacity-10 text-emerald-600 group-hover:scale-110 transition-transform duration-700">
-                        <i data-lucide="sparkles" class="w-40 h-40"></i>
+                <!-- 2. Habits (Top Right) -->
+                <div class="bento-item-habits bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col justify-between group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="absolute -right-4 -bottom-4 opacity-10 text-emerald-600 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-40 h-40"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     </div>
                     <div class="relative z-10">
                         <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-50 mb-4">
-                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-stone-900 mb-2">Intelligent Habits</h3>
-                        <p class="text-sm text-stone-600 font-medium">Build consistency without the guilt. If you miss a day, our AI gently helps you recover your momentum rather than punishing you.</p>
+                        <h3 class="text-xl font-bold text-stone-900 mb-2">Habits</h3>
+                        <p class="text-sm text-stone-600 font-medium">Real change comes from small, consistent actions. Focus on getting just 1% better every day, while your AI coach encourages you through the quiet weeks when progress feels slow but is actually secretly compounding.</p>
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-stone-200 bg-stone-50 p-8 flex flex-col justify-between relative group overflow-hidden">
+                <!-- 3. Inbox (Bottom Right, under Habits) -->
+                <div class="bento-item-inbox bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col justify-between group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="absolute -right-4 -bottom-4 opacity-[0.04] text-stone-900 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-48 h-48"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
+                    </div>
                     <div class="relative z-10">
                         <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-stone-600 shadow-sm border border-stone-200 mb-4">
-                            <i data-lucide="inbox" class="w-5 h-5"></i>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-stone-900 mb-2">Universal Inbox</h3>
-                        <p class="text-sm text-stone-600 font-medium">Capture thoughts and open loops instantly. A frictionless space to brain dump before your ideas slip away.</p>
+                        <h3 class="text-xl font-bold text-stone-900 mb-2">Inbox</h3>
+                        <p class="text-sm text-stone-600 font-medium">Your mind is meant for having ideas, not endlessly holding onto them. Instantly capture every passing thought, task, or sudden worry the moment it strikes. Getting these open loops out of your head and into a trusted system immediately relieves stress and anxiety.</p>
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-green-100 bg-green-50/50 p-8 flex flex-col justify-between relative group overflow-hidden">
-                    <div class="absolute top-6 right-6 px-2 py-1 bg-green-200/50 text-green-700 text-[9px] font-black uppercase tracking-widest rounded-md">Coming Soon</div>
+                <!-- 4. WhatsApp Sync (Bottom Left) -->
+                <div class="bento-item-whatsapp bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col justify-between group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="absolute -right-6 -bottom-6 opacity-10 text-green-600 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <i data-lucide="message-circle" class="w-40 h-40"></i>
+                    </div>
+                    <div class="absolute top-6 right-6 px-2 py-1 bg-green-200/50 text-green-700 text-[9px] font-black uppercase tracking-widest rounded-md z-10">Coming Soon</div>
                     <div class="relative z-10">
                         <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-green-600 shadow-sm border border-green-100 mb-4">
                             <i data-lucide="message-square" class="w-5 h-5"></i>
@@ -189,13 +334,17 @@
                     </div>
                 </div>
 
-                <div class="rounded-[2rem] border border-rose-100 bg-rose-50/50 p-8 flex flex-col justify-between relative group overflow-hidden">
+                <!-- 5. Time Buckets (Bottom Right, next to WhatsApp) -->
+                <div class="bento-item-lifemap bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col justify-between group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="absolute -right-10 -bottom-16 opacity-10 text-rose-600 group-hover:scale-110 transition-transform duration-700 pointer-events-none">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-72 h-72"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    </div>
                     <div class="relative z-10">
                         <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-rose-600 shadow-sm border border-rose-100 mb-4">
-                            <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
-                        <h3 class="text-xl font-bold text-stone-900 mb-2">Life Map</h3>
-                        <p class="text-sm text-stone-600 font-medium">Group your life into specific chapters. Track the exact experiences you want to fulfill in each phase of your journey.</p>
+                        <h3 class="text-xl font-bold text-stone-900 mb-2">Time Buckets</h3>
+                        <p class="text-sm text-stone-600 font-medium max-w-2xl">A traditional bucket list tricks you into delaying your dreams until you retire. Instead, intentionally assign experiences to the exact decade they make the most sense physically and mentally. Plan the intense backpacking trip for your twenties and the family vacation for your thirties, ensuring you actually live them before the window closes.</p>
                     </div>
                 </div>
 
@@ -206,112 +355,274 @@
     <section class="py-24 bg-stone-50 border-y border-stone-100">
         <div class="max-w-7xl mx-auto px-6">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-extrabold text-stone-900 mb-4">For those seeking clarity in a noisy world.</h2>
-                <p class="text-stone-500 font-medium">A workspace designed for people who want more from their days.</p>
+                <h2 class="text-3xl font-extrabold text-stone-900 mb-4">Built for the overwhelmed and ambitious.</h2>
+                <p class="text-stone-500 font-medium">A single space to organize your mind, protect your time, and finally get things done that actually matter.</p>
             </div>
             
             <div class="grid md:grid-cols-3 gap-6">
+                
+                <!-- Card 1: Inbox/Brain Dump -->
                 <div class="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm">
                     <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 mb-6">
                         <i data-lucide="brain" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-stone-900 mb-3">You feel scattered</h3>
-                    <p class="text-stone-500 text-sm leading-relaxed">You have big ambitions but your thoughts are everywhere. You need a centralized space to capture ideas, lock in your focus, and eliminate daily decision fatigue.</p>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3">Too much on your mind?</h3>
+                    <p class="text-stone-500 text-sm leading-relaxed">Trying to hold every task, idea, and obligation in your head is exhausting. Give your mind a break by capturing everything instantly in a trusted space, so you can stop worrying and start executing.</p>
                 </div>
                 
+                <!-- Card 2: Habits/Consistency -->
                 <div class="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 mb-6">
                         <i data-lucide="compass" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-stone-900 mb-3">You fall off track</h3>
-                    <p class="text-stone-500 text-sm leading-relaxed">You start strong but struggle when life gets busy. You need a setup that tracks your execution, analyzes your slip ups, and coaches you back on track without the toxic guilt.</p>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3">Giving up after one missed day?</h3>
+                    <p class="text-stone-500 text-sm leading-relaxed">You start a new routine strong, but one busy week completely derails you. Instead of demanding perfection, your system should adapt to your hard days, helping you scale back and recover without the guilt.</p>
                 </div>
                 
+                <!-- Card 3: Deep Work/Focus -->
                 <div class="bg-white p-8 rounded-[2rem] border border-stone-100 shadow-sm">
                     <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 mb-6">
-                        <i data-lucide="leaf" class="w-6 h-6"></i>
+                        <i data-lucide="target" class="w-6 h-6"></i>
                     </div>
-                    <h3 class="text-xl font-bold text-stone-900 mb-3">You want intentional growth</h3>
-                    <p class="text-stone-500 text-sm leading-relaxed">You care deeply about self improvement. You want to ensure you are actually spending your limited time on what matters most, rather than just reacting blindly to endless task lists.</p>
+                    <h3 class="text-xl font-bold text-stone-900 mb-3">Busy day, but nothing done?</h3>
+                    <p class="text-stone-500 text-sm leading-relaxed">It is incredibly easy to spend all day reacting to emails and notifications while your real goals sit untouched. Carve out dedicated time to tune out the noise and finally make meaningful progress.</p>
                 </div>
+                
             </div>
         </div>
     </section>
 
-    <section class="py-32 relative" id="pricing">
+    <!-- Updated Multi-Tier Pricing Section with Toggle -->
+    <section class="py-32 relative bg-[#FDFDFB]" id="pricing">
         <div class="max-w-6xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl font-extrabold text-stone-900 mb-4">Invest in your peace of mind.</h2>
-                <p class="text-stone-500 font-medium">Simple, transparent plans. Exponential returns on your clarity and focus.</p>
+            
+            <div class="text-center mb-10">
+                <h2 class="text-4xl font-extrabold tracking-tighter text-stone-900 mb-4">Invest in your peace of mind.</h2>
+                <p class="text-stone-500 font-medium max-w-xl mx-auto text-lg">Start building momentum for free, or unlock the full power of your AI coach when you are ready to scale.</p>
+            </div>
+
+            <!-- Billing Toggle -->
+            <div class="flex justify-center items-center gap-4 mb-16">
+                <span class="text-sm font-bold text-stone-600" id="label-monthly">Monthly</span>
+                <button type="button" id="billing-toggle" onclick="toggleBilling()" class="relative inline-flex h-7 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-stone-300 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2" role="switch" aria-checked="false">
+                    <span class="sr-only">Toggle annual billing</span>
+                    <span id="toggle-knob" aria-hidden="true" class="pointer-events-none inline-block h-6 w-6 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+                <span class="text-sm font-bold text-stone-900" id="label-annual">
+                    Annual <span class="ml-1.5 text-[10px] font-black uppercase tracking-widest text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md">Save up to 42%</span>
+                </span>
             </div>
 
             <div class="grid md:grid-cols-3 gap-8 mb-12">
                 
-                <div class="bg-white rounded-[2.5rem] p-8 border border-stone-200 shadow-sm flex flex-col hover:border-indigo-200 transition-colors">
-                    <h3 class="text-xl font-bold text-stone-900 mb-2">Guided</h3>
-                    <p class="text-sm text-stone-500 mb-6 border-b border-stone-100 pb-6">Perfect for establishing your baseline routines and organizing your mind.</p>
-                    <div class="mb-8">
-                        <span class="text-5xl font-black text-stone-900">$0</span>
-                        <span class="text-stone-400 font-medium">/forever</span>
+                <!-- Tier 1: Basic -->
+                <div class="bg-white rounded-[2.5rem] p-8 border border-stone-200 shadow-sm flex flex-col hover:border-stone-300 transition-colors">
+                    <h3 class="text-xl font-bold text-stone-900 mb-2">Basic</h3>
+                    <p class="text-sm text-stone-500 mb-6 border-b border-stone-100 pb-6">Perfect for escaping the noise and establishing your baseline daily routines.</p>
+                    
+                    <div class="mb-8 h-[92px]">
+                        <div class="flex items-center gap-2 mb-1 opacity-0 pointer-events-none">
+                            <span class="text-2xl font-bold">$0</span>
+                        </div>
+                        <div>
+                            <span class="text-5xl font-black text-stone-900">$0</span>
+                            <span class="text-stone-400 font-medium">/forever</span>
+                        </div>
                     </div>
+                    
                     <ul class="space-y-4 mb-10 flex-1">
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-stone-300"></i> Essential habit tracking (up to 3)</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-stone-300"></i> Distraction free focus system</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-stone-300"></i> Core life management tools</li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
+                            <span>Universal Inbox capture</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
+                            <span>Distraction-free Deep Work timer</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-stone-300 shrink-0"></i>
+                            <span>Core Habit tracking (up to 3)</span>
+                        </li>
                     </ul>
                     <a href="{{ url_for('auth.register') }}" class="w-full py-4 px-6 bg-stone-100 hover:bg-stone-200 text-stone-900 rounded-2xl text-center font-bold transition-colors">Start Free</a>
                 </div>
 
+                <!-- Tier 2: Pro -->
                 <div class="bg-stone-900 rounded-[2.5rem] p-8 border border-stone-800 shadow-2xl flex flex-col relative transform md:-translate-y-4">
-                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-indigo-400 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30">
+                    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-500/30 whitespace-nowrap">
                         Most Popular
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-2">Visionary</h3>
-                    <p class="text-sm text-stone-400 mb-6 border-b border-stone-800 pb-6">Unlock your dedicated AI life assistant and deeper personal insights.</p>
-                    <div class="mb-8">
-                        <span class="text-5xl font-black text-white">$12</span>
-                        <span class="text-stone-500 font-medium">/month</span>
+                    <h3 class="text-xl font-bold text-white mb-2">Pro</h3>
+                    <p class="text-sm text-stone-400 mb-6 border-b border-stone-800 pb-6">The complete system. Tie your daily actions directly to your long-term identity.</p>
+                    
+                    <!-- Pro Pricing Container -->
+                    <div class="mb-8 h-[92px] relative">
+                        <!-- Monthly Price -->
+                        <div class="price-monthly absolute inset-0 transition-opacity duration-300 opacity-100">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl font-bold text-stone-500 line-through decoration-rose-500/60">$15</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/30">Early Adopter Rate</span>
+                            </div>
+                            <div>
+                                <span class="text-5xl font-black text-white">$9</span>
+                                <span class="text-stone-500 font-medium">/month</span>
+                            </div>
+                        </div>
+                        <!-- Annual Price -->
+                        <div class="price-annual absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl font-bold text-stone-500 line-through decoration-rose-500/60">$12</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/30">Early Adopter Rate</span>
+                            </div>
+                            <div>
+                                <span class="text-5xl font-black text-white">$7</span>
+                                <span class="text-stone-500 font-medium">/month</span>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Billed $84 annually</p>
+                        </div>
                     </div>
+
                     <ul class="space-y-4 mb-10 flex-1">
-                        <li class="flex items-center gap-3 text-sm text-stone-300 font-medium"><i data-lucide="check" class="w-5 h-5 text-indigo-400"></i> Unlimited habit tracking & goals</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-300 font-medium"><i data-lucide="check" class="w-5 h-5 text-indigo-400"></i> Daily AI insights & coaching</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-300 font-medium"><i data-lucide="check" class="w-5 h-5 text-indigo-400"></i> Journaling & Custom Prompts</li>
+                        <li class="flex items-start gap-3 text-sm text-stone-300 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-indigo-400 shrink-0"></i> 
+                            <span>Unlimited Habits, Time Buckets & Identity mapping</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-300 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-indigo-400 shrink-0"></i> 
+                            <span>Daily journaling & automated AI morning briefings</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-300 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-indigo-400 shrink-0"></i> 
+                            <span>Intelligent pattern recognition & recovery plans</span>
+                        </li>
                     </ul>
-                    <a href="{{ url_for('auth.register', plan='pro') }}" class="w-full py-4 px-6 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl text-center font-bold transition-all shadow-lg shadow-indigo-500/25">Upgrade to Visionary</a>
+                    <a href="{{ url_for('auth.register', plan='pro') }}" class="w-full py-4 px-6 bg-indigo-500 hover:bg-indigo-400 text-white rounded-2xl text-center font-bold transition-all shadow-lg shadow-indigo-500/25">Upgrade to Pro</a>
                 </div>
 
-                <div class="bg-white rounded-[2.5rem] p-8 border border-stone-200 shadow-sm flex flex-col hover:border-indigo-200 transition-colors">
+                <!-- Tier 3: Limitless -->
+                <div class="bg-white rounded-[2.5rem] p-8 border border-stone-200 shadow-sm flex flex-col hover:border-stone-300 transition-colors">
                     <h3 class="text-xl font-bold text-stone-900 mb-2">Limitless</h3>
-                    <p class="text-sm text-stone-500 mb-6 border-b border-stone-100 pb-6">Frictionless capture with complete conversational journaling access.</p>
-                    <div class="mb-8">
-                        <span class="text-5xl font-black text-stone-900">$29</span>
-                        <span class="text-stone-400 font-medium">/month</span>
+                    <p class="text-sm text-stone-500 mb-6 border-b border-stone-100 pb-6">Zero friction. The ultimate setup for those who want deep insights and total flexibility.</p>
+                    
+                    <!-- Limitless Pricing Container -->
+                    <div class="mb-8 h-[92px] relative">
+                        <!-- Monthly Price -->
+                        <div class="price-monthly absolute inset-0 transition-opacity duration-300 opacity-100">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl font-bold text-stone-400 line-through decoration-rose-500/60">$29</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">Early Adopter Rate</span>
+                            </div>
+                            <div>
+                                <span class="text-5xl font-black text-stone-900">$19</span>
+                                <span class="text-stone-500 font-medium">/month</span>
+                            </div>
+                        </div>
+                        <!-- Annual Price -->
+                        <div class="price-annual absolute inset-0 transition-opacity duration-300 opacity-0 pointer-events-none">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-xl font-bold text-stone-400 line-through decoration-rose-500/60">$24</span>
+                                <span class="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-100">Early Adopter Rate</span>
+                            </div>
+                            <div>
+                                <span class="text-5xl font-black text-stone-900">$15</span>
+                                <span class="text-stone-500 font-medium">/month</span>
+                            </div>
+                            <p class="text-xs text-stone-400 mt-1">Billed $180 annually</p>
+                        </div>
                     </div>
+
                     <ul class="space-y-4 mb-10 flex-1">
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-emerald-500"></i> Everything in Visionary</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-emerald-500"></i> Conversational WhatsApp Sync</li>
-                        <li class="flex items-center gap-3 text-sm text-stone-700 font-medium"><i data-lucide="check" class="w-5 h-5 text-emerald-500"></i> Priority AI model access</li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 shrink-0"></i> 
+                            <span>Everything in Pro, plus complete tracking analytics & infinite journal history</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 shrink-0"></i> 
+                            <span>Priority Access: Conversational WhatsApp Sync <span class="ml-2 text-[8px] uppercase tracking-widest font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">Soon</span></span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-stone-700 font-medium">
+                            <i data-lucide="check" class="w-5 h-5 text-emerald-500 shrink-0"></i> 
+                            <span>Priority access to all future feature updates and early beta testing</span>
+                        </li>
                     </ul>
-                    <a href="{{ url_for('auth.register', plan='elite') }}" class="w-full py-4 px-6 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-center font-bold transition-colors">Go Limitless</a>
+                    <a href="{{ url_for('auth.register', plan='limitless') }}" class="w-full py-4 px-6 bg-stone-900 hover:bg-stone-800 text-white rounded-2xl text-center font-bold transition-colors">Go Limitless</a>
                 </div>
             </div>
 
-            <div class="max-w-4xl mx-auto bg-gradient-to-br from-indigo-50 to-white rounded-[2.5rem] p-1 border-2 border-indigo-100 shadow-xl">
+            <!-- Lifetime Pass -->
+            <div class="max-w-4xl mx-auto bg-stone-50 rounded-[2.5rem] p-1 border border-stone-200 shadow-sm hover:shadow-md transition-shadow">
                 <div class="bg-white rounded-[2.25rem] p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div>
-                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-md mb-4 border border-rose-100">Limited Availability</div>
-                        <h3 class="text-2xl font-extrabold text-stone-900 mb-2">The Lifetime Sanctuary Pass</h3>
-                        <p class="text-stone-500 font-medium max-w-md">Hate subscriptions? Pay once and own the Limitless tier forever. A permanent investment in your self improvement.</p>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-widest rounded-md mb-4 border border-rose-100">
+                            Early Adopter — 50% Off
+                        </div>
+                        <h3 class="text-2xl font-extrabold text-stone-900 mb-2">The Lifetime License</h3>
+                        <p class="text-stone-500 font-medium max-w-md">Hate subscriptions? Pay once and own the Limitless tier forever. A permanent investment in your focus.</p>
                     </div>
                     <div class="text-center md:text-right shrink-0">
                         <div class="text-4xl font-black text-stone-900 mb-1">$299</div>
-                        <div class="text-sm font-bold text-stone-400 line-through mb-4">$500 Regular</div>
+                        <div class="text-sm font-bold text-stone-400 line-through decoration-rose-500/50 mb-4">$599 Regular Price</div>
                         <a href="{{ url_for('auth.register', plan='lifetime') }}" class="inline-block px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all shadow-md">Claim Lifetime Access</a>
                     </div>
                 </div>
             </div>
+            
         </div>
     </section>
+
+    <!-- Vanilla JS for Pricing Toggle -->
+    <script>
+        let isAnnual = false;
+        
+        function toggleBilling() {
+            isAnnual = !isAnnual;
+            const knob = document.getElementById('toggle-knob');
+            const toggleBg = document.getElementById('billing-toggle');
+            
+            const monthlyPrices = document.querySelectorAll('.price-monthly');
+            const annualPrices = document.querySelectorAll('.price-annual');
+            const labelMonthly = document.getElementById('label-monthly');
+            const labelAnnual = document.getElementById('label-annual');
+            
+            if (isAnnual) {
+                // UI Toggle styling
+                knob.classList.replace('translate-x-0', 'translate-x-7');
+                toggleBg.classList.replace('bg-stone-300', 'bg-indigo-600');
+                toggleBg.setAttribute('aria-checked', 'true');
+                
+                labelMonthly.classList.replace('text-stone-900', 'text-stone-600');
+                labelAnnual.classList.replace('text-stone-600', 'text-stone-900');
+
+                // Price swapping
+                monthlyPrices.forEach(el => {
+                    el.classList.replace('opacity-100', 'opacity-0');
+                    el.classList.add('pointer-events-none');
+                });
+                annualPrices.forEach(el => {
+                    el.classList.replace('opacity-0', 'opacity-100');
+                    el.classList.remove('pointer-events-none');
+                });
+            } else {
+                // UI Toggle styling
+                knob.classList.replace('translate-x-7', 'translate-x-0');
+                toggleBg.classList.replace('bg-indigo-600', 'bg-stone-300');
+                toggleBg.setAttribute('aria-checked', 'false');
+                
+                labelMonthly.classList.replace('text-stone-600', 'text-stone-900');
+                labelAnnual.classList.replace('text-stone-900', 'text-stone-600');
+
+                // Price swapping
+                monthlyPrices.forEach(el => {
+                    el.classList.replace('opacity-0', 'opacity-100');
+                    el.classList.remove('pointer-events-none');
+                });
+                annualPrices.forEach(el => {
+                    el.classList.replace('opacity-100', 'opacity-0');
+                    el.classList.add('pointer-events-none');
+                });
+            }
+        }
+    </script>
 
     <section class="py-24 bg-white border-t border-stone-100">
         <div class="max-w-3xl mx-auto px-6">
