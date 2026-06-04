@@ -33,10 +33,12 @@ class Subscription(db.Model):  # pylint: disable=R0903; # sqlalchemy class used 
     user = relationship("User", back_populates="subscriptions")
     plan = relationship("Plan", back_populates="subscriptions")
 
-    def __init__(self, user_id: int, movie_id: int, date_watched: datetime):
+    def __init__(self, user_id: int, plan_id: int, start_date: datetime, end_date: datetime, status=SubscriptionStatus.ACTIVE):
         self.user_id = user_id
-        self.movie_id = movie_id
-        self.date_watched = date_watched
+        self.plan_id = plan_id
+        self.start_date = start_date
+        self.end_date = end_date
+        self.status = status
 
     def __repr__(self):
         return (

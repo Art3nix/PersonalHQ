@@ -5,6 +5,7 @@ from datetime import datetime, date
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from personalhq.models.subscriptions import SubscriptionStatus
 from personalhq.extensions import db, bcrypt
 
 
@@ -77,6 +78,14 @@ class User(UserMixin, db.Model):
         """Verifies if the provided plain-text password matches the hash."""
         return bcrypt.check_password_hash(self.password, password)
 
+    @property
+    def active_plan(self):
+        """Returns the name of the user's currently active plan, or 'Basic' if none."""
+        active_sub = self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
+        if active_sub and active_sub.plan:
+            return active_sub.plan.name.lower()
+        return 'basic'
+
     def __init__(self, email: str,
                  first_name: str,
                  last_name: str,
@@ -93,3 +102,5 @@ class User(UserMixin, db.Model):
             f' {self.email}'
             f' {self.last_login}'
         )
+    
+    

@@ -58,6 +58,8 @@ def create_app(config_name=None):
     app.register_blueprint(dashboard_bp)
     from personalhq.routes.auth import auth_bp
     app.register_blueprint(auth_bp)
+    from personalhq.routes.billing import billing_bp
+    app.register_blueprint(billing_bp)
     from personalhq.routes.habits import habits_api_bp, habits_view_bp
     app.register_blueprint(habits_api_bp)
     app.register_blueprint(habits_view_bp)

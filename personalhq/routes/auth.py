@@ -69,6 +69,15 @@ def register():
             return render_template('auth/register.html', form=form)
 
         login_user(user)
+        
+        # Check if they clicked a specific tier from the landing page
+        target_plan = request.args.get('plan', 'basic').lower()
+        
+        # If they chose a paid tier, send them to the checkout!
+        if target_plan in ['pro', 'limitless', 'lifetime']:
+            return redirect(url_for('billing.mock_upgrade', plan_name=target_plan))
+            
+        # Otherwise, they chose Basic. Send them to onboarding/dashboard.
         return redirect_user_state(user)
 
     return render_template('auth/register.html', form=form)
