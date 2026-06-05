@@ -93,6 +93,17 @@ class User(UserMixin, db.Model):
         from personalhq.models.subscriptions import SubscriptionStatus
         return self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
 
+    @property
+    def access_level(self):
+        """Returns the user's numeric access level based on their active plan.
+        1 = Basic, 2 = Pro, 3 = Limitless, 4 = Lifetime
+        """
+        from personalhq.models.subscriptions import SubscriptionStatus
+        active_sub = self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
+        if active_sub and active_sub.plan:
+            return active_sub.plan.access_level
+        return 1 # Default to Basic
+
     def __init__(self, email: str,
                  first_name: str,
                  last_name: str,

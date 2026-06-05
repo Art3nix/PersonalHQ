@@ -170,7 +170,7 @@
             </form>
         </section>
 
-        <section class="bg-white rounded-[2rem] border border-stone-200 overflow-hidden shadow-sm mb-8 mt-12">
+        <section id="pricing" class="bg-white rounded-[2rem] border border-stone-200 overflow-hidden shadow-sm mb-8 mt-12">
             <div class="p-8 border-b border-stone-100 flex justify-between items-start">
                 <div>
                     <h3 class="text-xl font-bold text-stone-900 mb-2">Billing & Subscription</h3>
@@ -201,7 +201,7 @@
                 </div>
                 
                 {% if current_user.active_plan == 'basic' %}
-                    <a href="{{ url_for('dashboard.index') }}#pricing" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
+                    <a href="/#pricing" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
                         Upgrade Plan
                     </a>
                 {% else %}
