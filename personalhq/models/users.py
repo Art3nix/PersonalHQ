@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    stripe_customer_id: Mapped[str | None] = mapped_column(unique=True, nullable=True)
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
@@ -85,6 +86,12 @@ class User(UserMixin, db.Model):
         if active_sub and active_sub.plan:
             return active_sub.plan.name.lower()
         return 'basic'
+    
+    @property
+    def active_subscription(self):
+        """Returns the user's currently active Subscription record."""
+        from personalhq.models.subscriptions import SubscriptionStatus
+        return self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
 
     def __init__(self, email: str,
                  first_name: str,

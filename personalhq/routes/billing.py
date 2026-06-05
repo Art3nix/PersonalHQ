@@ -121,3 +121,28 @@ def mock_upgrade(plan_name):
     
     flash(f'Successfully upgraded to {plan.name}!', 'success')
     return redirect(url_for('dashboard.index'))
+
+@billing_bp.route('/portal')
+@login_required
+def customer_portal():
+    """Generates a secure, one-time link to the Stripe Customer Portal."""
+    
+    # 1. Ensure the user actually has a Stripe Customer ID
+    if not current_user.stripe_customer_id:
+        flash('No active billing profile found. Please upgrade your plan first.', 'error')
+        return redirect(url_for('settings.index'))
+
+    try:
+        # 2. Tell Stripe to create a portal session
+        # You will need your Stripe Secret Key configured (stripe.api_key = 'sk_test_...')
+        portal_session = stripe.billing_portal.Session.create(
+            customer=current_user.stripe_customer_id,
+            return_url=url_for('settings.index', _external=True) # Where to send them when they click "Back"
+        )
+        
+        # 3. Redirect them to the secure Stripe URL
+        return redirect(portal_session.url)
+        
+    except Exception as e:
+        flash('Unable to access the billing portal right now. Please try again later.', 'error')
+        return redirect(url_for('settings.index'))
