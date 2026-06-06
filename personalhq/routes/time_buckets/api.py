@@ -246,6 +246,7 @@ def edit_theme(id):
 
 @time_buckets_api_bp.route('/themes/<int:id>/delete', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def delete_theme(id):
     theme = db.session.get(CoreTheme, id)
     # Security: Check ownership
@@ -268,6 +269,7 @@ def edit_emotion(id):
 
 @time_buckets_api_bp.route('/emotions/<int:id>/delete', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def delete_emotion(id):
     emotion = db.session.get(EmotionalValue, id)
     # Security: Check ownership

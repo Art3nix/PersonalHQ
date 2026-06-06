@@ -205,6 +205,7 @@ def edit_prompt(prompt_id):
 
 @journals_api_bp.route('/prompts/<int:prompt_id>/delete', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def delete_prompt(prompt_id):
     """Deletes a specific prompt."""
     prompt = db.session.get(JournalPrompt, prompt_id)
