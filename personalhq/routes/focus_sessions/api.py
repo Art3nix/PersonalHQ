@@ -17,7 +17,13 @@ def start():
     data = request.get_json() or {}
     name = data.get('name', 'Deep Work Block')
     duration = data.get('duration_minutes', 60)
-    identity_id = data.get('identity_id')
+    
+    # --- SECURITY LOCK ---
+    if current_user.access_level >= 2:
+        identity_id = data.get('identity_id')
+    else:
+        identity_id = None
+    # ---------------------
 
     session = focus_service.start_session(current_user.id, name, duration, identity_id)
     return jsonify({"status": "success", "session_id": session.id}), 201
@@ -84,7 +90,12 @@ def schedule_session():
         user_id=current_user.id, target_date=target_date
     ).scalar() or 0
 
-    identity_id = request.form.get('identity_id', type=int)
+    # --- SECURITY LOCK ---
+    if current_user.access_level >= 2:
+        identity_id = request.form.get('identity_id', type=int)
+    else:
+        identity_id = None
+    # ---------------------
 
     new_session = FocusSession(
         user_id=current_user.id,
@@ -163,14 +174,17 @@ def edit_session(session_id):
     name = request.form.get('name')
     target_date_str = request.form.get('target_date')
     duration = request.form.get('target_duration_minutes', type=int)
-    identity_id = request.form.get('identity_id', type=int)
 
     if name and target_date_str:
         session.name = name.strip()
         session.target_date = datetime.strptime(target_date_str, '%Y-%m-%d').date()
         if duration:
             session.target_duration_minutes = duration
-        session.identity_id = identity_id or None
+
+        # --- SECURITY LOCK ---
+        if current_user.access_level >= 2:
+            session.identity_id = request.form.get('identity_id', type=int) or None
+        # ---------------------
         db.session.commit()
 
     return redirect(url_for('focus_view.planner'))
