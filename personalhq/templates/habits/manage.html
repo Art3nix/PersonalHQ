@@ -185,10 +185,18 @@
                         {{ ai_habits_subtitle | default('Track your consistency and manage your routines.', true) }}
                     </p>
                 </div>
-                <button onclick="document.getElementById('new-habit-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('new-habit-modal').classList.remove('translate-x-full'), 10);" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    New Habit
-                </button>
+                <!-- New Habit Button with Tier Limitation -->
+                {% if current_user.access_level < 2 and habits|length >= 3 %}
+                    <a href="{{ url_for('settings.index') }}#pricing" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Unlock More Habits
+                    </a>
+                {% else %}
+                    <button onclick="document.getElementById('new-habit-modal').classList.remove('hidden'); setTimeout(() => document.getElementById('new-habit-modal').classList.remove('translate-x-full'), 10);" class="bg-[#1A1C1E] text-white px-6 py-3 rounded-2xl font-bold text-sm hover:bg-stone-800 transition-all shadow-xl shadow-stone-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        New Habit
+                    </button>
+                {% endif %}
             </header>
 
             <section class="mb-12">
@@ -813,18 +821,33 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
-                    <div class="relative">
-                        <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-10 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer appearance-none">
-                            <option value="">None (Unassigned)</option>
-                            {% for identity in identities %}
-                                <option value="{{ identity.id }}">{{ identity.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        Assign to Identity
+                        {% if current_user.access_level < 2 %}
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-500 border border-indigo-100">Pro</span>
+                        {% else %}
+                            <span class="text-stone-400 font-normal tracking-normal lowercase">(Optional)</span>
+                        {% endif %}
+                    </label>
+                    
+                    {% if current_user.access_level >= 2 %}
+                        <div class="relative">
+                            <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-10 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer appearance-none">
+                                <option value="">None (Unassigned)</option>
+                                {% for identity in identities %}
+                                    <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <a href="{{ url_for('settings.index') }}#pricing" class="w-full bg-stone-50/50 border border-stone-100 rounded-xl py-3 px-4 text-sm outline-none font-medium text-stone-400 flex items-center justify-between group hover:border-indigo-200 transition-colors cursor-pointer shadow-sm">
+                            <span>Upgrade to map habits to identities</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-300 group-hover:text-indigo-500 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </a>
+                    {% endif %}
                 </div>
                 <details class="border border-stone-200 rounded-2xl overflow-hidden">
                     <summary class="text-xs font-bold text-stone-900 uppercase tracking-wider px-4 py-3 cursor-pointer hover:bg-stone-50 transition-colors list-none flex items-center justify-between">
@@ -1007,18 +1030,33 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity</label>
-                    <div class="relative">
-                        <select name="identity_id" id="edit-identity-input" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-10 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer appearance-none">
-                            <option value="">None (Unassigned)</option>
-                            {% for identity in identities %}
-                                <option value="{{ identity.id }}">{{ identity.name }}</option>
-                            {% endfor %}
-                        </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                        Assign to Identity
+                        {% if current_user.access_level < 2 %}
+                            <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-500 border border-indigo-100">Pro</span>
+                        {% else %}
+                            <span class="text-stone-400 font-normal tracking-normal lowercase">(Optional)</span>
+                        {% endif %}
+                    </label>
+                    
+                    {% if current_user.access_level >= 2 %}
+                        <div class="relative">
+                            <select name="identity_id" id="edit-identity-input" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 pl-4 pr-10 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer appearance-none">
+                                <option value="">None (Unassigned)</option>
+                                {% for identity in identities %}
+                                    <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-stone-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
                         </div>
-                    </div>
+                    {% else %}
+                        <a href="{{ url_for('settings.index') }}#pricing" class="w-full bg-stone-50/50 border border-stone-100 rounded-xl py-3 px-4 text-sm outline-none font-medium text-stone-400 flex items-center justify-between group hover:border-indigo-200 transition-colors cursor-pointer shadow-sm">
+                            <span>Upgrade to map habits to identities</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-stone-300 group-hover:text-indigo-500 transition-colors"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </a>
+                    {% endif %}
                 </div>
                 <details class="border border-stone-200 rounded-2xl overflow-hidden" id="edit-habit-loop-details">
                     <summary class="text-xs font-bold text-stone-900 uppercase tracking-wider px-4 py-3 cursor-pointer hover:bg-stone-50 transition-colors list-none flex items-center justify-between">
@@ -1311,14 +1349,22 @@
             
             // 2. Pre-fill text inputs
             document.getElementById('edit-name-input').value = data.name;
-            document.getElementById('edit-identity-input').value = data.identity;
+            
+            // SAFETY CHECK: Only set identity if the user has access and the dropdown exists
+            const identityInput = document.getElementById('edit-identity-input');
+            if (identityInput) {
+                identityInput.value = data.identity;
+            }
+
             document.getElementById('edit-description').value = data.description || '';
             document.getElementById('edit-trigger').value = data.trigger || '';
             document.getElementById('edit-target-count').value = data.target || 1;
+            
             const editCraving = document.getElementById('edit-craving');
             const editReward = document.getElementById('edit-reward');
             if (editCraving) editCraving.value = data.craving || '';
             if (editReward) editReward.value = data.reward || '';
+            
             // Open the habit loop section if any field is filled
             if (data.trigger || data.description || data.craving || data.reward) {
                 const loopDetails = document.getElementById('edit-habit-loop-details');
