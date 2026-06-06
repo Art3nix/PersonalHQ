@@ -3,6 +3,7 @@
 from flask import flash
 from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
+from personalhq.utils.decorators import requires_access_level
 from personalhq.extensions import db
 from personalhq.models.journals import Journal, JournalFrequency
 from personalhq.models.journalentries import JournalEntry
@@ -12,6 +13,7 @@ journals_api_bp = Blueprint('journals_api', __name__, url_prefix='/actions/journ
 
 @journals_api_bp.route('/<int:journal_id>/entries', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def add_entry(journal_id):
     """Receives form data to create a new journal entry."""
     journal = db.session.get(Journal, journal_id)
@@ -36,6 +38,7 @@ def add_entry(journal_id):
 
 @journals_api_bp.route('/entries/<int:entry_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_entry(entry_id):
     """Updates the text and the prompt of a specific journal entry."""
     entry = db.session.get(JournalEntry, entry_id)
@@ -76,6 +79,7 @@ def delete_entry(entry_id):
 
 @journals_api_bp.route('/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_journal():
     """Creates a new journal category."""
     name = request.form.get('name')
@@ -106,6 +110,7 @@ def create_journal():
 
 @journals_api_bp.route('/<int:journal_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_journal(journal_id):
     """Updates an existing Journal's name, description, icon, and frequency."""
     journal = db.session.get(Journal, journal_id)
@@ -154,6 +159,7 @@ def delete_journal(journal_id):
 
 @journals_api_bp.route('/<int:journal_id>/prompts/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def add_prompt(journal_id):
     """Adds a new rotating prompt to a specific journal."""
     journal = db.session.get(Journal, journal_id)
@@ -178,6 +184,7 @@ def add_prompt(journal_id):
 
 @journals_api_bp.route('/prompts/<int:prompt_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_prompt(prompt_id):
     """Updates the text of a specific journal prompt."""
     prompt = db.session.get(JournalPrompt, prompt_id)

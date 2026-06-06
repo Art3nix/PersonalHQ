@@ -27,51 +27,55 @@ def index():
         recent_entries[journal.id] = journal_entries
 
     # ==========================================
-    # AI COACH CONTEXT
+    # AI COACH CONTEXT (PRO TIER ONLY)
     # ==========================================
-    today = get_logical_today(current_user)
-    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+    
+    ai_journals_subtitle = None
+    ai_journals_empty_state = None
 
-    # Fetch from DB
-    ai_journals_subtitle = daily_note.ai_journals_subtitle if daily_note else None
-    ai_journals_empty_state = daily_note.ai_journals_empty_state if daily_note else None
+    if current_user.access_level >= 2:
+        daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+        ai_journals_subtitle = daily_note.ai_journals_subtitle if daily_note else None
+        ai_journals_empty_state = daily_note.ai_journals_empty_state if daily_note else None
 
-    if current_app.config['TEST_AI_NUDGES'] is True:
-        if not journals:
-            ai_journals_empty_state = "A clear mind executes better. Create a 'Daily Brain Dump' or a 'Gratitude' journal to start processing your thoughts."
-        else:
-            # 1. Global Subtitle
-            # Check if they have written anything today across all journals
-            today = get_logical_today(current_user)
-            wrote_today = any(
-                entry.created_at.date() == today
-                for entries in recent_entries.values()
-                for entry in entries
-            )
-
-            if wrote_today:
-                ai_journals_subtitle = "Your mind is decluttered. You have successfully processed your thoughts today."
+        if current_app.config.get('TEST_AI_NUDGES') is True:
+            if not journals:
+                ai_journals_empty_state = "A clear mind executes better. Create a 'Daily Brain Dump' or a 'Gratitude' journal to start processing your thoughts."
             else:
-                ai_journals_subtitle = "You haven't written today. Take 2 minutes to document what is on your mind."
+                # 1. Global Subtitle
+                # Check if they have written anything today across all journals
+                today = get_logical_today(current_user)
+                wrote_today = any(
+                    entry.created_at.date() == today
+                    for entries in recent_entries.values()
+                    for entry in entries
+                )
 
-            # 2. Individual Journal Insights
-            for journal in journals:
-                all_entries = recent_entries.get(journal.id, [])
-
-                if not all_entries:
-                    journal.ai_insight = "This space is completely empty. What is holding you back from writing your first entry here?"
+                if wrote_today:
+                    ai_journals_subtitle = "Your mind is decluttered. You have successfully processed your thoughts today."
                 else:
-                    last_entry_date = all_entries[0].created_at.date()
-                    days_since_last = (today - last_entry_date).days
+                    ai_journals_subtitle = "You haven't written today. Take 2 minutes to document what is on your mind."
 
-                    if days_since_last == 0:
-                        journal.ai_insight = "Entry logged today. Momentum is building."
-                    elif days_since_last <= 3:
-                        journal.ai_insight = f"Last updated {days_since_last} days ago. Keep the habit alive."
+                # 2. Individual Journal Insights
+                for journal in journals:
+                    all_entries = recent_entries.get(journal.id, [])
+
+                    if not all_entries:
+                        journal.ai_insight = "This space is completely empty. What is holding you back from writing your first entry here?"
                     else:
-                        journal.ai_insight = f"It has been {days_since_last} days since you last wrote here. Is there a lingering thought you need to get out?"
-    # ==========================================
-    # END JOURNALS AI MOCK DATA
+                        last_entry_date = all_entries[0].created_at.date()
+                        days_since_last = (today - last_entry_date).days
+
+                        if days_since_last == 0:
+                            journal.ai_insight = "Entry logged today. Momentum is building."
+                        elif days_since_last <= 3:
+                            journal.ai_insight = f"Last updated {days_since_last} days ago. Keep the habit alive."
+                        else:
+                            journal.ai_insight = f"It has been {days_since_last} days since you last wrote here. Is there a lingering thought you need to get out?"
+    else:
+        # Clear insights for Basic tier
+        for journal in journals:
+            journal.ai_insight = None
     # ==========================================
 
     return render_template(
@@ -120,27 +124,27 @@ def write(journal_id):
             active_prompt = journal.prompts[0]
 
     # ==========================================
-    # AI COACH CONTEXT
+    # AI COACH CONTEXT (PRO TIER ONLY)
     # ==========================================
-    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+    ai_writing_coach = None
+    ai_prompt_suggestion = None
 
-    # Fetch from DB
-    ai_writing_coach = daily_note.ai_writing_coach if daily_note else None
-    ai_prompt_suggestion = daily_note.ai_prompt_suggestion if daily_note else None
+    if current_user.access_level >= 2:
+        daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+        ai_writing_coach = daily_note.ai_writing_coach if daily_note else None
+        ai_prompt_suggestion = daily_note.ai_prompt_suggestion if daily_note else None
 
-    if current_app.config['TEST_AI_NUDGES'] is True:
-        # 1. Warm-Up Coach
-        if entry_to_edit:
-            ai_writing_coach = "You are editing a past entry. Be careful not to rewrite history; just clarify the thoughts you had in that specific moment."
-        else:
-            # Here you could check time of day, streak length, etc.
-            ai_writing_coach = "Drop your mental filters. The blank page isn't judging you. Write whatever comes to mind first, even if it's just 'I don't know what to write today'."
+        if current_app.config.get('TEST_AI_NUDGES') is True:
+            # 1. Warm-Up Coach
+            if entry_to_edit:
+                ai_writing_coach = "You are editing a past entry. Be careful not to rewrite history; just clarify the thoughts you had in that specific moment."
+            else:
+                # Here you could check time of day, streak length, etc.
+                ai_writing_coach = "Drop your mental filters. The blank page isn't judging you. Write whatever comes to mind first, even if it's just 'I don't know what to write today'."
 
-        # 2. Sidebar Prompt Engineer
-        # In production, an LLM would read their past 5 entries and generate a prompt they haven't answered yet.
-        ai_prompt_suggestion = "What is one difficult decision I am currently avoiding?"
-    # ==========================================
-    # END WRITING AI MOCK DATA
+            # 2. Sidebar Prompt Engineer
+            # In production, an LLM would read their past 5 entries and generate a prompt they haven't answered yet.
+            ai_prompt_suggestion = "What is one difficult decision I am currently avoiding?"
     # ==========================================
 
     return render_template(
@@ -166,43 +170,43 @@ def entries(journal_id):
     journal_entries = JournalEntry.query.filter_by(journal_id=journal.id).order_by(JournalEntry.created_at.desc()).all()
 
     # ==========================================
-    # AI COACH CONTEXT
+    # AI COACH CONTEXT (PRO TIER ONLY)
     # ==========================================
-    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+    ai_archive_insight = None
+    ai_archive_empty_state = None
 
-    # Fetch from DB
-    ai_archive_insight = daily_note.ai_archive_insight if daily_note else None
-    ai_archive_empty_state = daily_note.ai_archive_empty_state if daily_note else None
+    if current_user.access_level >= 2:
+        daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+        ai_archive_insight = daily_note.ai_archive_insight if daily_note else None
+        ai_archive_empty_state = daily_note.ai_archive_empty_state if daily_note else None
 
-    if current_app.config['TEST_AI_NUDGES'] is True:
-        if not journal_entries:
-            ai_archive_empty_state = f"This '{journal.name}' journal is a blank slate. Use the Prompts menu to find a starting point and write your first entry."
-        else:
-            # 1. Macro Archive Insight (Summarizing the journal)
-            if len(journal_entries) >= 5:
-                ai_archive_insight = "Pattern detected: You consistently write longer entries on weekends. Your stress levels appear lower when you document them."
+        if current_app.config.get('TEST_AI_NUDGES') is True:
+            if not journal_entries:
+                ai_archive_empty_state = f"This '{journal.name}' journal is a blank slate. Use the Prompts menu to find a starting point and write your first entry."
             else:
-                ai_archive_insight = "You've established a baseline. Keep adding entries to unlock deeper pattern recognition."
-
-            # 2. Micro Entry Insights (Attached to individual past entries)
-            for i, entry in enumerate(journal_entries):
-                # We only want to put insights on SOME entries, not every single one, 
-                # to prevent the UI from feeling cluttered.
-                content_lower = entry.content.lower()
-                
-                if i == 0: # Most recent entry
-                    entry.ai_insight = "Your latest entry. Notice how your perspective here compares to your older entries below."
-                elif "anxious" in content_lower or "worried" in content_lower:
-                    entry.ai_insight = "Reflection: Looking back at this now, did the thing you were worried about actually happen?"
-                elif "goal" in content_lower or "excited" in content_lower:
-                    entry.ai_insight = "Momentum check: Have you taken the next physical step toward this since you wrote it?"
-                elif len(entry.content.split()) > 100 and i % 3 == 0:
-                    # Randomly tagging long, deep entries
-                    entry.ai_insight = "Deep dive. This entry contains significant emotional processing."
+                # 1. Macro Archive Insight
+                if len(journal_entries) >= 5:
+                    ai_archive_insight = "Pattern detected: You consistently write longer entries on weekends. Your stress levels appear lower when you document them."
                 else:
-                    entry.ai_insight = None
-    # ==========================================
-    # END ARCHIVE AI MOCK DATA
+                    ai_archive_insight = "You've established a baseline. Keep adding entries to unlock deeper pattern recognition."
+
+                # 2. Micro Entry Insights
+                for i, entry in enumerate(journal_entries):
+                    content_lower = entry.content.lower()
+                    if i == 0:
+                        entry.ai_insight = "Your latest entry. Notice how your perspective here compares to your older entries below."
+                    elif "anxious" in content_lower or "worried" in content_lower:
+                        entry.ai_insight = "Reflection: Looking back at this now, did the thing you were worried about actually happen?"
+                    elif "goal" in content_lower or "excited" in content_lower:
+                        entry.ai_insight = "Momentum check: Have you taken the next physical step toward this since you wrote it?"
+                    elif len(entry.content.split()) > 100 and i % 3 == 0:
+                        entry.ai_insight = "Deep dive. This entry contains significant emotional processing."
+                    else:
+                        entry.ai_insight = None
+    else:
+        # Explicitly clear any stale insights for Basic users
+        for entry in journal_entries:
+            entry.ai_insight = None
     # ==========================================
 
     return render_template(
