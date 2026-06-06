@@ -3,6 +3,7 @@
 from datetime import date, timedelta
 from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
+from personalhq.utils.decorators import requires_access_level
 from personalhq.extensions import db
 from personalhq.models.experiences import Experience
 from personalhq.models.coretheme import CoreTheme
@@ -14,6 +15,7 @@ time_buckets_api_bp = Blueprint('time_buckets_api', __name__, url_prefix='/actio
 
 @time_buckets_api_bp.route('/experiences/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_experience():
     """Creates a new Experience and links it to a Time Bucket."""
     name = request.form.get('name')
@@ -47,6 +49,7 @@ def create_experience():
 
 @time_buckets_api_bp.route('/experiences/<int:exp_id>/toggle', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def toggle_experience(exp_id):
     """Toggles the completion status of an experience."""
     exp = db.session.get(Experience, exp_id)
@@ -62,6 +65,7 @@ def toggle_experience(exp_id):
 
 @time_buckets_api_bp.route('/buckets/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_bucket():
     """Creates a new Time Bucket on the timeline."""
     name = request.form.get('name')
@@ -87,6 +91,7 @@ def create_bucket():
 
 @time_buckets_api_bp.route('/buckets/<int:bucket_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_bucket(bucket_id):
     """Updates an existing Time Bucket."""
     bucket = db.session.get(TimeBucket, bucket_id)
@@ -110,6 +115,7 @@ def edit_bucket(bucket_id):
 
 @time_buckets_api_bp.route('/experiences/<int:exp_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_experience(exp_id):
     """Updates an existing Experience and its bucket assignment."""
     exp = db.session.get(Experience, exp_id)
@@ -202,6 +208,7 @@ def get_bucket_dates_from_age(start_age, end_age, user):
 
 @time_buckets_api_bp.route('/themes/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_theme():
     name = request.form.get('name')
     color = request.form.get('color', 'stone')
@@ -214,6 +221,7 @@ def create_theme():
 
 @time_buckets_api_bp.route('/emotions/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_emotion():
     name = request.form.get('name')
     color = request.form.get('color', 'rose')
@@ -226,6 +234,7 @@ def create_emotion():
 
 @time_buckets_api_bp.route('/themes/<int:id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_theme(id):
     theme = db.session.get(CoreTheme, id)
     # Security: Check ownership
@@ -247,6 +256,7 @@ def delete_theme(id):
 
 @time_buckets_api_bp.route('/emotions/<int:id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_emotion(id):
     emotion = db.session.get(EmotionalValue, id)
     # Security: Check ownership
