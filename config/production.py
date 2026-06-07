@@ -20,6 +20,8 @@ class ProductionConfig(Config): # pylint: disable=R0903; # flask config class us
     REMEMBER_COOKIE_SECURE = True
     SESSION_COOKIE_SAMESITE = "Strict"
 
+    # Google Analytics
+    GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID')
 
     # Force test nudges to be disabled
     TEST_AI_NUDGES = False
