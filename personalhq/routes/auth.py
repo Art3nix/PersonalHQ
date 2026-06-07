@@ -6,7 +6,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from personalhq.forms.auth_forms import LoginForm, RegistrationForm, ForgotPasswordForm, ResetPasswordForm
 from personalhq.services import auth_service
 from personalhq.models.users import User
-from personalhq.extensions import db
+from personalhq.extensions import db, limiter
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -17,6 +17,7 @@ def redirect_user_state(user):
     return redirect(url_for('dashboard.index'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if current_user.is_authenticated:
         return redirect_user_state(current_user)
@@ -51,6 +52,7 @@ def logout():
     return redirect(url_for('auth.login'))
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def register():
     if current_user.is_authenticated:
         return redirect_user_state(current_user)
@@ -83,6 +85,7 @@ def register():
     return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/forgot-password', methods=['GET', 'POST'])
+@limiter.limit("3 per hour")
 def forgot_password():
     if current_user.is_authenticated:
         return redirect_user_state(current_user)
@@ -101,6 +104,7 @@ def forgot_password():
     return render_template('auth/forgot-password.html', form=form)
 
 @auth_bp.route('/reset-password/<token>', methods=['GET', 'POST'])
+@limiter.limit("5 per hour")
 def reset_password(token):
     if current_user.is_authenticated:
         return redirect_user_state(current_user)
