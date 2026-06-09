@@ -18,13 +18,49 @@
     <script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
 
     {% if config.GA_TRACKING_ID %}
-        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}"></script>
         <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
+            // Define the function to load GA4, but do NOT run it yet
+            function loadGoogleAnalytics() {
+                if (document.getElementById('ga-script')) return; // Prevent duplicate loading
+                
+                const script = document.createElement('script');
+                script.id = 'ga-script';
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}";
+                document.head.appendChild(script);
 
-            gtag('config', '{{ config.GA_TRACKING_ID }}');
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ config.GA_TRACKING_ID }}');
+            }
+
+            // On page load, check if they already accepted cookies in a previous session
+            document.addEventListener('DOMContentLoaded', () => {
+                const consent = localStorage.getItem('lifehq_cookie_consent');
+                
+                if (consent === 'accepted') {
+                    // They already consented, fire GA4 immediately
+                    loadGoogleAnalytics();
+                } else if (!consent) {
+                    // No decision made yet, show the banner
+                    const banner = document.getElementById('cookie-consent-banner');
+                    if(banner) banner.classList.remove('translate-y-[150%]', 'opacity-0');
+                }
+            });
+
+            // Functions triggered by the banner buttons
+            function acceptCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                loadGoogleAnalytics(); // Fire GA4 now!
+            }
+
+            function rejectCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                // GA4 is never loaded
+            }
         </script>
     {% endif %}
     
@@ -82,6 +118,29 @@
                 <button onclick="closeArchiveModal()" class="flex-1 py-3.5 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-colors">Cancel</button>
                 <button onclick="executeDelete()" class="flex-1 py-3.5 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">Archive</button>
             </div>
+        </div>
+    </div>
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-6 right-6 z-[200] max-w-sm bg-white p-6 rounded-3xl shadow-2xl border border-stone-200 transform translate-y-[150%] opacity-0 transition-all duration-500 ease-out">
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shrink-0">
+                <i data-lucide="cookie" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-stone-900 font-extrabold tracking-tight">Your Privacy</h3>
+        </div>
+        
+        <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+        </p>
+        
+        <div class="flex gap-3">
+            <button onclick="rejectCookies()" class="flex-1 py-3 bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200 rounded-xl text-sm font-bold transition-colors">
+                Reject
+            </button>
+            <button onclick="acceptCookies()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all">
+                Accept All
+            </button>
         </div>
     </div>
 
