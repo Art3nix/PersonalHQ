@@ -18,6 +18,10 @@ class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    tos_consent = BooleanField(
+        'I agree to the Terms of Service and Privacy Policy',
+        validators=[DataRequired(message="You must agree to the Terms and Privacy Policy to create an account.")]
+    )
     submit = SubmitField('Register')
 
 class ForgotPasswordForm(FlaskForm):

@@ -1,7 +1,8 @@
 """Settings and account management routes."""
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_login import login_required, current_user
+import stripe
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask_login import login_required, current_user, logout_user
 from personalhq.extensions import db, bcrypt
 
 settings_bp = Blueprint('settings', __name__, url_prefix='/settings')
@@ -51,6 +52,29 @@ def index():
                 current_user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
                 db.session.commit()
                 flash('Password changed successfully.', 'success')
+
+        elif action == 'delete_account':
+            # 1. Unmask the Proxy: Get the actual SQLAlchemy object
+            user_to_delete = current_user._get_current_object()
+            
+            # 2. Cancel the Stripe Subscription
+            active_sub = user_to_delete.active_subscription
+            # (Assumes your Subscription model has a 'stripe_subscription_id' column)
+            if active_sub and getattr(active_sub, 'stripe_subscription_id', None):
+                try:
+                    stripe.Subscription.delete(active_sub.stripe_subscription_id)
+                except stripe.error.StripeError as e:
+                    current_app.logger.error(f"Stripe cancellation failed for user {user_to_delete.id}: {str(e)}")
+
+            # 3. Delete the user from the database FIRST
+            db.session.delete(user_to_delete)
+            db.session.commit()
+            
+            # 4. Clear the local session cookie LAST
+            logout_user() 
+            
+            flash('Your account and all associated data have been permanently deleted.', 'success')
+            return redirect(url_for('auth.login'))
 
         return redirect(url_for('settings.index'))
 
