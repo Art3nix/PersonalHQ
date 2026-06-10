@@ -32,7 +32,8 @@ def index():
 
     if current_user.access_level >= 2:
         # Fetch from DB (Mapping to the names we set in the model)
-        ai_inbox_subtitle = daily_note.ai_braindump_subtitle if daily_note else None
+        ai_inbox_overload = daily_note.ai_inbox_overload if daily_note else None
+        ai_inbox_subtitle = daily_note.ai_inbox_subtitle if daily_note else None
         ai_empty_state = daily_note.ai_braindump_empty_state if daily_note else None
 
         if current_app.config.get('TEST_AI_NUDGES') is True:
