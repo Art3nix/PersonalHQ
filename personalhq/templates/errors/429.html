@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Too Many Requests - Life HQ{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-stone-50 flex items-center justify-center p-6 relative overflow-hidden">
+    
+    <!-- Background ambiance matching the LifeHQ aesthetic -->
+    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-amber-300/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-rose-300/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="max-w-md w-full relative z-10 text-center">
+        
+        <!-- Warning Icon Box -->
+        <div class="w-20 h-20 bg-white border border-stone-200 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-stone-200/50">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-amber-500">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        
+        <h1 class="text-4xl font-extrabold text-stone-900 tracking-tight mb-3">Slow down.</h1>
+        
+        <p class="text-sm font-medium text-stone-500 mb-10 leading-relaxed px-4">
+            {{ description | default("You have made too many requests in a short period of time. Please take a breath and try again in a few minutes.", true) }}
+        </p>
+
+        <a href="{{ url_for('auth.login') }}" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-stone-900 text-white rounded-2xl text-sm font-bold hover:bg-stone-800 transition-all shadow-lg shadow-stone-200">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Return to Login
+        </a>
+        
+    </div>
+</div>
+{% endblock %}

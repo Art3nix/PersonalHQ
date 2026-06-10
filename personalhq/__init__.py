@@ -6,7 +6,7 @@ from datetime import timedelta
 from flask import Flask, render_template, session, request
 from flask_login import current_user
 from personalhq.services.time_service import get_local_now, get_logical_today
-from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail
+from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail, limiter
 from personalhq import models
 
 from config.development import DevelopmentConfig
@@ -36,6 +36,7 @@ def create_app(config_name=None):
     login_manager.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)
+    limiter.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -51,11 +52,19 @@ def create_app(config_name=None):
         db.session.rollback()
         return render_template('errors/500.html'), 500
 
+    @app.errorhandler(429)
+    def ratelimit_handler(e):
+        return render_template('errors/429.html', description="You have exceeded your request limit. Please try again in a few minutes."), 429
+
     # Register Blueprints
+    from personalhq.routes.landing import landing_bp
+    app.register_blueprint(landing_bp)
     from personalhq.routes.dashboard import dashboard_bp
     app.register_blueprint(dashboard_bp)
     from personalhq.routes.auth import auth_bp
     app.register_blueprint(auth_bp)
+    from personalhq.routes.billing import billing_bp
+    app.register_blueprint(billing_bp)
     from personalhq.routes.habits import habits_api_bp, habits_view_bp
     app.register_blueprint(habits_api_bp)
     app.register_blueprint(habits_view_bp)

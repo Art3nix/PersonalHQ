@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | LifeHQ</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    {% if config.GA_TRACKING_ID %}
+        <script>
+            // Define the function to load GA4, but do NOT run it yet
+            function loadGoogleAnalytics() {
+                if (document.getElementById('ga-script')) return; // Prevent duplicate loading
+                
+                const script = document.createElement('script');
+                script.id = 'ga-script';
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}";
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ config.GA_TRACKING_ID }}');
+            }
+
+            // On page load, check if they already accepted cookies in a previous session
+            document.addEventListener('DOMContentLoaded', () => {
+                const consent = localStorage.getItem('lifehq_cookie_consent');
+                
+                if (consent === 'accepted') {
+                    // They already consented, fire GA4 immediately
+                    loadGoogleAnalytics();
+                } else if (!consent) {
+                    // No decision made yet, show the banner
+                    const banner = document.getElementById('cookie-consent-banner');
+                    if(banner) banner.classList.remove('translate-y-[150%]', 'opacity-0');
+                }
+            });
+
+            // Functions triggered by the banner buttons
+            function acceptCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                loadGoogleAnalytics(); // Fire GA4 now!
+            }
+
+            function rejectCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                // GA4 is never loaded
+            }
+        </script>
+    {% endif %}
+
+    <style>
+        :root {
+            --bg-canvas: #FDFDFB;
+            --text-main: #1A1C1E;
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-canvas); 
+            color: var(--text-main);
+        }
+
+        /* Subtle Vertical Grid for Main Content */
+        .bg-grid-vertical {
+            background-image: linear-gradient(to right, #F5F5F4 1px, transparent 1px);
+            background-size: 25% 100%;
+            background-position: left top;
+        }
+        
+        /* Print optimization */
+        @media print {
+            .no-print, aside { display: none !important; }
+            body, .bg-grid-vertical { background: white !important; }
+            main { padding: 0 !important; max-width: 100% !important; }
+            h2 { page-break-after: avoid; }
+            p, li { page-break-inside: avoid; color: #000 !important; }
+            .highlight-box { border: 1px solid #000 !important; background: transparent !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900 flex flex-col lg:flex-row min-h-screen">
+
+    <!-- Fixed Left Sidebar -->
+    <aside class="w-full lg:w-72 shrink-0 lg:border-r border-stone-200 bg-[#FDFDFB] flex flex-col lg:h-screen lg:sticky lg:top-0 no-print z-50">
+        <div class="px-6 lg:px-8 py-4 lg:pt-10 lg:pb-8 border-b border-stone-100 flex items-center justify-between bg-[#FDFDFB]/90 backdrop-blur-md">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight text-stone-900">LifeHQ</span>
+            </a>
+            <a href="/" class="lg:hidden text-sm font-bold text-stone-500">Back</a>
+        </div>
+        
+        <div class="hidden lg:block flex-1 overflow-y-auto py-8 scrollbar-hide">
+            <div class="px-8 mb-4">
+                <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Privacy & Data</h4>
+            </div>
+            <nav class="flex flex-col relative" id="toc-nav">
+                <div class="-ml-0.5 flex flex-col">
+                    <a href="#introduction" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-indigo-600 text-stone-900 font-bold transition-all duration-200">1. Introduction & Scope</a>
+                    <a href="#information-collected" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">2. Information We Collect</a>
+                    <a href="#how-collected" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">3. How We Collect Data</a>
+                    <a href="#how-used" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">4. How We Use Information</a>
+                    <a href="#legal-bases" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">5. Legal Bases (GDPR)</a>
+                    <a href="#cookies-analytics" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">6. Cookies & Analytics</a>
+                    <a href="#ai-processing" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">7. AI & Machine Learning</a>
+                    <a href="#sharing" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">8. Sharing & Disclosure</a>
+                    <a href="#international" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">9. International Transfers</a>
+                    <a href="#retention" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">10. Data Retention</a>
+                    <a href="#security" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">11. Security Measures</a>
+                    <a href="#user-rights" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">12. Your Privacy Rights</a>
+                    <a href="#gdpr" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">13. GDPR Disclosures</a>
+                    <a href="#ccpa" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">14. California Rights (CCPA)</a>
+                    <a href="#children" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">15. Children's Privacy</a>
+                    <a href="#third-party" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">16. Third-Party Integrations</a>
+                    <a href="#business-transfers" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">17. Business Transfers</a>
+                    <a href="#changes" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">18. Changes to this Policy</a>
+                    <a href="#contact" class="toc-link block text-[13px] py-2 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">19. Contact Information</a>
+                </div>
+            </nav>
+        </div>
+        
+        <div class="hidden lg:block p-6 border-t border-stone-100">
+            <a href="/" class="flex items-center gap-2 text-[13px] font-bold text-stone-500 hover:text-stone-900 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Homepage
+            </a>
+        </div>
+    </aside>
+
+    <!-- Mobile Header -->
+    <nav class="lg:hidden fixed w-full z-50 bg-[#FDFDFB]/90 backdrop-blur-md border-b border-stone-200 no-print">
+        <div class="px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white">
+                    <i data-lucide="layers" class="w-3 h-3"></i>
+                </div>
+                <span class="font-extrabold text-stone-900">LifeHQ</span>
+            </a>
+            <a href="/" class="text-sm font-bold text-stone-500">Back</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 bg-grid-vertical min-w-0 relative pt-16 lg:pt-0">
+        <div class="max-w-4xl mx-auto px-6 lg:px-24 py-16 lg:py-24 relative z-10">
+            
+            <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tighter text-stone-900 mb-10 leading-[1.1]">Privacy Policy</h1>
+
+            <div class="bg-white border border-stone-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-2xl p-8 mb-10 highlight-box">
+                <h3 class="text-indigo-900 font-bold mb-3 flex items-center gap-2 text-lg">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-indigo-600"></i>
+                    Our Privacy Promise
+                </h3>
+                <p class="!mb-0 text-stone-600 text-[14px] font-medium leading-relaxed">
+                    LifeHQ is built to be a safe, private workspace for your mind. We encrypt your journals, we strictly block analytics trackers until you consent, we do not sell your personal data to data brokers, and we strictly configure our AI sub-processors so that your private thoughts are <strong>never</strong> used to train public AI models. 
+                </p>
+            </div>
+
+            <p class="font-bold text-stone-900 mb-12 text-[15px]">Effective Date: June 9, 2026</p>
+
+            <h2 id="introduction" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">1. Introduction & Scope</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Welcome to LifeHQ. This Privacy Policy explains how LifeHQ ("we," "us," or "our") collects, uses, shares, and protects your personal information when you use our web application, habit tracker, decade planner, AI coaching features, and any related services (collectively, the "Service").</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">This Policy applies to all users, subscribers, and visitors of the Service. It operates in conjunction with our Terms of Service. By using LifeHQ, you acknowledge that you have read and understood this Privacy Policy.</p>
+
+            <h2 id="information-collected" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">2. Information We Collect</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">To provide you with a personalized and secure experience, we collect specific categories of information:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Account Information:</strong> When you register, we collect your name, email address, password (stored as a secure bcrypt hash), and your local timezone to accurately track your daily habits.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">User-Submitted Content:</strong> We store the data you actively input into the Service. This includes your tracked habits, Time Buckets (decade planner goals), deep work sessions, and your universal inbox notes. Crucially, this includes your private Journal Entries, which are protected using application-level column encryption.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Payment & Billing Information:</strong> If you upgrade to a premium tier, our third-party payment processor (Stripe) collects your billing details and credit card information. LifeHQ does not store your full credit card number; we only retain basic subscription status, tier information, and billing history to manage your account.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Communications:</strong> If you contact customer support, we collect the contents of your messages and any contact information provided.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Device, Log, & Usage Data:</strong> We automatically collect standard server log data for security and performance, including your IP address (used strictly by our rate-limiter to prevent brute-force attacks), browser type, operating system, and the timestamps of your interactions with our application.</li>
+            </ul>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Is this data required?</strong> Providing your Account Information (email, password) is strictly required to create an account and use the Service. Payment Information is required to access premium tiers. If you do not provide this mandatory information, we cannot provide the Service to you. Providing User-Submitted Content is entirely optional, but without it, the Service cannot generate your personalized habit insights or journal reflections.</p>
+
+            <h2 id="how-collected" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">3. How We Collect Data</h2>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Directly from you:</strong> When you fill out forms, type in your journal, create habits, or interact with the AI Coach.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Automatically:</strong> Through functional session cookies necessary to keep you logged in, server security logs, and Google Analytics (only if you consent).</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">From Third Parties:</strong> We receive secure webhooks from Stripe confirming successful payments or subscription cancellations.</li>
+            </ul>
+
+            <h2 id="how-used" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">4. How We Use Information</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We use the information we collect for the following purposes:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Providing the Service:</strong> To maintain your account, save your daily progress, and render your LifeHQ dashboard.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Operating the AI Features:</strong> To safely transmit your journal entries and habits to our AI models to generate personalized morning briefings and insights.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Security & Authentication:</strong> To verify your identity, prevent unauthorized access (using Flask-Limiter), and protect against automated bot attacks on our authentication routes.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Account Management & Billing:</strong> To process your subscriptions, handle upgrades to Pro/Limitless, and send administrative emails (like password resets).</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Analytics & Improvement:</strong> To understand how users navigate the platform, resolve bugs, and improve system performance.</li>
+            </ul>
+
+            <h2 id="legal-bases" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">5. Legal Bases for Processing (GDPR)</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If you are an individual in the European Economic Area (EEA), our legal basis for collecting and using your personal information depends on the context:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Contract Performance:</strong> Processing is necessary to fulfill our Terms of Service (e.g., maintaining your dashboard, generating AI insights, and billing).</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Legitimate Interests:</strong> Processing is necessary for our legitimate business interests, such as securing our infrastructure, preventing fraud, and improving the app, provided these interests are not overridden by your data protection rights.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Consent:</strong> We rely on your explicit consent for non-essential tracking (like Google Analytics cookies) and for processing sensitive data entered into your journals.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Legal Obligations:</strong> We process data to comply with tax and accounting laws in the Czech Republic.</li>
+            </ul>
+
+            <h2 id="cookies-analytics" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">6. Cookies, Tracking & Analytics</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We use cookies and similar tracking technologies to track activity on our Service.</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Essential Cookies:</strong> These are strictly necessary for the application to function. This includes the Flask session cookie used to keep you securely logged in and CSRF tokens to prevent cross-site request forgery attacks. These cannot be disabled.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Analytics Tracking (Google Analytics 4):</strong> We use GA4 to measure aggregate user behavior (e.g., page views, feature adoption). <strong>This script is strictly blocked by default and will not load until you explicitly click 'Accept' on our cookie consent banner.</strong></li>
+            </ul>
+
+            <h2 id="ai-processing" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">7. AI and Machine Learning Specifics</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ integrates Large Language Models to act as your AI Coach. Because you may input highly sensitive reflections into the Service, we adhere to strict AI privacy standards:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Zero Data Retention APIs:</strong> We interface with our AI providers (e.g., OpenAI, Google) exclusively via their enterprise/developer APIs. By default, these providers are contractually prohibited from using API data to train their public or foundational models.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">No Internal Training:</strong> LifeHQ does not train proprietary AI models on your private journal entries. The AI processing happens in memory to generate your specific insight and is not permanently retained by the model.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">No Automated Decision-Making:</strong> We do not use your personal data for automated decision-making or profiling that produces legal or similarly significant effects. Our AI Coach provides optional, non-binding organizational suggestions.</li>
+            </ul>
+
+            <h2 id="sharing" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">8. Sharing and Disclosure of Information</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong>We do not, under any circumstances, sell your personal data.</strong> We only share information with third parties in the following limited circumstances:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Service Providers (Sub-processors):</strong> We share necessary data with trusted vendors acting on our behalf. This includes Oracle Cloud (database and server hosting), Stripe (payment processing), external LLM providers (for AI coaching), and email delivery services (for password resets).</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Legal Compliance:</strong> We may disclose data if legally required to do so by a valid subpoena, court order, or binding request from Czech or applicable EU authorities, or to protect the safety and rights of LifeHQ and our users.</li>
+            </ul>
+
+            <h2 id="international" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">9. International Data Transfers</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Our primary database and application servers are hosted on Oracle Cloud Infrastructure within the European Union. However, some of our sub-processors (such as Stripe or certain AI API providers) may process data in the United States. When transferring personal data outside the EEA, we ensure adequate safeguards are in place, primarily through the execution of the European Commission's Standard Contractual Clauses (SCCs) or reliance on the EU-US Data Privacy Framework.</p>
+
+            <h2 id="retention" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">10. Data Retention</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We retain your personal data and User Content only for as long as your account is active or as needed to provide you the Service. If you choose to delete your account, your personal data and encrypted journals are immediately removed from our active databases. Routine automated server backups containing encrypted snapshots of the database will be securely overwritten in the standard 30-day lifecycle. We may retain basic billing records longer as required by tax and accounting laws.</p>
+
+            <h2 id="security" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">11. Security Measures</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We implement robust, multi-layered security to protect your data:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Encryption in Transit & at Rest:</strong> All traffic is secured via HTTPS/TLS. Our underlying Oracle Cloud servers utilize Block Volume encryption at rest to protect against physical data breaches.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Application-Level Encryption:</strong> Highly sensitive text fields, specifically your Journal Entries and Inbox Brain Dumps, are encrypted at the application level (using SQLAlchemy `StringEncryptedType` and secure Fernet keys) before touching the database.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">DDoS & Brute Force Protection:</strong> Critical authentication routes are strictly protected by server-side rate limiters to prevent bot attacks.</li>
+            </ul>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">While we follow industry best practices, no method of transmission over the Internet or electronic storage is 100% secure. We cannot guarantee absolute security.</p>
+
+            <h2 id="user-rights" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">12. Your Privacy Rights</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Depending on your location, you have rights regarding your personal data:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Access & Portability:</strong> You can request a copy of the personal data we hold about you.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Correction:</strong> You can edit your account details and habits directly within the dashboard.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Deletion:</strong> You can delete specific items (using the global delete/archive modal) or request full account deletion.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Withdraw Consent:</strong> Where we rely on consent (e.g., analytics cookies), you can withdraw it at any time.</li>
+            </ul>
+
+            <h2 id="gdpr" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">13. GDPR Disclosures (EEA, UK, Switzerland)</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If you are a resident of the European Economic Area (EEA), the UK, or Switzerland, you have the right to object to processing based on legitimate interests, request restriction of processing, and lodge a complaint with your local Data Protection Authority. The data controller for your personal information is the Provider listed in Section 19.</p>
+
+            <h2 id="ccpa" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">14. California Privacy Rights (CCPA)</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If you are a California resident, the California Consumer Privacy Act (CCPA) as amended by the CPRA grants you specific rights regarding your personal information. <strong>We do not sell your personal information, nor do we share it for cross-context behavioral advertising.</strong> Therefore, we do not require a "Do Not Sell or Share My Personal Information" opt-out link.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Your rights include: the right to know what personal information is collected, the right to delete personal information, the right to correct inaccurate information, the right to limit the use and disclosure of sensitive personal information, and the right not to receive discriminatory treatment for the exercise of your privacy rights. Please submit requests to exercise these rights via the contact email below.</p>
+
+            <h2 id="children" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">15. Children's Privacy</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ is not intended for individuals under the age of 16. We do not knowingly collect personal data from children under 16. If we become aware that we have collected personal data from a child under 16 without verified parental consent, we will take immediate steps to delete that information from our servers. If you are a parent or guardian and believe your child has provided us with personal data, please contact us.</p>
+
+            <h2 id="third-party" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">16. Third-Party Integrations</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">The Service may contain links to third-party websites or offer integrations (such as our planned conversational WhatsApp sync). If you choose to use these integrations, the third party may receive your information. We do not control and are not responsible for the privacy practices of third-party platforms. We encourage you to review their privacy policies.</p>
+
+            <h2 id="business-transfers" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">17. Business Transfers</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If LifeHQ is involved in a merger, acquisition, corporate restructuring, or sale of assets, your personal data may be transferred as part of that transaction. We will provide notice via email or a prominent notice on our website before your personal data is transferred and becomes subject to a different privacy policy.</p>
+
+            <h2 id="changes" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">18. Changes to this Privacy Policy</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We may update this Privacy Policy periodically to reflect changes in our practices or legal requirements. If we make material changes (e.g., changing how we process your encrypted data or AI data sharing practices), we will notify you by email or through a prominent notice on the dashboard prior to the change becoming effective. We encourage you to review this page periodically for the latest information.</p>
+
+            <h2 id="contact" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">19. Contact Information</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If you have any questions, concerns, or requests to exercise your data rights regarding this Privacy Policy, please contact the Data Controller:</p>
+            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6 mt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-600 shadow-sm">
+                        <i data-lucide="shield-question" class="w-5 h-5"></i>
+                    </div>
+                    <p class="font-extrabold text-lg text-stone-900 !mb-0">LifeHQ Privacy Team</p>
+                </div>
+                <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Provider: [YOUR FULL LEGAL NAME]</p>
+                <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Address: [YOUR REGISTERED ADDRESS, PRAGUE, CZECHIA]</p>
+                <p class="text-stone-500 !mb-0 pl-13 text-[14px]">Email: <a href="mailto:support@lifehq.com" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">support@lifehq.com</a></p>
+            </div>
+
+        </div>
+    </main>
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-6 right-6 z-[200] max-w-sm bg-white p-6 rounded-3xl shadow-2xl border border-stone-200 transform translate-y-[150%] opacity-0 transition-all duration-500 ease-out">
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shrink-0">
+                <i data-lucide="cookie" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-stone-900 font-extrabold tracking-tight">Your Privacy</h3>
+        </div>
+        
+        <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+        </p>
+        
+        <div class="flex gap-3">
+            <button onclick="rejectCookies()" class="flex-1 py-3 bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200 rounded-xl text-sm font-bold transition-colors">
+                Reject
+            </button>
+            <button onclick="acceptCookies()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all">
+                Accept All
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '-10% 0px -80% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.toc-link').forEach(link => {
+                            link.classList.remove('active', 'border-indigo-600', 'text-stone-900', 'font-bold');
+                            link.classList.add('border-transparent', 'text-stone-500', 'font-medium');
+                            
+                            if (link.getAttribute('href') === `#${entry.target.id}`) {
+                                link.classList.remove('border-transparent', 'text-stone-500', 'font-medium');
+                                link.classList.add('active', 'border-indigo-600', 'text-stone-900', 'font-bold');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('main h2').forEach(heading => {
+                observer.observe(heading);
+            });
+        });
+    </script>
+</body>
+</html>

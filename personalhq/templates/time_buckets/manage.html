@@ -132,12 +132,19 @@
                 </p>
             </div>
             <div class="flex items-center gap-3 shrink-0">
-                <button onclick="document.getElementById('slide-over-labels').classList.remove('translate-x-full')" class="bg-white border border-stone-200 text-stone-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-50 transition-all shadow-sm">
-                    Manage Labels
-                </button>
-                <button onclick="document.getElementById('slide-over').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
-                    + New Experience
-                </button>
+                {% if current_user.access_level >= 2 %}
+                    <button onclick="document.getElementById('slide-over-labels').classList.remove('translate-x-full')" class="bg-white border border-stone-200 text-stone-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-stone-50 transition-all shadow-sm">
+                        Manage Labels
+                    </button>
+                    <button onclick="document.getElementById('slide-over').classList.remove('translate-x-full')" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200">
+                        + New Experience
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('settings.index') }}#pricing" class="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> 
+                        Upgrade to Plan Life
+                    </a>
+                {% endif %}
             </div>
         </header>
 
@@ -184,6 +191,7 @@
                                     <span class="text-xs font-bold text-stone-500 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-100">
                                         {{ bucket.start_date.year }} — {{ bucket.end_date.year }}
                                     </span>
+                                    {% if current_user.access_level >= 2 %}
                                     <div class="flex items-center gap-1">
                                         {% set start_age = bucket.start_date.year - current_user.date_of_birth.year %}
                                         {% set is_jan_first = current_user.date_of_birth.month == 1 and current_user.date_of_birth.day == 1 %}
@@ -209,6 +217,7 @@
                                             </button>
                                         </form>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
 
@@ -225,10 +234,17 @@
                                                 {% endif %}">
                                         <div class="flex justify-between items-start gap-3">
                                             
+                                            {% if current_user.access_level >= 2 %}
                                             <button onclick="toggleExperience({{ link.experience.id }}, '{{ exp_color }}')" class="mt-0.5 shrink-0 transition-colors text-stone-300 hover:text-{{ exp_color }}-500">
                                                 <svg id="icon-empty-{{ link.experience.id }}" class="w-5 h-5 {% if link.experience.is_completed %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
                                                 <svg id="icon-check-{{ link.experience.id }}" class="w-5 h-5 text-{{ exp_color }}-500 {% if not link.experience.is_completed %}hidden{% endif %}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                                             </button>
+                                            {% else %}
+                                            <!-- Disabled state for Basic users -->
+                                            <div class="mt-0.5 shrink-0 text-stone-200 cursor-not-allowed">
+                                                <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle></svg>
+                                            </div>
+                                            {% endif %}
 
                                             <div class="flex-1">
                                                 <h4 id="exp-title-{{ link.experience.id }}" class="text-base font-extrabold transition-all 
@@ -264,7 +280,7 @@
                                                     <p class="text-xs font-medium text-stone-500 mt-1 line-clamp-2 leading-relaxed">{{ link.experience.details }}</p>
                                                 {% endif %}
                                             </div>
-                                            
+                                            {% if current_user.access_level >= 2 %}
                                             <div class="opacity-0 group-hover:opacity-100 transition-opacity ml-2 shrink-0">
                                                 <button type="button" 
                                                         data-id="{{ link.experience.id }}"
@@ -288,6 +304,7 @@
                                                     </button>
                                                 </form>
                                             </div>
+                                            {% endif %}
                                         </div>
 
                                         {% if link.experience.ai_insight %}
@@ -320,12 +337,18 @@
                     <div class="relative pl-20 pt-4">
                         <div class="absolute left-[1.65rem] top-1/2 -translate-y-1/2 w-5 h-5 bg-stone-50 border-4 border-stone-200 rounded-full z-10"></div>
                         
+                        {% if current_user.access_level >= 2 %}
                         <button onclick="document.getElementById('slide-over-bucket').classList.remove('translate-x-full')" class="w-full border-2 border-dashed border-stone-200 rounded-2xl p-6 hover:bg-stone-50 hover:border-stone-300 transition-colors group flex items-center justify-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 group-hover:text-stone-600 group-hover:bg-stone-200 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             </div>
                             <span class="text-sm font-bold text-stone-500 group-hover:text-stone-700">Add a new Time Bucket</span>
                         </button>
+                        {% else %}
+                        <a href="{{ url_for('settings.index') }}#pricing" class="w-full border-2 border-dashed border-stone-200 rounded-2xl p-6 hover:bg-stone-50 transition-colors group flex items-center justify-center gap-3 text-stone-400">
+                            <span class="text-sm font-bold">Upgrade to add Time Buckets</span>
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </section>

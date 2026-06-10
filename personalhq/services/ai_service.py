@@ -52,7 +52,7 @@ if not sys_logger.handlers:
 # The Routing Chain: Try the fastest/smartest first, then fall back to stable older models.
 FALLBACK_MODELS = [
     'gemini-2.5-flash', # Primary: Fast, but prone to high-demand spikes
-    'gemini-1.5-flash', # Backup 1: Older, highly stable, huge capacity
+    'gemini-1.5-flash-latest', # Backup 1: Older, highly stable, huge capacity
     'gemini-2.5-pro'    # Backup 2: Slower and more expensive, but different compute cluster
 ]
 
@@ -66,7 +66,10 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
         sys_logger.error("[AI_FATAL] GEMINI_API_KEY is missing from .env")
         raise ValueError("AI configuration missing.")
         
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(
+        api_key=api_key,
+        http_options={'timeout': 120000} # 120s
+    )
     
     # 1. Loop through the Fallback Chain
     for model_name in models:
@@ -96,8 +99,8 @@ def generate_json(system_prompt, models=FALLBACK_MODELS, max_retries_per_model=3
                 # Check for 503 (High Demand) or 429 (Rate Limit)
                 if e.code in [503, 429] and attempt < max_retries_per_model - 1:
                     
-                    # Exponential Backoff (2s, 4s, 8s) + Random Jitter (0.0 to 1.0s)
-                    sleep_time = (2 ** (attempt + 1)) + random.uniform(0, 1)
+                    # Exponential Backoff (10s, 20s, 40s) + Random Jitter
+                    sleep_time = (10 * (2 ** attempt)) + random.uniform(0, 1)
                     sys_logger.warning(f"[AI_API_ERROR] {model_name} Error ({e.code}) | Latency: {latency_ms}ms. Retrying in {sleep_time:.2f}s (Attempt {attempt + 1}/{max_retries_per_model})...")
                     
                     time.sleep(sleep_time)
@@ -338,6 +341,14 @@ You MUST respond with a RAW, valid JSON OBJECT using this exact schema:
     try:
         ai_data = generate_json(system_prompt)
         sys_logger.info(f"[COACH_RESPONSE_RECEIVED] Successfully parsed JSON for {user.email}.")
+        
+        # --- 0. WIPE STALE ENTITY INSIGHTS ---
+        # Clear out yesterday's item-specific coaching so we only see fresh, relevant notes today.
+        Habit.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_celebration': None})
+        TimeBucket.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_empty_state': None})
+        Journal.query.filter_by(user_id=user.id).update({'ai_insight': None})
+        Identity.query.filter_by(user_id=user.id).update({'ai_insight': None})
+        FocusSession.query.filter_by(user_id=user.id).update({'ai_insight': None, 'ai_intention': None})
         
         # --- 1. PROCESS DAILY NOTE (GLOBAL) ---
         note_data = ai_data.get('daily_note', {})

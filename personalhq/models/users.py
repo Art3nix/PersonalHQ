@@ -5,6 +5,7 @@ from datetime import datetime, date
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from personalhq.models.subscriptions import SubscriptionStatus
 from personalhq.extensions import db, bcrypt
 
 
@@ -15,6 +16,7 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
+    stripe_customer_id: Mapped[str | None] = mapped_column(unique=True, nullable=True)
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
@@ -77,6 +79,31 @@ class User(UserMixin, db.Model):
         """Verifies if the provided plain-text password matches the hash."""
         return bcrypt.check_password_hash(self.password, password)
 
+    @property
+    def active_plan(self):
+        """Returns the name of the user's currently active plan, or 'Basic' if none."""
+        active_sub = self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
+        if active_sub and active_sub.plan:
+            return active_sub.plan.name.lower()
+        return 'basic'
+    
+    @property
+    def active_subscription(self):
+        """Returns the user's currently active Subscription record."""
+        from personalhq.models.subscriptions import SubscriptionStatus
+        return self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
+
+    @property
+    def access_level(self):
+        """Returns the user's numeric access level based on their active plan.
+        1 = Basic, 2 = Pro, 3 = Limitless, 4 = Lifetime
+        """
+        from personalhq.models.subscriptions import SubscriptionStatus
+        active_sub = self.subscriptions.filter_by(status=SubscriptionStatus.ACTIVE).first()
+        if active_sub and active_sub.plan:
+            return active_sub.plan.access_level
+        return 1 # Default to Basic
+
     def __init__(self, email: str,
                  first_name: str,
                  last_name: str,
@@ -93,3 +120,5 @@ class User(UserMixin, db.Model):
             f' {self.email}'
             f' {self.last_login}'
         )
+    
+    

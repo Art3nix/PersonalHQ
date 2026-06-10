@@ -70,13 +70,30 @@ def create_habit():
     
     # SECURITY PATCH: Cap the streak at 10,000 (roughly 27 years)
     raw_streak = request.form.get('initial_streak', 0, type=int)
-    initial_streak = min(raw_streak, 10000) 
+    initial_streak = min(raw_streak, 10000)
 
     if not name or not frequency_str or not icon:
         return redirect(url_for('habits_view.manage'))
 
     frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
-    identity_id = request.form.get('identity_id', type=int)
+    
+    # ---------------------------------------------------------
+    # SECURITY LOCK 1: Habit Limit (Max 3 for Basic)
+    # ---------------------------------------------------------
+    if current_user.access_level < 2:
+        active_count = Habit.query.filter_by(user_id=current_user.id, is_active=True).count()
+        if active_count >= 3:
+            flash("You've reached your foundation limit of 3 habits. Upgrade your space to add more.", "info")
+            return redirect(url_for('habits_view.manage'))
+
+    # ---------------------------------------------------------
+    # SECURITY LOCK 2: Identity Mapping (Pro Only)
+    # ---------------------------------------------------------
+    if current_user.access_level >= 2:
+        identity_id = request.form.get('identity_id', type=int)
+    else:
+        identity_id = None
+    # ---------------------------------------------------------
 
     craving = request.form.get('craving', '').strip()
     reward = request.form.get('reward', '').strip()
@@ -140,7 +157,14 @@ def edit_habit(habit_id):
         habit.name = name.strip()
         habit.icon = icon.strip()
         habit.frequency = HabitFrequency.DAILY if frequency_str == 'DAILY' else HabitFrequency.WEEKLY
-        habit.identity_id = identity_id or None
+        
+        # --- SECURITY LOCK ---
+        if current_user.access_level >= 2:
+            habit.identity_id = identity_id or None
+        else:
+            habit.identity_id = None
+        # ---------------------
+
         habit.description = description if description else None
         habit.trigger = trigger if trigger else None
         habit.target_count = target_count
@@ -244,6 +268,15 @@ def archive_habit(habit_id):
 def unarchive_habit(habit_id):
     habit = db.session.get(Habit, habit_id)
     if habit and habit.user_id == current_user.id:
+
+        # --- SECURITY LOCK: Habit Limit ---
+        if current_user.access_level < 2:
+            active_count = Habit.query.filter_by(user_id=current_user.id, is_active=True).count()
+            if active_count >= 3:
+                flash("You've reached your foundation limit of 3 habits. Upgrade to unarchive more.", "info")
+                return redirect(url_for('habits_view.manage'))
+        # ----------------------------------
+
         habit.is_active = True
         db.session.commit()
     return redirect(url_for('habits_view.manage'))

@@ -160,55 +160,60 @@ def manage():
             current_counts[habit.id] = sum(l.progress for l in logs)
 
     # ==========================================
-    # AI COACH CONTEXT
+    # AI COACH CONTEXT (PRO TIER ONLY)
     # ==========================================
-    
     today = get_logical_today(current_user)
-    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=today).first()
 
-    # Fetch from DB (Mapping exactly to the DailyNote model)
-    ai_habits_subtitle = daily_note.ai_habits_subtitle if daily_note else None
-    ai_habits_empty_state = daily_note.ai_habits_empty_state if daily_note else None
-    
-    # Analytics strings (Usually passed to the calendar/analytics view)
-    ai_heatmap_analysis = daily_note.ai_heatmap_analysis if daily_note else None
-    ai_dow_analysis = daily_note.ai_dow_analysis if daily_note else None
-    ai_momentum_analysis = daily_note.ai_momentum_analysis if daily_note else None
+    # Default to None for Basic users
+    ai_habits_subtitle = None
+    ai_habits_empty_state = None
+    ai_heatmap_analysis = None
+    ai_dow_analysis = None
+    ai_momentum_analysis = None
 
-    if current_app.config['TEST_AI_NUDGES'] is True:
-        if not all_habits:
-            ai_habits_empty_state = "A system of atomic habits is the foundation of a high-performance life. Pick one small thing you want to do every day and build from there."
-        else:
-            ai_habits_subtitle = "Your daily systems are running smoothly. Keep casting votes for your identity."
+    if current_user.access_level >= 2:
+        # Fetch from DB (Mapping exactly to the DailyNote model)
+        ai_habits_subtitle = daily_note.ai_habits_subtitle if daily_note else None
+        ai_habits_empty_state = daily_note.ai_habits_empty_state if daily_note else None
+        ai_heatmap_analysis = daily_note.ai_heatmap_analysis if daily_note else None
+        ai_dow_analysis = daily_note.ai_dow_analysis if daily_note else None
+        ai_momentum_analysis = daily_note.ai_momentum_analysis if daily_note else None
 
-        # 1. Sidebar Analytics Coaching
-        ai_heatmap_analysis = "Your intensity is highest mid-week, but drops off significantly on weekends. Consider designing a separate, lighter weekend routine to maintain baseline momentum."
-        
-        # Look for patterns in the Day of Week data (mock logic)
-        ai_dow_analysis = "Thursdays are consistently your lowest execution day. What is happening in your schedule on Thursdays that is draining your energy?"
-        
-        # Look for trends in the momentum data (mock logic)
-        ai_momentum_analysis = "You've increased total completions by 15% over the last 3 weeks. The compounding effect is taking hold. Protect this momentum."
-
-        # 2. Individual Habit Coaching (Using the same logic your API will use)
-        for habit in all_habits:
-            status_str = habit_statuses.get(habit.id)
-            current_count = current_counts.get(habit.id, 0)
-            is_completed = current_count >= habit.target_count
-
-            if is_completed:
-                if habit.streak == habit.best_streak and habit.best_streak > 1:
-                    habit.ai_insight = "New all-time best! You are operating at a completely new level of consistency."
-                elif habit.streak > 0 and habit.streak % 5 == 0:
-                    habit.ai_insight = f"Milestone reached: {habit.streak} days. The neural pathways are solidifying."
-                else:
-                    habit.ai_insight = "Execution complete. Another vote cast for the person you are becoming."
-            elif status_str == 'EXPIRING':
-                habit.ai_insight = "Your streak is at immediate risk. Don't let a slip become a slide."
-            elif not habit.trigger or not habit.craving:
-                habit.ai_insight = "This habit is missing a defined loop. Add a specific Cue and Craving to make it stick faster."
+        if current_app.config.get('TEST_AI_NUDGES') is True:
+            if not all_habits:
+                ai_habits_empty_state = "A system of atomic habits is the foundation of a high-performance life. Pick one small thing you want to do every day and build from there."
             else:
-                habit.ai_insight = None
+                ai_habits_subtitle = "Your daily systems are running smoothly. Keep casting votes for your identity."
+
+            # 1. Sidebar Analytics Coaching
+            ai_heatmap_analysis = "Your intensity is highest mid-week, but drops off significantly on weekends. Consider designing a separate, lighter weekend routine to maintain baseline momentum."
+            ai_dow_analysis = "Thursdays are consistently your lowest execution day. What is happening in your schedule on Thursdays that is draining your energy?"
+            ai_momentum_analysis = "You've increased total completions by 15% over the last 3 weeks. The compounding effect is taking hold. Protect this momentum."
+
+            # 2. Individual Habit Coaching
+            for habit in all_habits:
+                status_str = habit_statuses.get(habit.id)
+                current_count = current_counts.get(habit.id, 0)
+                is_completed = current_count >= habit.target_count
+
+                if is_completed:
+                    if habit.streak == habit.best_streak and habit.best_streak > 1:
+                        habit.ai_insight = "New all-time best! You are operating at a completely new level of consistency."
+                    elif habit.streak > 0 and habit.streak % 5 == 0:
+                        habit.ai_insight = f"Milestone reached: {habit.streak} days. The neural pathways are solidifying."
+                    else:
+                        habit.ai_insight = "Execution complete. Another vote cast for the person you are becoming."
+                elif status_str == 'EXPIRING':
+                    habit.ai_insight = "Your streak is at immediate risk. Don't let a slip become a slide."
+                elif not habit.trigger or not habit.craving:
+                    habit.ai_insight = "This habit is missing a defined loop. Add a specific Cue and Craving to make it stick faster."
+                else:
+                    habit.ai_insight = None
+    else:
+        # Ensure Basic users don't see stray insights loaded onto the habit objects
+        for habit in all_habits:
+            habit.ai_insight = None
     # ==========================================
 
 

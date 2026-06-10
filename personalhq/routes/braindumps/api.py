@@ -1,7 +1,7 @@
 """API routes for handling BrainDump data actions."""
 
 from datetime import datetime
-from flask import Blueprint, redirect, url_for, jsonify, request
+from flask import Blueprint, redirect, url_for, jsonify, request, flash
 from flask_login import login_required, current_user
 from sqlalchemy import func
 from personalhq.extensions import db
@@ -68,6 +68,14 @@ def convert_dump(dump_id):
     convert_type = request.form.get('convert_type') # 'focus' or 'experience'
     name = request.form.get('name')
 
+    # ---------------------------------------------------------
+    # THE SECURITY LOCK: Block Tier 1 users from Tier 2 features
+    # ---------------------------------------------------------
+    if convert_type in ['experience', 'journal'] and current_user.access_level < 2:
+        flash("Converting to Time Buckets and Journals requires a Pro subscription.", "info")
+        return redirect(url_for('braindumps_view.index'))
+    # ---------------------------------------------------------
+
     if convert_type == 'focus':
         target_date_str = request.form.get('target_date')
         duration = request.form.get('target_duration_minutes', type=int)
@@ -80,7 +88,13 @@ def convert_dump(dump_id):
             user_id=current_user.id, target_date=target_date
         ).scalar() or 0
 
-        identity_id = request.form.get('identity_id', type=int)
+        # ---------------------------------------------------------
+        # SECURITY LOCK: Only Pro+ users can map actions to Identities
+        # ---------------------------------------------------------
+        if current_user.access_level >= 2:
+            identity_id = request.form.get('identity_id', type=int)
+        else:
+            identity_id = None
 
         new_session = FocusSession(
             user_id=current_user.id,
@@ -129,5 +143,5 @@ def convert_dump(dump_id):
     # Clear it from the Inbox
     db.session.delete(dump)
     db.session.commit()
-
+    flash('Successfully converted thought.', 'success')
     return redirect(url_for('braindumps_view.index'))

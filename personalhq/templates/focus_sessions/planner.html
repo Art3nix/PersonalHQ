@@ -444,13 +444,28 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity (Optional)</label>
-                        <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
-                            <option value="">None (Unassigned)</option>
-                            {% for identity in identities %}
-                                <option value="{{ identity.id }}">{{ identity.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            Assign to Identity
+                            {% if current_user.access_level < 2 %}
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-500 border border-indigo-100">Pro</span>
+                            {% else %}
+                                <span class="text-stone-400 font-normal tracking-normal lowercase">(Optional)</span>
+                            {% endif %}
+                        </label>
+                        
+                        {% if current_user.access_level >= 2 %}
+                            <select name="identity_id" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                <option value="">None (Unassigned)</option>
+                                {% for identity in identities %}
+                                    <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <a href="{{ url_for('settings.index') }}#pricing" class="w-full bg-stone-50/50 border border-stone-100 rounded-xl py-3 px-4 text-sm outline-none font-medium text-stone-400 flex items-center justify-between group hover:border-indigo-200 transition-colors cursor-pointer block shadow-sm">
+                                <span>Upgrade to map blocks to identities</span>
+                                <i data-lucide="lock" class="w-4 h-4 text-stone-300 group-hover:text-indigo-500 transition-colors"></i>
+                            </a>
+                        {% endif %}
                     </div>
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
@@ -586,13 +601,28 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">Assign to Identity</label>
-                        <select name="identity_id" id="edit-session-identity" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all outline-none font-medium cursor-pointer">
-                            <option value="">None (Unassigned)</option>
-                            {% for identity in identities %}
-                                <option value="{{ identity.id }}">{{ identity.name }}</option>
-                            {% endfor %}
-                        </select>
+                        <label class="block text-xs font-bold text-stone-900 uppercase tracking-wider mb-2 flex items-center gap-2">
+                            Assign to Identity
+                            {% if current_user.access_level < 2 %}
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-indigo-50 text-indigo-500 border border-indigo-100">Pro</span>
+                            {% else %}
+                                <span class="text-stone-400 font-normal tracking-normal lowercase">(Optional)</span>
+                            {% endif %}
+                        </label>
+                        
+                        {% if current_user.access_level >= 2 %}
+                                <select name="identity_id" id="edit-session-identity" class="w-full bg-stone-50 border border-stone-200 rounded-xl py-3 px-4 text-sm focus:bg-white focus:border-indigo-500 outline-none font-medium cursor-pointer">
+                                    <option value="">None (Unassigned)</option>
+                                    {% for identity in identities %}
+                                        <option value="{{ identity.id }}">{{ identity.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                            <a href="{{ url_for('settings.index') }}#pricing" class="w-full bg-stone-50/50 border border-stone-100 rounded-xl py-3 px-4 text-sm outline-none font-medium text-stone-400 flex items-center justify-between group hover:border-indigo-200 transition-colors cursor-pointer block shadow-sm">
+                                <span>Upgrade to map blocks to identities</span>
+                                <i data-lucide="lock" class="w-4 h-4 text-stone-300 group-hover:text-indigo-500 transition-colors"></i>
+                            </a>
+                        {% endif %}
                     </div>
                     <div class="pt-4">
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200">
@@ -812,7 +842,12 @@
             document.getElementById('edit-session-name').value = data.name;
             document.getElementById('edit-session-date').value = data.date;
             document.getElementById('edit-session-duration').value = data.duration;
-            document.getElementById('edit-session-identity').value = data.identity;
+            
+            // Safety check: Only try to set the value if the dropdown actually exists
+            const identitySelect = document.getElementById('edit-session-identity');
+            if (identitySelect) {
+                identitySelect.value = data.identity;
+            }
             
             document.getElementById('edit-session-modal').classList.remove('translate-x-full');
         }

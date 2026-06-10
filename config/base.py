@@ -11,6 +11,11 @@ class Config: # pylint: disable=R0903; # flask config class used to only store d
     SECRET_KEY = os.environ.get("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    # This forces SQLAlchemy to "ping" the DB to check if it's alive before querying
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 1800  # Automatically recycle connections older than 30 minutes
+    }
 
     # Mail
     MAIL_SERVER = os.environ.get("MAIL_SERVER")

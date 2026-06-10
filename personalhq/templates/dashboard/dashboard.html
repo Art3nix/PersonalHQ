@@ -177,10 +177,17 @@
         </div>
         
         <div class="shrink-0">
-            <a href="{{ url_for('dashboard.onboarding') }}" class="whitespace-nowrap inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
-                Build with AI
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </a>
+            {% if current_user.access_level >= 2 %}
+                <button onclick="document.getElementById('ai-wizard-modal').classList.remove('hidden')" class="whitespace-nowrap inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-200">
+                    Build with AI
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+            {% else %}
+                <a href="{{ url_for('settings.index') }}#pricing" class="whitespace-nowrap inline-flex items-center justify-center gap-2 px-6 py-3 bg-stone-900 text-white rounded-xl text-sm font-bold hover:bg-stone-800 transition-colors shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Upgrade for AI
+                </a>
+            {% endif %}
         </div>
         
     </div>
@@ -475,7 +482,7 @@
                         </h3>
                     </div>
 
-                    {% if active_bucket %}
+                    {% if active_bucket and current_user.access_level >= 2 %}
                     <div class="bg-white border border-stone-100 rounded-[2rem] p-7 shadow-xl shadow-stone-200/40 relative overflow-hidden group">
                         
                         <div class="mb-6">
@@ -533,9 +540,17 @@
                         <p class="text-[11px] font-medium text-stone-500 mt-1.5 mb-6 leading-relaxed px-2">
                             {{ ai_chapter_empty_state | default('Time passes whether we plan it or not. Give this current phase of your life a theme so you know exactly what experiences to prioritize right now.', true) }}
                         </p>
-                        <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
-                            Design Your Chapter →
-                        </a>
+                        
+                        {% if current_user.access_level >= 2 %}
+                            <a href="{{ url_for('time_buckets_view.manage') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 text-stone-600 rounded-xl font-bold text-xs hover:bg-indigo-600 hover:text-white hover:border-indigo-600 transition-all shadow-sm">
+                                Design Your Chapter →
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('settings.index') }}#pricing" class="inline-flex items-center gap-2 px-5 py-2.5 bg-stone-900 text-white rounded-xl font-bold text-xs hover:bg-stone-800 transition-all shadow-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                Unlock Life Map
+                            </a>
+                        {% endif %}
                     </div>
                     {% endif %}
                 </section>

@@ -63,32 +63,39 @@ def matrix():
     unassigned_habits = Habit.query.filter_by(user_id=current_user.id, identity_id=None, is_active=True).all()
 
     # ==========================================
-    # AI COACH CONTEXT
+    # AI COACH CONTEXT (PRO TIER ONLY)
     # ==========================================
-    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=get_logical_today(current_user)).first()
+    daily_note = DailyNote.query.filter_by(user_id=current_user.id, logical_date=today).first()
 
-    # Fetch from DB (We named this one ai_identity_empty_state in the model)
-    ai_empty_state = daily_note.ai_identity_empty_state if daily_note else None
+    ai_empty_state = None
 
-    if current_app.config['TEST_AI_NUDGES'] is True:
-        if not identity_stats:
-            ai_empty_state = "Who do you want to be? Don't worry about outcomes yet. Focus on creating one identity (e.g., 'The Writer') and we will build the systems to support it."
-        else:
-            for stat in identity_stats:
-                # 1. Disconnected (No habits linked)
-                if not stat['habit_count'] and not stat['focus_count']:
-                    stat['model'].ai_insight = "An identity without actions is just a wish. Attach one small daily habit to start building evidence."
-                
-                # 2. Slipping Alignment (Calculated from your existing logic)
-                elif stat['total_evidence'] == 0:
-                    stat['model'].ai_insight = f"Your '{stat['model'].name}' identity has been quiet lately. Do we need to schedule a small win today to get it back?"
-                
-                # 3. Strong Alignment
-                elif stat['total_evidence'] > 0:
-                    stat['model'].ai_insight = f"The evidence is stacking up. You are consistently proving to yourself that you are {stat['model'].name}."
-                
-                else:
-                    stat['model'].ai_insight = None
+    if current_user.access_level >= 2:
+        # Fetch from DB (We named this one ai_identity_empty_state in the model)
+        ai_empty_state = daily_note.ai_identity_empty_state if daily_note else None
+
+        if current_app.config.get('TEST_AI_NUDGES') is True:
+            if not identity_stats:
+                ai_empty_state = "Who do you want to be? Don't worry about outcomes yet. Focus on creating one identity (e.g., 'The Writer') and we will build the systems to support it."
+            else:
+                for stat in identity_stats:
+                    # 1. Disconnected (No habits linked)
+                    if not stat['habit_count'] and not stat['focus_count']:
+                        stat['model'].ai_insight = "An identity without actions is just a wish. Attach one small daily habit to start building evidence."
+                    
+                    # 2. Slipping Alignment
+                    elif stat['total_evidence'] == 0:
+                        stat['model'].ai_insight = f"Your '{stat['model'].name}' identity has been quiet lately. Do we need to schedule a small win today to get it back?"
+                    
+                    # 3. Strong Alignment
+                    elif stat['total_evidence'] > 0:
+                        stat['model'].ai_insight = f"The evidence is stacking up. You are consistently proving to yourself that you are {stat['model'].name}."
+                    
+                    else:
+                        stat['model'].ai_insight = None
+    else:
+        # Clear insights for Basic tier
+        for stat in identity_stats:
+            stat['model'].ai_insight = None
     # ==========================================
 
     return render_template(

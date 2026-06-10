@@ -16,6 +16,53 @@
 
     <!-- Lucide icons — self-hosted -->
     <script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
+
+    {% if config.GA_TRACKING_ID %}
+        <script>
+            // Define the function to load GA4, but do NOT run it yet
+            function loadGoogleAnalytics() {
+                if (document.getElementById('ga-script')) return; // Prevent duplicate loading
+                
+                const script = document.createElement('script');
+                script.id = 'ga-script';
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}";
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ config.GA_TRACKING_ID }}');
+            }
+
+            // On page load, check if they already accepted cookies in a previous session
+            document.addEventListener('DOMContentLoaded', () => {
+                const consent = localStorage.getItem('lifehq_cookie_consent');
+                
+                if (consent === 'accepted') {
+                    // They already consented, fire GA4 immediately
+                    loadGoogleAnalytics();
+                } else if (!consent) {
+                    // No decision made yet, show the banner
+                    const banner = document.getElementById('cookie-consent-banner');
+                    if(banner) banner.classList.remove('translate-y-[150%]', 'opacity-0');
+                }
+            });
+
+            // Functions triggered by the banner buttons
+            function acceptCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                loadGoogleAnalytics(); // Fire GA4 now!
+            }
+
+            function rejectCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                // GA4 is never loaded
+            }
+        </script>
+    {% endif %}
     
     {% block extra_head %}{% endblock %}
 </head>
@@ -51,7 +98,7 @@
             <div class="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-6 border border-red-100">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
             </div>
-            <h3 class="text-xl font-extrabold text-stone-900 mb-2">Delete Item?</h3>
+            <h3 id="delete-modal-title" class="text-xl font-extrabold text-stone-900 mb-2">Delete Item?</h3>
             <p class="text-sm font-medium text-stone-500 mb-8">Are you sure you want to delete <span id="delete-item-name" class="font-bold text-stone-900">this</span>? This action cannot be undone.</p>
             <div class="flex gap-3">
                 <button onclick="closeDeleteModal()" class="flex-1 py-3.5 bg-stone-50 text-stone-600 font-bold rounded-xl hover:bg-stone-100 transition-colors">Cancel</button>
@@ -73,43 +120,69 @@
             </div>
         </div>
     </div>
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-6 right-6 z-[200] max-w-sm bg-white p-6 rounded-3xl shadow-2xl border border-stone-200 transform translate-y-[150%] opacity-0 transition-all duration-500 ease-out">
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shrink-0">
+                <i data-lucide="cookie" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-stone-900 font-extrabold tracking-tight">Your Privacy</h3>
+        </div>
+        
+        <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+        </p>
+        
+        <div class="flex gap-3">
+            <button onclick="rejectCookies()" class="flex-1 py-3 bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200 rounded-xl text-sm font-bold transition-colors">
+                Reject
+            </button>
+            <button onclick="acceptCookies()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all">
+                Accept All
+            </button>
+        </div>
+    </div>
 
-      <script>
-          let formToSubmit = null;
+        <script>
+            let formToSubmit = null;
 
-          function confirmDelete(formId, itemName) {
-              formToSubmit = document.getElementById(formId);
-              document.getElementById('delete-item-name').innerText = `"${itemName}"`;
-              
-              const modal = document.getElementById('global-delete-modal');
-              const box = document.getElementById('global-delete-modal-box');
-              
-              modal.classList.remove('hidden');
-              // Small delay to allow display:block to apply before animating opacity
-              requestAnimationFrame(() => {
-                  modal.classList.remove('opacity-0');
-                  box.classList.remove('scale-95');
-              });
-          }
+            function confirmDelete(formId, itemName, customTitle = 'Delete Item?') {
+                formToSubmit = document.getElementById(formId);
+                
+                // Update the text dynamically
+                document.getElementById('delete-item-name').innerText = itemName; 
+                document.getElementById('delete-modal-title').innerText = customTitle; 
+                
+                const modal = document.getElementById('global-delete-modal');
+                const box = document.getElementById('global-delete-modal-box');
+                
+                modal.classList.remove('hidden');
+                // Small delay to allow display:block to apply before animating opacity
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    box.classList.remove('scale-95');
+                });
+            }
 
-          function closeDeleteModal() {
-              const modal = document.getElementById('global-delete-modal');
-              const box = document.getElementById('global-delete-modal-box');
-              
-              modal.classList.add('opacity-0');
-              box.classList.add('scale-95');
-              
-              setTimeout(() => {
-                  modal.classList.add('hidden');
-                  formToSubmit = null;
-              }, 200);
-          }
+            function closeDeleteModal() {
+                const modal = document.getElementById('global-delete-modal');
+                const box = document.getElementById('global-delete-modal-box');
+                
+                modal.classList.add('opacity-0');
+                box.classList.add('scale-95');
+                
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    formToSubmit = null;
+                }, 200);
+            }
 
-          function executeDelete() {
-              if (formToSubmit) {
-                  formToSubmit.submit();
-              }
-          }
+            function executeDelete() {
+                if (formToSubmit) {
+                    formToSubmit.submit();
+                }
+            }
 
           // Uses your existing global 'formToSubmit' variable and 'executeDelete' function!
         function confirmArchive(formId, itemName) {

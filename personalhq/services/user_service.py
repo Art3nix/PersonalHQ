@@ -26,7 +26,7 @@ def recalculate_user_reset_hour(user):
 
     # Query all activity sources
     dumps = db.session.scalars(select(BrainDump.created_at).filter(BrainDump.user_id == user.id, BrainDump.created_at >= naive_two_weeks_ago)).all()
-    journals = db.session.scalars(select(JournalEntry.created_at).filter(JournalEntry.user_id == user.id, JournalEntry.created_at >= naive_two_weeks_ago)).all()
+    journals = db.session.scalars(select(JournalEntry.created_at).filter(JournalEntry.journal.has(user_id=user.id), JournalEntry.created_at >= naive_two_weeks_ago)).all()
     page_views = db.session.scalars(select(UserActivity.timestamp).filter(UserActivity.user_id == user.id, UserActivity.timestamp >= naive_two_weeks_ago)).all()
     focus = db.session.scalars(select(FocusSession.start_time).filter(FocusSession.user_id == user.id, FocusSession.start_time >= naive_two_weeks_ago)).all()
     habits = db.session.scalars(select(HabitLog.logged_at).filter(HabitLog.habit.has(user_id=user.id), HabitLog.logged_at >= naive_two_weeks_ago)).all()

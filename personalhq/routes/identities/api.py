@@ -3,6 +3,7 @@
 from datetime import timedelta, date
 from flask import Blueprint, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
+from personalhq.utils.decorators import requires_access_level
 from personalhq.extensions import db
 from personalhq.models.identities import Identity
 from personalhq.models.journals import Journal, JournalFrequency
@@ -21,6 +22,7 @@ identities_api_bp = Blueprint('identities_api', __name__, url_prefix='/actions/i
 
 @identities_api_bp.route('/create', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def create_identity():
     """Creates a new Identity and optionally links existing unassigned habits."""
     name = request.form.get('name')
@@ -62,6 +64,7 @@ def create_identity():
 
 @identities_api_bp.route('/<int:identity_id>/edit', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def edit_identity(identity_id):
     """Updates an existing Identity's core details."""
     identity = db.session.get(Identity, identity_id)
@@ -102,6 +105,7 @@ def delete_identity(identity_id):
 
 @identities_api_bp.route('/generate_batch', methods=['POST'])
 @login_required
+@requires_access_level(2)
 def generate_batch():
     """Takes MULTIPLE identities from onboarding, architects the whole system dynamically, and saves it."""
     data = request.get_json()

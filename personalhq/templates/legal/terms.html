@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | LifeHQ</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    {% if config.GA_TRACKING_ID %}
+        <script>
+            // Define the function to load GA4, but do NOT run it yet
+            function loadGoogleAnalytics() {
+                if (document.getElementById('ga-script')) return; // Prevent duplicate loading
+                
+                const script = document.createElement('script');
+                script.id = 'ga-script';
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id={{ config.GA_TRACKING_ID }}";
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '{{ config.GA_TRACKING_ID }}');
+            }
+
+            // On page load, check if they already accepted cookies in a previous session
+            document.addEventListener('DOMContentLoaded', () => {
+                const consent = localStorage.getItem('lifehq_cookie_consent');
+                
+                if (consent === 'accepted') {
+                    // They already consented, fire GA4 immediately
+                    loadGoogleAnalytics();
+                } else if (!consent) {
+                    // No decision made yet, show the banner
+                    const banner = document.getElementById('cookie-consent-banner');
+                    if(banner) banner.classList.remove('translate-y-[150%]', 'opacity-0');
+                }
+            });
+
+            // Functions triggered by the banner buttons
+            function acceptCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                loadGoogleAnalytics(); // Fire GA4 now!
+            }
+
+            function rejectCookies() {
+                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
+                // GA4 is never loaded
+            }
+        </script>
+    {% endif %}
+
+    <style>
+        :root {
+            --bg-canvas: #FDFDFB;
+            --text-main: #1A1C1E;
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-canvas); 
+            color: var(--text-main);
+        }
+
+        /* Subtle Vertical Grid for Main Content */
+        .bg-grid-vertical {
+            background-image: linear-gradient(to right, #F5F5F4 1px, transparent 1px);
+            background-size: 25% 100%;
+            background-position: left top;
+        }
+        
+        /* Print optimization */
+        @media print {
+            .no-print, aside { display: none !important; }
+            body, .bg-grid-vertical { background: white !important; }
+            main { padding: 0 !important; max-width: 100% !important; }
+            h2 { page-break-after: avoid; }
+            p, li { page-break-inside: avoid; color: #000 !important; }
+            .highlight-box { border: 1px solid #000 !important; background: transparent !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900 flex flex-col lg:flex-row min-h-screen">
+
+    <aside class="w-full lg:w-72 shrink-0 lg:border-r border-stone-200 bg-[#FDFDFB] flex flex-col lg:h-screen lg:sticky lg:top-0 no-print z-50">
+        <div class="px-6 lg:px-8 py-4 lg:pt-10 lg:pb-8 border-b border-stone-100 flex items-center justify-between bg-[#FDFDFB]/90 backdrop-blur-md">
+            <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
+                <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
+                    <i data-lucide="layers" class="w-4 h-4"></i>
+                </div>
+                <span class="text-xl font-extrabold tracking-tight text-stone-900">LifeHQ</span>
+            </a>
+            <a href="/" class="lg:hidden text-sm font-bold text-stone-500">Back</a>
+        </div>
+        
+        <div class="hidden lg:block flex-1 overflow-y-auto py-8">
+            <div class="px-8 mb-4">
+                <h4 class="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Legal</h4>
+            </div>
+            <nav class="flex flex-col relative" id="toc-nav">
+                <div class="-ml-0.5 flex flex-col">
+                    <a href="#acceptance" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-indigo-600 text-stone-900 font-bold transition-all duration-200">Acceptance of Terms</a>
+                    <a href="#provider" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Provider Information</a>
+                    <a href="#service-ai" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Service & AI Limitations</a>
+                    <a href="#accounts" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Accounts & Eligibility</a>
+                    <a href="#payments" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Subscriptions & Lifetime Pass</a>
+                    <a href="#eu-waiver" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">EU Consumer Rights Waiver</a>
+                    <a href="#content-ip" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Content & IP Ownership</a>
+                    <a href="#acceptable-use" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Acceptable Use Policy</a>
+                    <a href="#third-party" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Third-Party Services</a>
+                    <a href="#termination" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Termination</a>
+                    <a href="#warranty" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Warranty Disclaimer</a>
+                    <a href="#liability" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Limitation of Liability</a>
+                    <a href="#governing-law" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Governing Law & Jurisdiction</a>
+                    <a href="#changes" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Changes to Terms</a>
+                    <a href="#contact" class="toc-link block text-[13px] py-2.5 pl-8 border-l-2 border-transparent text-stone-500 font-medium hover:text-stone-900 transition-all duration-200">Contact Information</a>
+                </div>
+            </nav>
+        </div>
+        
+        <div class="hidden lg:block p-6 border-t border-stone-100">
+            <a href="/" class="flex items-center gap-2 text-[13px] font-bold text-stone-500 hover:text-stone-900 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Homepage
+            </a>
+        </div>
+    </aside>
+
+    <nav class="lg:hidden fixed w-full z-50 bg-[#FDFDFB]/90 backdrop-blur-md border-b border-stone-200 no-print">
+        <div class="px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white">
+                    <i data-lucide="layers" class="w-3 h-3"></i>
+                </div>
+                <span class="font-extrabold text-stone-900">LifeHQ</span>
+            </a>
+            <a href="/" class="text-sm font-bold text-stone-500">Back</a>
+        </div>
+    </nav>
+
+    <main class="flex-1 bg-grid-vertical min-w-0 relative pt-16 lg:pt-0">
+        <div class="max-w-4xl mx-auto px-6 lg:px-24 py-16 lg:py-24 relative z-10">
+            
+            <h1 class="text-5xl lg:text-6xl font-extrabold tracking-tighter text-stone-900 mb-10 leading-[1.1]">Terms of Service</h1>
+
+            <div class="bg-white border border-stone-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-xl p-8 mb-10">
+                <p class="!mb-0 text-stone-600 text-[14px] font-medium leading-relaxed">
+                    This document establishes the legal terms for using LifeHQ. For details regarding our data practices, sub-processors, and data retention, please review our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 transition-colors font-semibold underline underline-offset-2 decoration-indigo-200">Privacy Policy</a>. By registering an account or subscribing to our Service, you agree to be bound by these terms.
+                </p>
+            </div>
+
+            <p class="font-bold text-stone-900 mb-12 text-[15px]">Effective Date: June 9, 2026</p>
+
+            <h2 id="acceptance" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Acceptance of Terms</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and LifeHQ ("we," "us," or "our"), concerning your access to and use of the LifeHQ web application, including its habit tracking, journaling, decade planner, AI coaching, and related features (collectively, the "Service").</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">By checking the explicit consent box during registration or checkout, or by accessing the Service, you signify your acceptance of these Terms. If you do not agree to these Terms, you may not use the Service.</p>
+
+            <h2 id="provider" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Provider Information</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">The Service is operated by an independent professional registered under the laws of the Czech Republic:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Provider:</strong> [YOUR FULL LEGAL NAME]</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Registered Office:</strong> [YOUR REGISTERED ADDRESS, CZECHIA]</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Identification Number (IČO):</strong> [YOUR IČO]</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Registration:</strong> Registered in the Trade Register (Zapsán v živnostenském rejstříku)</li>
+            </ul>
+
+            <h2 id="service-ai" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Description of Service and AI Limitations</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ synthesizes your actions, habits, and journal entries to deliver personalized organizational insights. The Service utilizes artificial intelligence to generate daily briefings and habit recovery suggestions based on the data you provide.</p>
+            
+            <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-8 my-8">
+                <h4 class="font-extrabold text-rose-900 mb-3 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center text-rose-600">
+                        <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+                    </div>
+                    Not Professional or Medical Advice
+                </h4>
+                <p class="text-rose-800 text-[14px] font-medium !mb-0 leading-relaxed">
+                    <strong>Our AI Coach is not a licensed therapist, psychologist, psychiatrist, or medical professional.</strong> All insights are generated algorithmically for informational, motivational, and self-organizational purposes only. You must not disregard professional advice or delay seeking treatment based on information provided by the Service. You are solely responsible for your physical and mental well-being.
+                </p>
+            </div>
+
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Due to the probabilistic nature of machine learning, AI-generated content may occasionally be inaccurate, inappropriate, or lack necessary context. You agree to independently evaluate the accuracy and relevance of any AI-generated insight before acting upon it.</p>
+
+            <h2 id="accounts" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Accounts and Eligibility</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Age Requirement:</strong> You must be at least 16 years of age to create an account. If we discover that an account has been created by a user under 16 without verified parental consent (as required by GDPR Article 8), we will terminate the account and delete the associated data.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Account Security:</strong> You are entirely responsible for maintaining the confidentiality of your credentials. You agree to notify us immediately of any unauthorized use of your account. We will not be liable for any loss arising from your failure to secure your credentials.</p>
+
+            <h2 id="payments" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Subscriptions and Lifetime Pass</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ offers a free "Basic" tier and paid premium tiers ("Pro", "Limitless", and a "Lifetime" pass).</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Billing:</strong> Subscription fees are billed in advance via our authorized merchant of record, Stripe. Your subscription automatically renews unless cancelled prior to the end of the current billing cycle. You may cancel at any time via your account settings.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Price Changes:</strong> We reserve the right to change our subscription prices. We will notify you at least 30 days before any price change takes effect. If you do not agree to the new price, you may cancel your subscription before the next billing cycle.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">The "Lifetime" Pass:</strong> A Lifetime pass grants you access to the specified features for the operational lifespan of the LifeHQ Service. If we are forced to permanently discontinue the Service within three (3) years of your Lifetime pass purchase, you are entitled to a prorated refund based on the remaining time in that 3-year period. After three years, the pass is considered fully delivered, and no refunds will be issued upon discontinuation.</li>
+            </ul>
+
+            <h2 id="eu-waiver" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">EU Consumer Rights and Withdrawal Waiver</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Under the EU Consumer Rights Directive, consumers residing in the European Union generally possess a 14-day right of withdrawal from remote purchases. However, an exception applies to the supply of digital content not supplied on a tangible medium.</p>
+            <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-8 my-8">
+                <h4 class="font-extrabold text-amber-900 mb-3 flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                    </div>
+                    Immediate Access Consent
+                </h4>
+                <p class="text-amber-900 text-[14px] font-medium !mb-0 leading-relaxed">
+                    During the checkout process, you will be required to explicitly consent to the immediate performance of the contract. <strong>By ticking the consent box and completing your purchase, you acknowledge and agree that you will lose your 14-day right of withdrawal once you access the premium Service.</strong> A confirmation of this consent will be provided to you via a durable medium (email) alongside your receipt.
+                </p>
+            </div>
+
+            <h2 id="content-ip" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Content and IP Ownership</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Your Content & AI Outputs:</strong> You retain all intellectual property rights to the text, habits, journals, and data you input into the Service ("User Content"). Furthermore, you own the rights to the specific insights, briefings, and summaries generated for you by the AI Coach based on your User Content ("Outputs").</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">License to Us:</strong> To operate the platform, you grant us a worldwide, non-exclusive, royalty-free license to use, host, store, and securely transmit your User Content to our AI sub-processors solely for the purposes of: (a) providing the Service to you, (b) preventing fraud or abuse, (c) debugging and security monitoring, and (d) complying with legal obligations. We do not use your private journal entries to train public AI models.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Our Property:</strong> The Service itself, including its original source code, user interface, methodology (e.g., the Time Buckets architecture), and algorithms, are the exclusive intellectual property of LifeHQ.</p>
+
+            <h2 id="acceptable-use" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Acceptable Use Policy</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">You agree not to misuse the Service. Specifically, you shall not:</p>
+            <ul class="list-none pl-0 mb-8 space-y-3">
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span>Attempt to reverse-engineer, decompile, or discover the underlying AI prompting structure of the Service.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span>Bypass or exploit security measures, rate limits, or access controls.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span>Use automated scripts or scraping tools to interact with the Service.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span>Share your account credentials with third parties or resell access to the Service.</li>
+            </ul>
+
+            <h2 id="third-party" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Third-Party Services and Sub-Processors</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We rely on trusted third-party providers (Sub-processors) for essential functionality. This includes Stripe for payment processing, hosting providers (e.g., Oracle Cloud) for database storage, and external Large Language Model providers (e.g., OpenAI or Google) to process your data for AI coaching. Our relationships with these processors are governed by Data Processing Agreements (DPAs) in compliance with the GDPR. For a full list of sub-processors and data flows, please see our Privacy Policy.</p>
+
+            <h2 id="termination" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Termination</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Termination by Us:</strong> If you materially breach these Terms (e.g., violating the Acceptable Use Policy), we may suspend or terminate your account with written notice and without refund. We may also terminate your Service without cause upon 30 days' written notice; in such an event, you will receive a prorated refund for any prepaid, unused time.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Termination by You:</strong> You may terminate your account at any time via your account settings. Upon termination, we will delete your User Content in accordance with the retention schedule defined in our Privacy Policy.</p>
+
+            <h2 id="warranty" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Warranty Disclaimer</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">SUBJECT TO YOUR MANDATORY STATUTORY RIGHTS AS A CONSUMER, THE SERVICE IS PROVIDED "AS-IS" AND "AS-AVAILABLE". WE EXPRESSLY DISCLAIM ALL WARRANTIES, WHETHER EXPRESS OR IMPLIED, INCLUDING IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE. WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR COMPLETELY SECURE.</p>
+
+            <h2 id="liability" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Limitation of Liability</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">NOTHING IN THESE TERMS SHALL EXCLUDE OR LIMIT LIABILITY FOR DEATH OR PERSONAL INJURY CAUSED BY NEGLIGENCE, INTENTIONAL MISCONDUCT, OR GROSS NEGLIGENCE. Furthermore, if you are an EU Consumer, these Terms do not limit your mandatory statutory rights or liability arising from our breach of fundamental contractual obligations.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">TO THE EXTENT PERMITTED BY LAW, IN NO EVENT SHALL LIFEHQ BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF DATA, PROFITS, OR REVENUE) ARISING OUT OF YOUR USE OF THE SERVICE. OUR TOTAL AGGREGATE LIABILITY TO YOU FOR ALL CLAIMS SHALL NOT EXCEED THE GREATER OF FIFTY EUROS (€50) OR THE TOTAL AMOUNT PAID BY YOU TO US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.</p>
+
+            <h2 id="indemnification" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Indemnification</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">To the extent permitted by consumer protection laws, you agree to indemnify and hold harmless LifeHQ and its creator from any claims, liabilities, damages, or costs (including reasonable attorneys' fees) arising out of your violation of these Terms, your gross negligence, or any third-party claim resulting from your User Content.</p>
+
+            <h2 id="governing-law" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Governing Law and Jurisdiction</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">These Terms shall be governed by the laws of the Czech Republic, without regard to conflict of law principles.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">EU Consumers:</strong> If you are a consumer residing in the European Union, you benefit from any mandatory provisions of the law of the country in which you are resident. You may bring a claim to enforce your consumer protection rights in connection with these Terms in the courts of the Czech Republic or in the courts of your resident EU Member State.</p>
+
+            <h2 id="changes" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Changes to the Terms</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We reserve the right to modify these Terms. If a revision meaningfully reduces your rights or changes pricing obligations, we will provide at least 30 days' advance notice via the email associated with your account. If you do not agree to the material changes, you have the right to terminate your agreement with us before the changes take effect and receive a prorated refund for any prepaid, unused time. Your continued use of the Service after the effective date constitutes your acceptance of the new Terms.</p>
+
+            <h2 id="contact" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Contact Information</h2>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If you have any questions or legal notices regarding these Terms, please contact us at:</p>
+            <div class="bg-stone-50 border border-stone-200 rounded-2xl p-6 mt-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-600 shadow-sm">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                    </div>
+                    <p class="font-extrabold text-lg text-stone-900 !mb-0">LifeHQ Legal</p>
+                </div>
+                <p class="text-stone-500 !mb-0 pl-13 text-[14px]">Email: <a href="mailto:support@lifehq.com" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">support@lifehq.com</a></p>
+            </div>
+
+        </div>
+    </main>
+    <!-- GDPR Cookie Consent Banner -->
+    <div id="cookie-consent-banner" class="fixed bottom-6 right-6 z-[200] max-w-sm bg-white p-6 rounded-3xl shadow-2xl border border-stone-200 transform translate-y-[150%] opacity-0 transition-all duration-500 ease-out">
+        
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shrink-0">
+                <i data-lucide="cookie" class="w-5 h-5"></i>
+            </div>
+            <h3 class="text-stone-900 font-extrabold tracking-tight">Your Privacy</h3>
+        </div>
+        
+        <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+        </p>
+        
+        <div class="flex gap-3">
+            <button onclick="rejectCookies()" class="flex-1 py-3 bg-stone-50 hover:bg-stone-100 text-stone-600 border border-stone-200 rounded-xl text-sm font-bold transition-colors">
+                Reject
+            </button>
+            <button onclick="acceptCookies()" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-200 transition-all">
+                Accept All
+            </button>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '-10% 0px -80% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        document.querySelectorAll('.toc-link').forEach(link => {
+                            link.classList.remove('active', 'border-indigo-600', 'text-stone-900', 'font-bold');
+                            link.classList.add('border-transparent', 'text-stone-500', 'font-medium');
+                            
+                            if (link.getAttribute('href') === `#${entry.target.id}`) {
+                                link.classList.remove('border-transparent', 'text-stone-500', 'font-medium');
+                                link.classList.add('active', 'border-indigo-600', 'text-stone-900', 'font-bold');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('main h2').forEach(heading => {
+                observer.observe(heading);
+            });
+        });
+    </script>
+</body>
+</html>
