@@ -105,7 +105,7 @@ def edit_bucket(bucket_id):
 
     if name and start_age and end_age:
         bucket.name = name.strip()
-        theme=theme.strip() if theme else ""
+        bucket.theme = theme.strip() if theme else ""
         start_date, end_date = get_bucket_dates_from_age(start_age, end_age, current_user)
         bucket.start_date = start_date
         bucket.end_date = end_date
