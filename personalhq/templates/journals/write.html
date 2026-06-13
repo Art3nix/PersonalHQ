@@ -160,7 +160,7 @@
                                     </a>
                                 {% endif %}
                                 
-                                {% if current_user.access_level >= 4 %}
+                                {% if current_user.access_level >= 2 %}
                                     <button id="main-submit-btn" type="submit" class="px-8 py-3.5 bg-{{ theme }}-600 text-white rounded-xl text-sm font-bold hover:bg-{{ theme }}-700 transition-colors shadow-lg shadow-{{ theme }}-200">
                                         {% if entry_to_edit %}Update Entry{% else %}Save Entry{% endif %}
                                     </button>
