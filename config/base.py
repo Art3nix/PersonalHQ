@@ -9,6 +9,7 @@ class Config: # pylint: disable=R0903; # flask config class used to only store d
     """Base configuration (12-factor compliant)."""
 
     SECRET_KEY = os.environ.get("SECRET_KEY")
+    ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY")
     SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # This forces SQLAlchemy to "ping" the DB to check if it's alive before querying
