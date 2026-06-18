@@ -145,7 +145,7 @@
                         <div class="flex items-start justify-between gap-6 w-full">
                             <div class="flex-1">
                                 <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-2">
-                                    Captured {{ dump.created_at.strftime('%b %d, %H:%M') }}
+                                    Captured {{ utc_to_local(dump.created_at).strftime('%b %d, %H:%M') }}
                                 </p>
                                 <p id="dump-content-{{ dump.id }}" class="text-base font-semibold text-stone-900 leading-relaxed whitespace-pre-wrap">{{ dump.content }}</p>
                             </div>
