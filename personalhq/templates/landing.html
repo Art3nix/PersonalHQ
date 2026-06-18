@@ -107,6 +107,8 @@
             .bento-item-inbox { grid-column: span 5; }
             .bento-item-whatsapp { grid-column: span 4; }
             .bento-item-lifemap { grid-column: span 8; }
+            /* ADD THIS LINE: */
+            .bento-item-privacy { grid-column: span 12; } 
         }
     </style>
 </head>
@@ -577,6 +579,35 @@
                     </div>
                 </div>
 
+                <!-- 6. Uncompromising Privacy -->
+                <div class="bento-item-privacy bg-white rounded-[2rem] border border-stone-200/60 p-8 flex flex-col md:flex-row justify-between items-center group overflow-hidden relative shadow-[0_2px_10px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 ring-1 ring-black/[0.02]">
+                    <div class="relative z-10 md:w-1/2 w-full md:pr-12 mb-8 md:mb-0">
+                        <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-stone-600 shadow-sm border border-stone-200 mb-4">
+                            <i data-lucide="lock" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-stone-900 mb-2">Uncompromising Privacy</h3>
+                        <p class="text-sm text-stone-600 font-medium leading-relaxed">A clear mind requires a truly safe space. Your journals, thoughts, and reflections are protected with AES encryption at rest. If our infrastructure is ever compromised, your entries remain mathematically locked. We provide the workspace; your insights remain entirely your own.</p>
+                    </div>
+                    
+                    <div class="relative z-10 md:w-1/2 w-full flex justify-end">
+                        <div class="w-full bg-stone-50 border border-stone-100 rounded-2xl p-6 font-mono text-[10px] sm:text-[11px] text-stone-400 break-all leading-loose relative overflow-hidden select-none">
+                            <div class="absolute inset-0 bg-gradient-to-b from-transparent via-stone-50/80 to-stone-50 rounded-2xl pointer-events-none z-10"></div>
+                            
+                            gAZx9R0iDGWe+QKIp5S9Mg==qLVEtvcMwFwBI7p8<br>
+                            xgWx7NzSww6ySIxuFmvILDjWTb5SgQ3knRddXchv<br>
+                            uIlhiWuMz4r3PqwXK2pwzipuoUSIaT+UZgDNw8L1<br>
+                            bJ7CVOJF7rqmHJsjQk8jwebFpYqQ8zVvLNxK1jM2<br>
+                            cT5bRA==vT9mW3qK8xN4bY1cJ6pL0s==gAZx9R0i<br>
+                            DGWe+QKIp5S9Mg==qLVEtvcMwFwBI7p8xgWx7NzS
+
+                            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+                                <span class="bg-white text-stone-700 font-bold tracking-widest uppercase text-[9px] px-3 py-1.5 rounded-lg border border-stone-200 shadow-sm flex items-center gap-1.5">
+                                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-stone-400"></i> Data Encrypted
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
