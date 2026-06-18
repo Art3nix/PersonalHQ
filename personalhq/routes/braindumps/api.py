@@ -29,6 +29,9 @@ def catch_thought():
     if "error" in result:
         return jsonify({"status": "error", "message": result["error"]}), 400
 
+    # Inject the success flag the Javascript is demanding
+    result["status"] = "success"
+
     return jsonify(result), 201
 
 @braindumps_api_bp.route('/<int:dump_id>/edit', methods=['POST'])

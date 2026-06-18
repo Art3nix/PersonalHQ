@@ -230,9 +230,9 @@
                     {% if daily_total > 0 %}
                     <div class="mt-4 flex items-center gap-4">
                         <div class="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-indigo-500 rounded-full transition-all duration-700" style="width: {{ ((daily_completed / daily_total) * 100)|round|int }}%"></div>
+                            <div id="daily-progress-bar" class="h-full bg-indigo-500 rounded-full transition-all duration-700" style="width: {{ ((daily_completed / daily_total) * 100)|round|int }}%"></div>
                         </div>
-                        <span class="text-xs font-bold text-stone-500 shrink-0">{{ daily_completed }}/{{ daily_total }} habits today</span>
+                        <span id="daily-progress-text" class="text-xs font-bold text-stone-500 shrink-0">{{ daily_completed }}/{{ daily_total }} habits today</span>
                     </div>
                     {% endif %}
                 </div>
@@ -335,7 +335,7 @@
                         {% set status = habit_statuses[habit.id] %}
                         {% set theme = habit.identity.color if habit.identity and habit.identity.color else 'indigo' %}
 
-                        <div class="habit-row-item flex flex-col gap-2" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" data-target="{{ habit.target_count }}" style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}">
+                        <div class="habit-row-item flex flex-col gap-2" data-freq="{{ habit.frequency.value }}" data-theme="{{ theme }}" data-target="{{ habit.target_count }}" data-status="{{ status }}" style="{% if habit.frequency.value != 'DAILY' %}display: none;{% endif %}">
                             
                             <div id="habit-card-{{ habit.id }}" class="flex flex-col p-4 border rounded-2xl transition-all group 
                                 {% if status == 'COMPLETED' %}bg-{{ theme }}-50/50 border-{{ theme }}-100
@@ -675,7 +675,6 @@
                 if (action === 'toggle') currentCount = (currentCount >= targetCount) ? 0 : targetCount;
                 
                 if (currentCount < 0) currentCount = 0;
-                if (currentCount > targetCount) currentCount = targetCount;
                 
                 countDisplay.innerText = `${currentCount} / ${targetCount}`;
                 if (minusBtn) minusBtn.disabled = (currentCount === 0);
@@ -685,6 +684,14 @@
             const data = await apiCall(`/actions/habits/${habitId}/${action}`, 'POST', {});
 
             if (data.status === 'success') {
+                // Update true backend progress
+                if (data.progress !== undefined && countDisplay) {
+                    countDisplay.innerText = `${data.progress} / ${targetCount}`;
+                }
+                // Update the progress bar
+                wrapper.dataset.status = data.habit_status;
+                updateDailyProgress();
+                
                 const iconBox = document.getElementById(`habit-icon-${habitId}`);
                 const nameEl = document.getElementById(`habit-name-${habitId}`);
                 const identityEl = document.getElementById(`habit-identity-${habitId}`);
@@ -808,6 +815,25 @@
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function updateDailyProgress() {
+            const dailyHabits = document.querySelectorAll('.habit-row-item[data-freq="DAILY"]');
+            if (dailyHabits.length === 0) return;
+            
+            let completed = 0;
+            dailyHabits.forEach(row => {
+                if (row.dataset.status === 'COMPLETED') completed++;
+            });
+            
+            const total = dailyHabits.length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            const bar = document.getElementById('daily-progress-bar');
+            const text = document.getElementById('daily-progress-text');
+            
+            if (bar) bar.style.width = `${percentage}%`;
+            if (text) text.innerText = `${completed}/${total} habits today`;
         }
         
         // --- DEEP WORK STATE MACHINE & QUEUE LOGIC ---
@@ -1240,27 +1266,32 @@
             sendBtn.classList.add('opacity-0', 'scale-90', 'pointer-events-none');
             sendBtn.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
 
-            // 2. Fire the payload to the Python backend
-            const data = await apiCall('/actions/braindumps/catch', 'POST', { content: val });
+            try {
+                // 2. Fire the payload to the Python backend
+                const data = await apiCall('/actions/braindumps/catch', 'POST', { content: val });
 
-            thoughtInput.disabled = false;
-            sendBtn.disabled = false;
-
-            if (data.status === 'success') {
-                // 3. Success Animation
-                showToast('Thought captured to Inbox!', 'success');
-                thoughtInput.placeholder = "✓ Thought saved!";
-                thoughtInput.classList.add('!border-[var(--success-green)]', 'text-[var(--success-green)]');
-                
-                setTimeout(() => {
-                    thoughtInput.placeholder = "Write down any thought...";
-                    thoughtInput.classList.remove('!border-[var(--success-green)]', 'text-[var(--success-green)]');
-                    thoughtInput.blur(); // Remove focus
-                    shortcutHint.classList.remove('opacity-0'); 
-                    shortcutHint.classList.add('opacity-70'); // Bring the hint back
-                }, 2500);
-            } else {
+                // Flexible success check
+                if (data.status === 'success' || data.success) {
+                    // 3. Success Animation (Safely checks if showToast exists)
+                    if (typeof showToast === 'function') {
+                        showToast('Thought captured to Inbox!', 'success');
+                    }
+                    thoughtInput.placeholder = "✓ Thought saved!";
+                    thoughtInput.classList.add('!border-[var(--success-green)]', 'text-[var(--success-green)]');
+                    
+                    setTimeout(() => {
+                        thoughtInput.placeholder = "Write down any thought...";
+                        thoughtInput.classList.remove('!border-[var(--success-green)]', 'text-[var(--success-green)]');
+                        thoughtInput.blur(); // Remove focus
+                        shortcutHint.classList.remove('opacity-0'); 
+                        shortcutHint.classList.add('opacity-70'); // Bring the hint back
+                    }, 2500);
+                } else {
+                    throw new Error(data.message || "Failed to save to server");
+                }
+            } catch (error) {
                 // 4. Error handling
+                console.error("Braindump capture error:", error);
                 thoughtInput.placeholder = "Error saving. Try again.";
                 thoughtInput.value = val; // Restore their text
                 
@@ -1271,6 +1302,9 @@
                 setTimeout(() => {
                     thoughtInput.placeholder = "Write down any thought...";
                 }, 3000);
+            } finally {
+                thoughtInput.disabled = false;
+                sendBtn.disabled = false;
             }
         }
 
