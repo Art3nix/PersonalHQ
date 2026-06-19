@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import func
 from flask import Blueprint, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
-from personalhq.extensions import db
+from personalhq.extensions import db, limiter
 from personalhq.models.focussessions import FocusSession, SessionStatus
 from personalhq.services import focus_service
 
@@ -63,6 +63,7 @@ def end(session_id):
 
 @focus_api_bp.route('/<int:session_id>/status', methods=['GET'])
 @login_required
+@limiter.exempt
 def status(session_id):
     """Fetches the true server-side time and state for the UI clock."""
     session = db.session.get(FocusSession, session_id)
