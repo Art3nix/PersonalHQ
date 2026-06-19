@@ -135,7 +135,9 @@
                         <div class="mt-6 space-y-2 border-t border-{{ theme }}-100/50 pt-4">
                             {% for entry in recent_entries[journal.id][:2] %}
                             <div class="bg-white/50 backdrop-blur-sm rounded-xl p-3 border border-{{ theme }}-100">
-                                <p class="text-[10px] font-bold text-{{ theme }}-500 uppercase tracking-wider mb-1">{{ entry.created_at.strftime('%b %d') }}</p>
+                                <p class="text-[10px] font-bold text-{{ theme }}-500 uppercase tracking-wider mb-1">
+                                    {{ utc_to_local(entry.created_at).strftime('%b %d') }}
+                                </p>
                                 <p class="text-xs text-stone-600 line-clamp-2 leading-relaxed">{{ entry.content[:100] }}{% if entry.content|length > 100 %}…{% endif %}</p>
                             </div>
                             {% endfor %}

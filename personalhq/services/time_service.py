@@ -60,3 +60,29 @@ def get_logical_today(user):
         return base_date + timedelta(days=1)
 
     return base_date
+
+def utc_to_local(utc_dt: datetime) -> datetime:
+    """Converts a naive UTC datetime from the database into the user's local naive datetime."""
+    if not utc_dt:
+        return utc_dt
+        
+    tz_str = "UTC"
+    try:
+        if current_user and current_user.is_authenticated and hasattr(current_user, 'timezone'):
+            tz_str = current_user.timezone or "UTC"
+    except Exception:
+        pass
+
+    try:
+        user_zone = ZoneInfo(tz_str)
+    except Exception:
+        user_zone = ZoneInfo("UTC")
+
+    # 1. Inform Python the naive database time is exactly UTC
+    aware_utc = utc_dt.replace(tzinfo=timezone.utc)
+    
+    # 2. Convert it to the user's specific timezone
+    local_time = aware_utc.astimezone(user_zone)
+    
+    # 3. Strip the timezone info again so Jinja's strftime formats it cleanly
+    return local_time.replace(tzinfo=None)

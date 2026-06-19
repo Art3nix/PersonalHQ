@@ -7,9 +7,13 @@ from personalhq.models.timebuckets import TimeBucket
 from personalhq.models.identities import Identity
 from personalhq.models.journals import Journal
 from personalhq.models.dailynotes import DailyNote
-from personalhq.services.time_service import get_logical_today
+from personalhq.services.time_service import get_logical_today, utc_to_local
 
 braindumps_view_bp = Blueprint('braindumps_view', __name__, url_prefix='/inbox')
+
+@braindumps_view_bp.app_context_processor
+def inject_time_utilities():
+    return dict(utc_to_local=utc_to_local)
 
 @braindumps_view_bp.route('/')
 @login_required

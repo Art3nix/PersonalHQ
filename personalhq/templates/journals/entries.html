@@ -147,7 +147,7 @@
                                 <div class="flex justify-between items-start mb-6">
                                     <span class="archive-date text-[10px] font-bold text-{{ theme }}-700 bg-{{ theme }}-50/80 px-3 py-1.5 rounded-lg uppercase tracking-widest border border-{{ theme }}-200 flex items-center gap-1.5 w-fit">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                        {{ entry.created_at.strftime('%b %d, %Y • %I:%M %p') }}
+                                        {{ utc_to_local(entry.created_at).strftime('%b %d, %Y • %H:%M') }}
                                     </span>
                                     
                                     <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

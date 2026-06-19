@@ -1,15 +1,17 @@
 """Module defining SQLAlchemy model of BrainDumps."""
 
+import os
 from datetime import datetime
 from flask import current_app
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy_utils import StringEncryptedType
-from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
+#from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from personalhq.extensions import db
 
 def get_encryption_key():
-    return current_app.config.get('ENCRYPTION_KEY')
+    return os.environ.get('ENCRYPTION_KEY') or current_app.config.get('ENCRYPTION_KEY')
 
 class BrainDump(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to only store data
     """Class representing table brain_dumps in database."""
@@ -18,8 +20,14 @@ class BrainDump(db.Model):  # pylint: disable=R0903; # sqlalchemy class used to 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
 
+# Inactive due to issues with InvalidToken when building from image
+# Fernet is very sensitive to data transfer - when it travels through docker hub, there might be some padding issues
+#    content: Mapped[str] = mapped_column(
+#        StringEncryptedType(db.Text, get_encryption_key, FernetEngine),
+#        nullable=False
+#    )
     content: Mapped[str] = mapped_column(
-        StringEncryptedType(db.Text, get_encryption_key, FernetEngine),
+        StringEncryptedType(db.Text, get_encryption_key, AesEngine, 'pkcs5'),
         nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(nullable=False)
