@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service | LifeHQ</title>
+    <title>Terms of Service | Kairos</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
 
             // On page load, check if they already accepted cookies in a previous session
             document.addEventListener('DOMContentLoaded', () => {
-                const consent = localStorage.getItem('lifehq_cookie_consent');
+                const consent = localStorage.getItem('kairos_cookie_consent');
                 
                 if (consent === 'accepted') {
                     // They already consented, fire GA4 immediately
@@ -46,13 +46,13 @@
 
             // Functions triggered by the banner buttons
             function acceptCookies() {
-                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                localStorage.setItem('kairos_cookie_consent', 'accepted');
                 document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
                 loadGoogleAnalytics(); // Fire GA4 now!
             }
 
             function rejectCookies() {
-                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                localStorage.setItem('kairos_cookie_consent', 'rejected');
                 document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
                 // GA4 is never loaded
             }
@@ -96,7 +96,7 @@
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
                     <i data-lucide="layers" class="w-4 h-4"></i>
                 </div>
-                <span class="text-xl font-extrabold tracking-tight text-stone-900">LifeHQ</span>
+                <span class="text-xl font-extrabold tracking-tight text-stone-900">Kairos</span>
             </a>
             <a href="/" class="lg:hidden text-sm font-bold text-stone-500">Back</a>
         </div>
@@ -139,7 +139,7 @@
                 <div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white">
                     <i data-lucide="layers" class="w-3 h-3"></i>
                 </div>
-                <span class="font-extrabold text-stone-900">LifeHQ</span>
+                <span class="font-extrabold text-stone-900">Kairos</span>
             </a>
             <a href="/" class="text-sm font-bold text-stone-500">Back</a>
         </div>
@@ -152,26 +152,26 @@
 
             <div class="bg-white border border-stone-200 shadow-[0_2px_10px_rgb(0,0,0,0.02)] rounded-xl p-8 mb-10">
                 <p class="!mb-0 text-stone-600 text-[14px] font-medium leading-relaxed">
-                    This document establishes the legal terms for using LifeHQ. For details regarding our data practices, sub-processors, and data retention, please review our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 transition-colors font-semibold underline underline-offset-2 decoration-indigo-200">Privacy Policy</a>. By registering an account or subscribing to our Service, you agree to be bound by these terms.
+                    This document establishes the legal terms for using Kairos. For details regarding our data practices, sub-processors, and data retention, please review our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 transition-colors font-semibold underline underline-offset-2 decoration-indigo-200">Privacy Policy</a>. By registering an account or subscribing to our Service, you agree to be bound by these terms.
                 </p>
             </div>
 
             <p class="font-bold text-stone-900 mb-12 text-[15px]">Effective Date: June 9, 2026</p>
 
             <h2 id="acceptance" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Acceptance of Terms</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and LifeHQ ("we," "us," or "our"), concerning your access to and use of the LifeHQ web application, including its habit tracking, journaling, decade planner, AI coaching, and related features (collectively, the "Service").</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Kairos ("we," "us," or "our"), concerning your access to and use of the Kairos web application, including its habit tracking, journaling, decade planner, AI coaching, and related features (collectively, the "Service").</p>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">By checking the explicit consent box during registration or checkout, or by accessing the Service, you signify your acceptance of these Terms. If you do not agree to these Terms, you may not use the Service.</p>
 
             <h2 id="provider" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Provider Information</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">The Service is operated by an independent professional registered under the laws of the Czech Republic:</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Project:</strong> LifeHQ (Currently in pre-launch testing)</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Project:</strong> Kairos (Currently in pre-launch testing)</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Location:</strong> Prague, Czech Republic</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Status:</strong> Informational / Waitlist phase. Formal commercial registration details will be published here prior to the platform officially launching and accepting payments.</li>
             </ul>
 
             <h2 id="service-ai" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Description of Service and AI Limitations</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ synthesizes your actions, habits, and journal entries to deliver personalized organizational insights. The Service utilizes artificial intelligence to generate daily briefings and habit recovery suggestions based on the data you provide.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Kairos synthesizes your actions, habits, and journal entries to deliver personalized organizational insights. The Service utilizes artificial intelligence to generate daily briefings and habit recovery suggestions based on the data you provide.</p>
             
             <div class="bg-rose-50/50 border border-rose-100 rounded-xl p-8 my-8">
                 <h4 class="font-extrabold text-rose-900 mb-3 flex items-center gap-2">
@@ -192,11 +192,11 @@
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Account Security:</strong> You are entirely responsible for maintaining the confidentiality of your credentials. You agree to notify us immediately of any unauthorized use of your account. We will not be liable for any loss arising from your failure to secure your credentials.</p>
 
             <h2 id="payments" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Subscriptions and Lifetime Pass</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ offers a free "Basic" tier and paid premium tiers ("Pro", "Limitless", and a "Lifetime" pass).</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Kairos offers a free "Basic" tier and paid premium tiers ("Pro", "Limitless", and a "Lifetime" pass).</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Billing:</strong> Subscription fees are billed in advance via our authorized merchant of record, Stripe. Your subscription automatically renews unless cancelled prior to the end of the current billing cycle. You may cancel at any time via your account settings.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Price Changes:</strong> We reserve the right to change our subscription prices. We will notify you at least 30 days before any price change takes effect. If you do not agree to the new price, you may cancel your subscription before the next billing cycle.</li>
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">The "Lifetime" Pass:</strong> A Lifetime pass grants you access to the specified features for the operational lifespan of the LifeHQ Service. If we are forced to permanently discontinue the Service within three (3) years of your Lifetime pass purchase, you are entitled to a prorated refund based on the remaining time in that 3-year period. After three years, the pass is considered fully delivered, and no refunds will be issued upon discontinuation.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">The "Lifetime" Pass:</strong> A Lifetime pass grants you access to the specified features for the operational lifespan of the Kairos Service. If we are forced to permanently discontinue the Service within three (3) years of your Lifetime pass purchase, you are entitled to a prorated refund based on the remaining time in that 3-year period. After three years, the pass is considered fully delivered, and no refunds will be issued upon discontinuation.</li>
             </ul>
 
             <h2 id="eu-waiver" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">EU Consumer Rights and Withdrawal Waiver</h2>
@@ -216,7 +216,7 @@
             <h2 id="content-ip" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Content and IP Ownership</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Your Content & AI Outputs:</strong> You retain all intellectual property rights to the text, habits, journals, and data you input into the Service ("User Content"). Furthermore, you own the rights to the specific insights, briefings, and summaries generated for you by the AI Coach based on your User Content ("Outputs").</p>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">License to Us:</strong> To operate the platform, you grant us a worldwide, non-exclusive, royalty-free license to use, host, store, and securely transmit your User Content to our AI sub-processors solely for the purposes of: (a) providing the Service to you, (b) preventing fraud or abuse, (c) debugging and security monitoring, and (d) complying with legal obligations. We do not use your private journal entries to train public AI models.</p>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Our Property:</strong> The Service itself, including its original source code, user interface, methodology (e.g., the Time Buckets architecture), and algorithms, are the exclusive intellectual property of LifeHQ.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong class="text-stone-900 font-bold">Our Property:</strong> The Service itself, including its original source code, user interface, methodology (e.g., the Time Buckets architecture), and algorithms, are the exclusive intellectual property of Kairos.</p>
 
             <h2 id="acceptable-use" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Acceptable Use Policy</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">You agree not to misuse the Service. Specifically, you shall not:</p>
@@ -239,10 +239,10 @@
 
             <h2 id="liability" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Limitation of Liability</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">NOTHING IN THESE TERMS SHALL EXCLUDE OR LIMIT LIABILITY FOR DEATH OR PERSONAL INJURY CAUSED BY NEGLIGENCE, INTENTIONAL MISCONDUCT, OR GROSS NEGLIGENCE. Furthermore, if you are an EU Consumer, these Terms do not limit your mandatory statutory rights or liability arising from our breach of fundamental contractual obligations.</p>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">TO THE EXTENT PERMITTED BY LAW, IN NO EVENT SHALL LIFEHQ BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF DATA, PROFITS, OR REVENUE) ARISING OUT OF YOUR USE OF THE SERVICE. OUR TOTAL AGGREGATE LIABILITY TO YOU FOR ALL CLAIMS SHALL NOT EXCEED THE GREATER OF FIFTY EUROS (€50) OR THE TOTAL AMOUNT PAID BY YOU TO US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">TO THE EXTENT PERMITTED BY LAW, IN NO EVENT SHALL KAIROS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES (INCLUDING LOSS OF DATA, PROFITS, OR REVENUE) ARISING OUT OF YOUR USE OF THE SERVICE. OUR TOTAL AGGREGATE LIABILITY TO YOU FOR ALL CLAIMS SHALL NOT EXCEED THE GREATER OF FIFTY EUROS (€50) OR THE TOTAL AMOUNT PAID BY YOU TO US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.</p>
 
             <h2 id="indemnification" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Indemnification</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">To the extent permitted by consumer protection laws, you agree to indemnify and hold harmless LifeHQ and its creator from any claims, liabilities, damages, or costs (including reasonable attorneys' fees) arising out of your violation of these Terms, your gross negligence, or any third-party claim resulting from your User Content.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">To the extent permitted by consumer protection laws, you agree to indemnify and hold harmless Kairos and its creator from any claims, liabilities, damages, or costs (including reasonable attorneys' fees) arising out of your violation of these Terms, your gross negligence, or any third-party claim resulting from your User Content.</p>
 
             <h2 id="governing-law" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">Governing Law and Jurisdiction</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">These Terms shall be governed by the laws of the Czech Republic, without regard to conflict of law principles.</p>
@@ -258,7 +258,7 @@
                     <div class="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-600 shadow-sm">
                         <i data-lucide="mail" class="w-5 h-5"></i>
                     </div>
-                    <p class="font-extrabold text-lg text-stone-900 !mb-0">LifeHQ Legal</p>
+                    <p class="font-extrabold text-lg text-stone-900 !mb-0">Kairos Legal</p>
                 </div>
                 <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Status: Pre-launch testing</p>
                 <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Location: Prague, Czech Republic</p>
@@ -278,7 +278,7 @@
         </div>
         
         <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
-            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve Kairos. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
         </p>
         
         <div class="flex gap-3">

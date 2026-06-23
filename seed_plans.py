@@ -1,4 +1,4 @@
-"""Script to seed the database with LifeHQ subscription plans."""
+"""Script to seed the database with Kairos subscription plans."""
 
 from personalhq import create_app
 from personalhq.extensions import db

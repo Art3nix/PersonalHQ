@@ -3,7 +3,7 @@
 {% block content %}
 
 <script>
-    if (localStorage.getItem('lifehq_sidebar_state') === 'collapsed') {
+    if (localStorage.getItem('kairos_sidebar_state') === 'collapsed') {
         document.documentElement.classList.add('sidebar-is-collapsed');
     }
 </script>
@@ -74,7 +74,7 @@
             <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-md shadow-indigo-200 flex items-center justify-center shrink-0 text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
             </div>
-            <h1 class="text-xl font-black text-stone-900 tracking-tighter whitespace-nowrap">Life<span class="text-indigo-600">HQ</span></h1>
+            <h1 class="text-xl font-black text-stone-900 tracking-tighter whitespace-nowrap">Kairos</h1>
         </div>
         <button onclick="toggleMobileMenu()" class="p-2 -mr-2 text-stone-500 hover:text-stone-900 focus:outline-none">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -94,7 +94,7 @@
                 <div class="w-8 h-8 bg-indigo-600 rounded-xl shadow-md shadow-indigo-200 flex items-center justify-center shrink-0 text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5Z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
                 </div>
-                <h1 class="sidebar-text text-xl font-black text-stone-900 tracking-tighter whitespace-nowrap">Life<span class="text-indigo-600">HQ</span></h1>
+                <h1 class="sidebar-text text-xl font-black text-stone-900 tracking-tighter whitespace-nowrap">Kairos</h1>
             </div>
         </div>
 
@@ -258,7 +258,7 @@
 
     function toggleSidebar() {
         const isCollapsed = document.documentElement.classList.toggle('sidebar-is-collapsed');
-        localStorage.setItem('lifehq_sidebar_state', isCollapsed ? 'collapsed' : 'expanded');
+        localStorage.setItem('kairos_sidebar_state', isCollapsed ? 'collapsed' : 'expanded');
     }
 
     function showToast(message, type = 'success', duration = 3500) {

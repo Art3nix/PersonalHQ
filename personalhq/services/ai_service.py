@@ -33,7 +33,7 @@ LOG_DIR = os.path.join(ROOT_DIR, 'logs')
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_FILE = os.path.join(LOG_DIR, 'system_operations.log')
 
-sys_logger = logging.getLogger('lifehq_system')
+sys_logger = logging.getLogger('kairos_system')
 sys_logger.setLevel(logging.INFO)
 
 # Use the absolute LOG_FILE path we just generated

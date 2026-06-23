@@ -17,7 +17,7 @@ def job_wrapper():
         run_hourly_dispatcher()
 
 if __name__ == '__main__':
-    print("Starting Life HQ Background Scheduler...", flush=True)
+    print("Starting Kairos Background Scheduler...", flush=True)
     
     # APScheduler 3.x works best with pytz
     scheduler = BlockingScheduler(timezone=pytz.utc)

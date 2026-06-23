@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy | LifeHQ</title>
+    <title>Privacy Policy | Kairos</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,7 @@
 
             // On page load, check if they already accepted cookies in a previous session
             document.addEventListener('DOMContentLoaded', () => {
-                const consent = localStorage.getItem('lifehq_cookie_consent');
+                const consent = localStorage.getItem('kairos_cookie_consent');
                 
                 if (consent === 'accepted') {
                     // They already consented, fire GA4 immediately
@@ -46,13 +46,13 @@
 
             // Functions triggered by the banner buttons
             function acceptCookies() {
-                localStorage.setItem('lifehq_cookie_consent', 'accepted');
+                localStorage.setItem('kairos_cookie_consent', 'accepted');
                 document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
                 loadGoogleAnalytics(); // Fire GA4 now!
             }
 
             function rejectCookies() {
-                localStorage.setItem('lifehq_cookie_consent', 'rejected');
+                localStorage.setItem('kairos_cookie_consent', 'rejected');
                 document.getElementById('cookie-consent-banner').classList.add('translate-y-[150%]', 'opacity-0');
                 // GA4 is never loaded
             }
@@ -97,7 +97,7 @@
                 <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-sm">
                     <i data-lucide="layers" class="w-4 h-4"></i>
                 </div>
-                <span class="text-xl font-extrabold tracking-tight text-stone-900">LifeHQ</span>
+                <span class="text-xl font-extrabold tracking-tight text-stone-900">Kairos</span>
             </a>
             <a href="/" class="lg:hidden text-sm font-bold text-stone-500">Back</a>
         </div>
@@ -145,7 +145,7 @@
                 <div class="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center text-white">
                     <i data-lucide="layers" class="w-3 h-3"></i>
                 </div>
-                <span class="font-extrabold text-stone-900">LifeHQ</span>
+                <span class="font-extrabold text-stone-900">Kairos</span>
             </a>
             <a href="/" class="text-sm font-bold text-stone-500">Back</a>
         </div>
@@ -163,22 +163,22 @@
                     Our Privacy Promise
                 </h3>
                 <p class="!mb-0 text-stone-600 text-[14px] font-medium leading-relaxed">
-                    LifeHQ is built to be a safe, private workspace for your mind. We encrypt your journals, we strictly block analytics trackers until you consent, we do not sell your personal data to data brokers, and we strictly configure our AI sub-processors so that your private thoughts are <strong>never</strong> used to train public AI models. 
+                    Kairos is built to be a safe, private workspace for your mind. We encrypt your journals, we strictly block analytics trackers until you consent, we do not sell your personal data to data brokers, and we strictly configure our AI sub-processors so that your private thoughts are <strong>never</strong> used to train public AI models. 
                 </p>
             </div>
 
             <p class="font-bold text-stone-900 mb-12 text-[15px]">Effective Date: June 9, 2026</p>
 
             <h2 id="introduction" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">1. Introduction & Scope</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Welcome to LifeHQ. This Privacy Policy explains how LifeHQ ("we," "us," or "our") collects, uses, shares, and protects your personal information when you use our web application, habit tracker, decade planner, AI coaching features, and any related services (collectively, the "Service").</p>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">This Policy applies to all users, subscribers, and visitors of the Service. It operates in conjunction with our Terms of Service. By using LifeHQ, you acknowledge that you have read and understood this Privacy Policy.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Welcome to Kairos. This Privacy Policy explains how Kairos ("we," "us," or "our") collects, uses, shares, and protects your personal information when you use our web application, habit tracker, decade planner, AI coaching features, and any related services (collectively, the "Service").</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">This Policy applies to all users, subscribers, and visitors of the Service. It operates in conjunction with our Terms of Service. By using Kairos, you acknowledge that you have read and understood this Privacy Policy.</p>
 
             <h2 id="information-collected" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">2. Information We Collect</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">To provide you with a personalized and secure experience, we collect specific categories of information:</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Account Information:</strong> When you register, we collect your name, email address, password (stored as a secure bcrypt hash), and your local timezone to accurately track your daily habits.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">User-Submitted Content:</strong> We store the data you actively input into the Service. This includes your tracked habits, Time Buckets (decade planner goals), deep work sessions, and your universal inbox notes. Crucially, this includes your private Journal Entries, which are protected using application-level column encryption.</li>
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Payment & Billing Information:</strong> If you upgrade to a premium tier, our third-party payment processor (Stripe) collects your billing details and credit card information. LifeHQ does not store your full credit card number; we only retain basic subscription status, tier information, and billing history to manage your account.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Payment & Billing Information:</strong> If you upgrade to a premium tier, our third-party payment processor (Stripe) collects your billing details and credit card information. Kairos does not store your full credit card number; we only retain basic subscription status, tier information, and billing history to manage your account.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Communications:</strong> If you contact customer support, we collect the contents of your messages and any contact information provided.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Device, Log, & Usage Data:</strong> We automatically collect standard server log data for security and performance, including your IP address (used strictly by our rate-limiter to prevent brute-force attacks), browser type, operating system, and the timestamps of your interactions with our application.</li>
             </ul>
@@ -194,7 +194,7 @@
             <h2 id="how-used" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">4. How We Use Information</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We use the information we collect for the following purposes:</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Providing the Service:</strong> To maintain your account, save your daily progress, and render your LifeHQ dashboard.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Providing the Service:</strong> To maintain your account, save your daily progress, and render your Kairos dashboard.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Operating the AI Features:</strong> To safely transmit your journal entries and habits to our AI models to generate personalized morning briefings and insights.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Security & Authentication:</strong> To verify your identity, prevent unauthorized access (using Flask-Limiter), and protect against automated bot attacks on our authentication routes.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Account Management & Billing:</strong> To process your subscriptions, handle upgrades to Pro/Limitless, and send administrative emails (like password resets).</li>
@@ -218,10 +218,10 @@
             </ul>
 
             <h2 id="ai-processing" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">7. AI and Machine Learning Specifics</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ integrates Large Language Models to act as your AI Coach. Because you may input highly sensitive reflections into the Service, we adhere to strict AI privacy standards:</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Kairos integrates Large Language Models to act as your AI Coach. Because you may input highly sensitive reflections into the Service, we adhere to strict AI privacy standards:</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Zero Data Retention APIs:</strong> We interface with our AI providers (e.g., OpenAI, Google) exclusively via their enterprise/developer APIs. By default, these providers are contractually prohibited from using API data to train their public or foundational models.</li>
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">No Internal Training:</strong> LifeHQ does not train proprietary AI models on your private journal entries. The AI processing happens in memory to generate your specific insight and is not permanently retained by the model.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">No Internal Training:</strong> Kairos does not train proprietary AI models on your private journal entries. The AI processing happens in memory to generate your specific insight and is not permanently retained by the model.</li>
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">No Automated Decision-Making:</strong> We do not use your personal data for automated decision-making or profiling that produces legal or similarly significant effects. Our AI Coach provides optional, non-binding organizational suggestions.</li>
             </ul>
 
@@ -229,7 +229,7 @@
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6"><strong>We do not, under any circumstances, sell your personal data.</strong> We only share information with third parties in the following limited circumstances:</p>
             <ul class="list-none pl-0 mb-8 space-y-3">
                 <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Service Providers (Sub-processors):</strong> We share necessary data with trusted vendors acting on our behalf. This includes Oracle Cloud (database and server hosting), Stripe (payment processing), external LLM providers (for AI coaching), and email delivery services (for password resets).</li>
-                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Legal Compliance:</strong> We may disclose data if legally required to do so by a valid subpoena, court order, or binding request from Czech or applicable EU authorities, or to protect the safety and rights of LifeHQ and our users.</li>
+                <li class="relative pl-5 text-[15px] font-medium text-stone-600 leading-relaxed"><span class="absolute left-0 top-2.5 w-1.5 h-1.5 rounded-full bg-stone-300"></span><strong class="text-stone-900 font-bold">Legal Compliance:</strong> We may disclose data if legally required to do so by a valid subpoena, court order, or binding request from Czech or applicable EU authorities, or to protect the safety and rights of Kairos and our users.</li>
             </ul>
 
             <h2 id="international" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">9. International Data Transfers</h2>
@@ -264,13 +264,13 @@
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Your rights include: the right to know what personal information is collected, the right to delete personal information, the right to correct inaccurate information, the right to limit the use and disclosure of sensitive personal information, and the right not to receive discriminatory treatment for the exercise of your privacy rights. Please submit requests to exercise these rights via the contact email below.</p>
 
             <h2 id="children" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">15. Children's Privacy</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">LifeHQ is not intended for individuals under the age of 16. We do not knowingly collect personal data from children under 16. If we become aware that we have collected personal data from a child under 16 without verified parental consent, we will take immediate steps to delete that information from our servers. If you are a parent or guardian and believe your child has provided us with personal data, please contact us.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">Kairos is not intended for individuals under the age of 16. We do not knowingly collect personal data from children under 16. If we become aware that we have collected personal data from a child under 16 without verified parental consent, we will take immediate steps to delete that information from our servers. If you are a parent or guardian and believe your child has provided us with personal data, please contact us.</p>
 
             <h2 id="third-party" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">16. Third-Party Integrations</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">The Service may contain links to third-party websites or offer integrations (such as our planned conversational WhatsApp sync). If you choose to use these integrations, the third party may receive your information. We do not control and are not responsible for the privacy practices of third-party platforms. We encourage you to review their privacy policies.</p>
 
             <h2 id="business-transfers" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">17. Business Transfers</h2>
-            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If LifeHQ is involved in a merger, acquisition, corporate restructuring, or sale of assets, your personal data may be transferred as part of that transaction. We will provide notice via email or a prominent notice on our website before your personal data is transferred and becomes subject to a different privacy policy.</p>
+            <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">If Kairos is involved in a merger, acquisition, corporate restructuring, or sale of assets, your personal data may be transferred as part of that transaction. We will provide notice via email or a prominent notice on our website before your personal data is transferred and becomes subject to a different privacy policy.</p>
 
             <h2 id="changes" class="text-3xl font-extrabold tracking-tight text-stone-900 mt-16 mb-6 scroll-mt-24">18. Changes to this Privacy Policy</h2>
             <p class="text-[15px] font-medium text-stone-600 leading-relaxed mb-6">We may update this Privacy Policy periodically to reflect changes in our practices or legal requirements. If we make material changes (e.g., changing how we process your encrypted data or AI data sharing practices), we will notify you by email or through a prominent notice on the dashboard prior to the change becoming effective. We encourage you to review this page periodically for the latest information.</p>
@@ -282,9 +282,9 @@
                     <div class="w-10 h-10 bg-white border border-stone-200 rounded-xl flex items-center justify-center text-stone-600 shadow-sm">
                         <i data-lucide="shield-question" class="w-5 h-5"></i>
                     </div>
-                    <p class="font-extrabold text-lg text-stone-900 !mb-0">LifeHQ Privacy Team</p>
+                    <p class="font-extrabold text-lg text-stone-900 !mb-0">Kairos Privacy Team</p>
                 </div>
-                <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Data Controller: LifeHQ Development Team</p>
+                <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Data Controller: Kairos Development Team</p>
                 <p class="text-stone-600 font-medium !mb-1 pl-13 text-[14px]">Location: Prague, Czech Republic</p>
                 <p class="text-stone-500 !mb-0 pl-13 text-[14px]">Email: <a href="mailto:lifehq.support@gmail.com" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">lifehq.support@gmail.com</a></p>
             </div>
@@ -302,7 +302,7 @@
         </div>
         
         <p class="text-sm font-medium text-stone-500 mb-6 leading-relaxed">
-            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve LifeHQ. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
+            We use essential cookies to keep you logged in, and optional analytics cookies to help us improve Kairos. We never sell your data. Read our <a href="/privacy" class="text-indigo-600 hover:text-indigo-800 underline underline-offset-2">Privacy Policy</a>.
         </p>
         
         <div class="flex gap-3">
