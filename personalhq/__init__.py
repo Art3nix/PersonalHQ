@@ -5,6 +5,7 @@ import time
 from datetime import timedelta
 from flask import Flask, render_template, session, request
 from flask_login import current_user
+from werkzeug.middleware.proxy_fix import ProxyFix
 from personalhq.services.time_service import get_local_now, get_logical_today
 from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail, limiter
 from personalhq import models
@@ -23,6 +24,9 @@ CONFIG_MAP = {
 def create_app(config_name=None):
     """Creates and configures the Flask application."""
     app = Flask(__name__)
+
+    # Trust the reverse proxy headers from Nginx
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     if config_name is None:
         config_name = os.environ.get("FLASK_CONFIG", "development")
