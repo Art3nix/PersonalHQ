@@ -4,6 +4,7 @@ anyio==4.13.0
 APScheduler==3.10.4
 bcrypt==4.1.2
 blinker==1.7.0
+brotli==1.2.0
 certifi==2026.2.25
 cffi==2.0.0
 charset-normalizer==3.4.7
@@ -17,6 +18,7 @@ email-validator==2.3.0
 exceptiongroup==1.2.1
 Flask==3.0.3
 Flask-Bcrypt==1.0.1
+Flask-Compress==1.24
 Flask-Limiter==4.1.1
 Flask-Login==0.6.3
 Flask-Mail==0.10.0

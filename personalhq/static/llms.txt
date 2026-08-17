@@ -1,0 +1,5 @@
+# Kairos
+
+> A unified workspace connecting daily habits, deep focus, and self-reflection.
+
+Kairos is a privacy-first personal productivity system. It replaces fragmented tools by integrating an adaptive habit tracker, a deep work timer, and an AES-encrypted private journal into one environment. It utilizes a framework based on mapping decade-long goals to daily, identity-based actions.

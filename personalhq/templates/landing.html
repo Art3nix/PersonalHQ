@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Primary Meta Tags -->
-    <title>Kairos — Intentional Habit Tracker, Private Journal & Deep Focus</title>
+    <title>Kairos | Identity Habits, Journal & Focus</title>
     <meta name="title" content="Kairos — Intentional Habit Tracker, Private Journal & Deep Focus">
     <meta name="description" content="A private sanctuary for your daily routines. Build lasting habits, enter deep focus, and reflect safely with an encrypted journal and a mindful AI guide.">
 
@@ -32,7 +32,9 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://unpkg.com/lucide@latest" defer></script>
+    
+    <!-- Lucide icons — self-hosted -->
+    <script src="{{ url_for('static', filename='js/lucide.min.js') }}"></script>
 
     {% if config.GA_TRACKING_ID %}
         <script>
@@ -145,7 +147,7 @@
         "name": "How is this different from other productivity apps?",
         "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Most tools give you a blank canvas, which forces you to spend hours designing your own setup. Kairos is a ready made personal productivity system. It seamlessly integrates your habit tracking, journaling, and deep work into one cohesive environment, guided by an AI that actively supports your self improvement journey."
+            "text": "Most tools give you a blank canvas. This forces you to spend hours building your own setup. Kairos gives you a ready-made system. It links your habits, journal, and focus timer into one space. Your AI coach guides you along the way."
         }
         },
         {
@@ -474,7 +476,7 @@
                 <div>
                     <h2 class="text-3xl md:text-4xl font-extrabold mb-6 tracking-tight">Why most productivity tools fail you.</h2>
                     <p class="text-stone-400 font-medium leading-relaxed mb-6">
-                        When your goals, journals, and daily tasks are scattered across a dozen different apps, you aren't getting organized. You are just creating more mental overhead. You lose sight of the bigger picture.
+                        Using a dozen different apps does not make you organized. It just creates more mental overhead. You completely lose sight of the big picture.
                     </p>
                     <p class="text-stone-400 font-medium leading-relaxed">
                         Kairos is built to be the exact opposite. It is a single space that ties your daily actions directly to your long term identity. We don't just give you empty boxes to check. We give you the clarity and support to actually follow through.
@@ -521,7 +523,7 @@
                     <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-12 group">
                         <div class="md:w-1/2 md:text-right order-2 md:order-1">
                             <h3 class="text-xl font-bold text-stone-900 mb-2">1. Time Buckets</h3>
-                            <p class="text-sm text-stone-500 leading-relaxed">We start at the very end. Define your ultimate life goals and strategically assign them to the decades they make the most sense.</p>
+                            <p class="text-sm text-stone-500 leading-relaxed">Start at the very end. Define your ultimate life goals. Assign them to the exact decade they make the most sense.</p>
                         </div>
                         <div class="absolute left-0 md:relative md:left-auto w-14 h-14 bg-white rounded-2xl border-2 border-stone-200 flex items-center justify-center text-rose-500 shadow-sm z-10 order-1 md:order-2 shrink-0 group-hover:border-rose-300 group-hover:scale-110 transition-all">
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-6 h-6"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -598,7 +600,7 @@
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         </div>
                         <h3 class="text-2xl font-bold text-stone-900 mb-2">Deep Work Engine</h3>
-                        <p class="text-stone-600 font-medium max-w-md">The most meaningful progress happens during periods of distraction-free concentration. Activate the integrated timer to tune out the noise and execute your highest leverage tasks without context switching.</p>
+                        <p class="text-stone-600 font-medium max-w-md">Deep focus drives real progress. Use the built-in timer to block out noise. Finish your most important work without switching contexts.</p>
                     </div>
                 </div>
 
@@ -626,7 +628,7 @@
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>
                         </div>
                         <h3 class="text-xl font-bold text-stone-900 mb-2">Universal Inbox</h3>
-                        <p class="text-sm text-stone-600 font-medium">Your mind is meant for having ideas, not endlessly holding onto them. Instantly capture every passing thought, task, or sudden worry the moment it strikes to immediately relieve stress and mental friction.</p>
+                        <p class="text-sm text-stone-600 font-medium">Your mind is meant for having ideas, not holding them. Instantly capture passing thoughts, tasks, or worries. Relieve stress and clear your mental friction the moment it strikes.</p>
                     </div>
                 </div>
 
@@ -655,7 +657,7 @@
                             <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         </div>
                         <h3 class="text-xl font-bold text-stone-900 mb-2">Decade Planner</h3>
-                        <p class="text-sm text-stone-600 font-medium max-w-2xl">A traditional bucket list tricks you into delaying your dreams. The Kairos planner lets you assign experiences to the exact decade they make the most physical and mental sense, ensuring you live them before the window closes.</p>
+                        <p class="text-sm text-stone-600 font-medium max-w-2xl">A traditional bucket list delays your dreams. Kairos lets you assign experiences to specific decades. Live them before your window closes.</p>
                     </div>
                 </div>
 
@@ -666,7 +668,7 @@
                             <i data-lucide="lock" class="w-5 h-5"></i>
                         </div>
                         <h3 class="text-xl font-bold text-stone-900 mb-2">Uncompromising Privacy</h3>
-                        <p class="text-sm text-stone-600 font-medium leading-relaxed">A clear mind requires a truly safe space. Your journals, thoughts, and reflections are protected with AES encryption at rest. If our infrastructure is ever compromised, your entries remain mathematically locked. We provide the workspace; your insights remain entirely your own.</p>
+                        <p class="text-sm text-stone-600 font-medium leading-relaxed">Your mind needs a safe space. We protect your journals with AES encryption. If our servers are ever breached, your entries remain mathematically locked. Your insights are strictly your own.</p>
                     </div>
                     
                     <div class="relative z-10 md:w-1/2 w-full flex justify-end">
@@ -1020,6 +1022,7 @@
             </div>
             <div class="flex gap-6 text-sm font-medium text-stone-400">
                 <a href="{{ url_for('landing.privacy') }}" class="hover:text-white transition-colors">Privacy</a>
+                <a href="{{ url_for('landing.privacy') }}#cookies-analytics" class="hover:text-white transition-colors">Cookie Policy</a>
                 <a href="{{ url_for('landing.terms') }}" class="hover:text-white transition-colors">Terms</a>
                 <a href="mailto:lifehq.support@gmail.com" class="hover:text-white transition-colors">Support</a>
             </div>

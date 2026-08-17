@@ -5,6 +5,7 @@ import time
 from datetime import timedelta
 from flask import Flask, render_template, session, request
 from flask_login import current_user
+from flask_compress import Compress
 from werkzeug.middleware.proxy_fix import ProxyFix
 from personalhq.services.time_service import get_local_now, get_logical_today
 from personalhq.extensions import db, bcrypt, login_manager, migrate, csrf, mail, limiter
@@ -32,6 +33,8 @@ def create_app(config_name=None):
         config_name = os.environ.get("FLASK_CONFIG", "development")
 
     app.config.from_object(CONFIG_MAP.get(config_name, DevelopmentConfig))
+
+    Compress(app)
 
     db.init_app(app)
     migrate.init_app(app, db)
@@ -146,4 +149,12 @@ def create_app(config_name=None):
                 # Update the session with the new timestamp
                 session['last_activity_log'] = now
 
+    @app.after_request
+    def add_header(response):
+        """Cache static files for 1 year to improve performance/TTFB."""
+        if 'static' in request.path:
+            response.cache_control.max_age = 31536000
+            response.cache_control.public = True
+        return response
+    
     return app

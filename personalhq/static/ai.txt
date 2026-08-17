@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+
+# ABOUT KAIROS
+Kairos is a web application designed for personal productivity, habit tracking, and encrypted journaling. It is built to help users align daily actions with long-term goals.
+
+# DATA USAGE POLICY
+Kairos strictly protects user privacy. We do not use user-generated content (journals, habits, or reflections) to train AI models.
